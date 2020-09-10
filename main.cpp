@@ -1,6 +1,3 @@
-
-//#include "vampSDLGameEngine.h"
-
 #define OLC_PGE_APPLICATION
 #include "olcPixelGameEngine.h"
 
@@ -181,16 +178,17 @@ class chesspiece
 {
 public:
 	chesspiece(Chess* game, TEAM nTeam = TEAM::NONE, point2d<int> p = { -1, -1 }, char t = 'N', std::vector<vector2d<int>> moves = { {0, 0} }, bool s = false);
-	virtual bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo);
+	virtual bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo) const;
 	virtual void Move(const point2d<int>& target);
-	virtual void DrawMoves();
-	void DrawYourself();
-	bool IsSameTeam(TEAM t) { return (team == t); }
-	TEAM GetTeam() { return team; }
-	bool IsCaptured() { return isCaptured; }
-	bool GetCaptured();
-	point2d<int> Pos() { return pos; }
-	char Type() { return piece_type; }
+	virtual void DrawMoves() const;
+	void DrawYourself() const;
+	bool IsSameTeam(TEAM t) const { return (team == t); }
+	bool HasMoved() const { return !first_move; }
+	TEAM Team() const { return team; }
+	bool IsCaptured() const { return isCaptured; }
+	bool CapturePiece();
+	point2d<int> Pos() const { return pos; }
+	char Type() const { return piece_type; }
 	void GuardCells();
 	virtual bool CanGuard(const point2d<int>& target);
 
@@ -210,7 +208,7 @@ class pawn : public chesspiece
 {
 public:
 	pawn(Chess* game, TEAM nTeam = TEAM::NONE, point2d<int> p = { -1, -1 });
-	bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo) override;
+	bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo) const override;
 	bool CanGuard(const point2d<int>& target) override;
 };
 class tower : public chesspiece
@@ -237,7 +235,9 @@ class king : public chesspiece
 {
 public:
 	king(Chess* game, TEAM nTeam = NONE, point2d<int> p = { -1, -1 });
-	bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo) override;
+	bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo) const override;
+	void DrawMoves() const override;
+	void Move(const point2d<int>& target) override;
 	bool CanGuard(const point2d<int>& target) override;
 	bool Check();
 	bool CheckMate();
@@ -425,7 +425,7 @@ bool Chess::OnUserCreate()
 
 	SelectCell({ 0, 0 });
 	activePlayer = &player1;
-	activeTeam = activePlayer->at(0)->GetTeam();
+	activeTeam = activePlayer->at(0)->Team();
 
 	return true;
 }
@@ -611,7 +611,7 @@ void Chess::SwitchPlayers()
 	{
 		activePlayer = &player2;
 	}
-	activeTeam = activePlayer->at(0)->GetTeam();
+	activeTeam = activePlayer->at(0)->Team();
 }
 
 chesspiece::chesspiece(Chess* game, TEAM nTeam, point2d<int> p, char t, std::vector<vector2d<int>> m, bool s)
@@ -631,7 +631,7 @@ chesspiece::chesspiece(Chess* game, TEAM nTeam, point2d<int> p, char t, std::vec
 	default: team_color = olc::GREEN; break;
 	}
 }
-bool chesspiece::IsMoveValid(const point2d<int>& target, MoveInfo& info)
+bool chesspiece::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 {
 	/* * STEP 1: CHECK TO SEE IF FIRST MOVE (FOR KING AND PAWN)
 	   * STEP 2: CHECK TO SEE IF THERE IS A PIECE AT THAT LOCATION
@@ -824,7 +824,7 @@ bool chesspiece::CanGuard(const point2d<int>& target)
 	}
 	return false;
 }
-void chesspiece::DrawMoves()
+void chesspiece::DrawMoves() const
 {
 	int padx = 2;
 	int pady = 2;
@@ -894,7 +894,7 @@ void chesspiece::GuardCells()
 		}
 	}
 }
-void chesspiece::DrawYourself()
+void chesspiece::DrawYourself() const
 {
 	if (!isCaptured) {
 		pGame->DrawDisk(pos, team_color);
@@ -917,9 +917,8 @@ void chesspiece::Move(const point2d<int>& target)
 	{
 		first_move = false;
 	}
-
 }
-bool chesspiece::GetCaptured()
+bool chesspiece::CapturePiece()
 {
 	if (!isCaptured)
 	{
@@ -946,7 +945,7 @@ pawn::pawn(Chess* game, TEAM nTeam, point2d<int> p) : chesspiece(game, nTeam, p,
 	moves = { move_front, move_front2, capture_left, capture_right };
 
 }
-bool pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info)
+bool pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 {
 	vector2d<int> move_vect(target - pos);
 	vector2d<int> move_front(moves[0]);
@@ -1040,7 +1039,7 @@ knight::knight(Chess* game, TEAM nTeam, point2d<int> p) : chesspiece(game, nTeam
 queen::queen(Chess* game, TEAM nTeam, point2d<int> p) : chesspiece(game, nTeam, p, 'Q', { {1, 1}, {1, -1}, {0, 1}, {1, 0}, {0, -1 }, {-1, 0}, {-1, -1}, {-1, 1} }, true) {}
 
 king::king(Chess* game, TEAM nTeam, point2d<int> p) : chesspiece(game, nTeam, p, 'K', { {1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {1, 0}, {-1, 0}, {0, -1}, {0, 1} }, false){}
-bool king::IsMoveValid(const point2d<int>& target, MoveInfo& info)
+bool king::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 {
 	// if we're checking for an out of bounds cell
 	if (target.x > pGame->GetBoardWidth() || target.y > pGame->GetBoardHeight() || target.x < 0 || target.y < 0)
@@ -1055,6 +1054,41 @@ bool king::IsMoveValid(const point2d<int>& target, MoveInfo& info)
 	{
 		info.reason = MoveInfo::INVALID_MOVE;
 		return false;
+	}
+
+	if (first_move) // check castle
+	{
+		if (movevect == vector2d<int>(2, 0))
+		{
+			chesspiece* rightTower = pGame->GetChessCell(pos + vector2d<int>(3, 0))->GetPiece();
+			if (rightTower != nullptr)
+			{
+				chesscell* c1 = pGame->GetChessCell(pos + vector2d<int>(2, 0));
+				chesscell* c2 = pGame->GetChessCell(pos + vector2d<int>(1, 0));
+				if (!rightTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty())
+				{
+					return true;
+				}
+			}
+			info.reason = MoveInfo::INVALID_MOVE;
+			return false;
+		}
+		else if (movevect == vector2d<int>(-3, 0))
+		{
+			chesspiece* leftTower = pGame->GetChessCell(pos + vector2d<int>(-4, 0))->GetPiece();
+			if (leftTower != nullptr)
+			{
+				chesscell* c1 = pGame->GetChessCell(pos + vector2d<int>(-3, 0));
+				chesscell* c2 = pGame->GetChessCell(pos + vector2d<int>(-2, 0));
+				chesscell* c3 = pGame->GetChessCell(pos + vector2d<int>(-1, 0));
+				if (!leftTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty() && c3->IsEmpty())
+				{
+					return true;
+				}
+			}
+			info.reason = MoveInfo::INVALID_MOVE;
+			return false;
+		}
 	}
 
 	for (auto& m1 : moves)
@@ -1085,8 +1119,85 @@ bool king::IsMoveValid(const point2d<int>& target, MoveInfo& info)
 			break;
 		}
 	}
+
 	info.reason = MoveInfo::INVALID_MOVE;
 	return false;
+}
+void king::DrawMoves() const
+{
+	int padx = 2;
+	int pady = 2;
+
+	for (auto& m : moves)
+	{
+		if (IsMoveValid(pos + m))
+		{
+			pGame->HighlightCell(pos + m, padx, pady, olc::DARK_GREEN);
+		}
+	}
+
+	if (first_move) // check for castle
+	{
+
+		if (IsMoveValid(pos + vector2d<int>(2, 0)))
+		{
+			pGame->HighlightCell(pos + vector2d<int>(2, 0), padx, pady, olc::DARK_GREEN);
+		}
+		if (IsMoveValid(pos + vector2d<int>(-3, 0)))
+		{
+			pGame->HighlightCell(pos + vector2d<int>(-3, 0), padx, pady, olc::DARK_GREEN);
+		}
+
+		//chesspiece* rightTower = pGame->GetChessCell(pos + vector2d<int>(3, 0))->GetPiece();
+		//if (rightTower != nullptr)
+		//{
+		//	chesscell* c1 = pGame->GetChessCell(pos + vector2d<int>(2, 0));
+		//	chesscell* c2 = pGame->GetChessCell(pos + vector2d<int>(1, 0));
+		//	if (!rightTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty())
+		//	{
+		//		pGame->HighlightCell(pos + vector2d<int>(2, 0), padx, pady, olc::DARK_GREEN);
+		//	}
+		//}
+		//chesspiece* leftTower = pGame->GetChessCell(pos + vector2d<int>(-4, 0))->GetPiece();
+		//if (leftTower != nullptr)
+		//{
+		//	chesscell* c1 = pGame->GetChessCell(pos + vector2d<int>(-3, 0));
+		//	chesscell* c2 = pGame->GetChessCell(pos + vector2d<int>(-2, 0));
+		//	chesscell* c3 = pGame->GetChessCell(pos + vector2d<int>(-1, 0));
+		//	if (!leftTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty() && c3->IsEmpty())
+		//	{
+		//		pGame->HighlightCell(pos + vector2d<int>(-3, 0), padx, pady, olc::DARK_GREEN);
+		//	}
+		//}
+	}
+}
+void king::Move(const point2d<int>& target)
+{
+	chesscell* oldcell = pGame->GetChessCell(pos);
+	chesscell* newcell = pGame->GetChessCell(target);
+	vector2d<int> movevect(target - pos);
+	if (first_move)
+	{
+		first_move = false;
+		if (movevect == vector2d<int>(2, 0))
+		{
+			chesspiece* rightTower = pGame->GetChessCell(pos + vector2d<int>(3, 0))->GetPiece();
+			rightTower->Move(rightTower->Pos() + vector2d<int>(-2, 0));
+		}
+		else if (movevect == vector2d<int>(-3, 0))
+		{
+			chesspiece* leftTower = pGame->GetChessCell(pos + vector2d<int>(-4, 0))->GetPiece();
+			leftTower->Move(leftTower->Pos() + vector2d<int>(2, 0));
+		}
+	}
+	if (oldcell != nullptr && newcell != nullptr)
+	{
+		pos = target;
+		oldcell->RemovePiece();
+		newcell->CaptureCell();
+		newcell->PlacePiece(this);
+		std::cout << "Moved " << piece_type << std::endl;
+	}
 }
 bool king::CanGuard(const point2d<int>& target)
 {
@@ -1197,7 +1308,7 @@ bool chesscell::CaptureCell()
 	{
 		return false;
 	}
-	piece->GetCaptured();
+	piece->CapturePiece();
 	piece = nullptr;
 	return true;
 }
