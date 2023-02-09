@@ -1,0 +1,5 @@
+out
+deps/
+*.dSYM
+**/.DS_Store
+.DS_Store

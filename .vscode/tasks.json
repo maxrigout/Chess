@@ -1,0 +1,38 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: clang++ build active file",
+            "command": "/usr/bin/clang++",
+            "args": [
+                "-Wall",
+                "-std=c++17",
+                "-fcolor-diagnostics",
+                "-fansi-escape-codes",
+                "-g",
+                "-Ideps/include",
+                "-Isrc",
+                "${workspaceFolder}/src/*.cpp",
+                "${workspaceFolder}/src/Chess/*.cpp",
+                "${workspaceFolder}/src/Chess/Pieces/*.cpp",
+                "-o",
+                "${workspaceFolder}/out",
+                "-F/Library/Frameworks",
+                "-framework",
+                "SDL2"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiler: /usr/bin/clang++"
+        }
+    ]
+}

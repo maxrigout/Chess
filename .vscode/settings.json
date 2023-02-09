@@ -1,0 +1,11 @@
+{
+	"editor.formatOnSave": false,
+	"[cpp]":{
+		"editor.wordBasedSuggestions": false,
+		"editor.suggest.insertMode": "replace",
+		"editor.semanticHighlighting.enabled": true,
+	},
+	"files.associations": {
+		"iostream": "cpp"
+	},
+}
