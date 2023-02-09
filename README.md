@@ -8,7 +8,7 @@ This project uses SDL as the main windowing system and as a renderer. You can in
 * Create the following directories inside "deps": include/SDL2.
 * Place the SDL2 headers inside "deps/include/SDL2".
     * Alternatively, you can change line 14 in the .vscode/tasks.json file to point to your own SDL2 installation .
-* You can then build the project using VS Code. (cmd/ctrl + shift + B)
+* You can then build the project using VS Code. (cmd + shift + B)
 
 ### Windows
 * TODO
@@ -17,8 +17,8 @@ This project uses SDL as the main windowing system and as a renderer. You can in
 * TODO
 
 ## Todo
-[x] Project refactor\
-[ ] Text (label for the pieces)\
-[ ] AI (AlphaBeta)\
-[ ] Better graphics\
-[ ] Implementing different rendering backends (Vulkan / Metal etc...)\
+- [x] Project refactor
+- [ ] Text (label for the pieces)
+- [ ] AI (AlphaBeta)
+- [ ] Better graphics
+- [ ] Implementing different rendering backends (Vulkan / Metal etc...)
