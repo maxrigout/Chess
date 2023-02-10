@@ -21,5 +21,6 @@ This project uses SDL as the main windowing system and as a renderer. You can in
 - [ ] Text (label for the pieces)
 - [ ] AI (AlphaBeta)
 - [ ] Better graphics
+- [ ] Window and input system
 - [ ] Setup script
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)

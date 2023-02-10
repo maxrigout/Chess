@@ -160,6 +160,7 @@ void Game::Run()
 
 void Game::Cleanup()
 {
+	FreeBoard();
 	FreeSDL();
 }
 
