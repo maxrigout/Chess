@@ -10,8 +10,8 @@ struct Color
 
 static const Color WHITE{255, 255, 255, 255};
 static const Color RED{255, 0, 0, 255};
-static const Color GREEN{255, 0, 0, 255};
-static const Color BLUE{255, 0, 0, 255};
+static const Color GREEN{0, 255, 0, 255};
+static const Color BLUE{0, 0, 255, 255};
 static const Color BLACK{0, 0, 0, 255};
 static const Color GREY{200, 200, 200, 255};
 static const Color YELLOW{255, 255, 0, 255};
@@ -31,8 +31,8 @@ static const Color DARK_PURPLE{50, 50, 100, 255};
 static const Color DARK_PURPLE2{63, 63, 127, 255};
 
 static const Color VERY_DARK_RED{63, 0, 0, 255};
-static const Color VERY_DARK_GREEN{63, 0, 0, 255};
-static const Color VERY_DARK_BLUE{63, 0, 0, 255};
+static const Color VERY_DARK_GREEN{0, 63, 0, 255};
+static const Color VERY_DARK_BLUE{0, 0, 63, 255};
 static const Color VERY_DARK_GREY{50, 50, 50, 255};
 static const Color VERY_DARK_YELLOW{63, 63, 0, 255};
 static const Color VERY_DARK_CYAN{0, 63, 63, 255};
