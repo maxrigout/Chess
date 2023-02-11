@@ -6,6 +6,8 @@
 #include "Chess/Pieces/Queen.h"
 #include "Chess/Pieces/King.h"
 
+#include "Renderer2D/SDL/Renderer2D_SDL.h"
+
 #include <iostream>
 
 
@@ -24,11 +26,14 @@ void Game::Init(int width, int height)
 {
 	InitSDL(width, height);
 	InitBoard();
-	m_isInitialized = true;
+	m_isInitialized = m_isSDLInitialized && m_isBoardInitialized;
 }
 
 void Game::InitSDL(int width, int height)
 {
+	if (m_isSDLInitialized)
+		return;
+	
 	SDL_Init(SDL_INIT_VIDEO);
 
 	// SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
@@ -42,21 +47,31 @@ void Game::InitSDL(int width, int height)
 		0
 	);
 
-	m_sdlRenderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	m_renderer.renderer = m_sdlRenderer;
-	m_renderer.windowWidth = width;
-	m_renderer.windowHeight = height;
+	if (m_renderer != nullptr)
+		delete m_renderer;
+	
+	m_renderer = new Renderer2D_SDL(SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+	//m_renderer->SetWindowDim({ width, height }); // optional
+
+	m_isSDLInitialized = true;
 }
 
 void Game::FreeSDL()
 {
-	SDL_DestroyRenderer(m_sdlRenderer);
+	if (!m_isSDLInitialized)
+		return;
+
 	SDL_DestroyWindow(m_window);
 	SDL_Quit();
+
+	m_isSDLInitialized = false;
 }
 
 void Game::InitBoard()
 {
+	if (m_isBoardInitialized)
+		return;
+
 	int width, height;
 	SDL_GetWindowSize(m_window, &width, &height);
 
@@ -78,8 +93,7 @@ void Game::InitBoard()
 		cellRenderHeightPx = height / boardHeight;
 	}
 
-	m_renderer.cellWidth = cellRenderWidthPx;
-	m_renderer.cellHeight = cellRenderHeightPx;
+	m_renderer->SetCellDim({ cellRenderWidthPx, cellRenderHeightPx });
 
 	TEAM team = TEAM::ONE;
 	Piece* t1, * t2, * b1, * b2, * h1, * h2, * q, * k;
@@ -134,21 +148,29 @@ void Game::InitBoard()
 	// SelectCell({ 0, 0 });
 	activePlayer = &player1Pieces;
 	activeTeam = activePlayer->at(0)->Team();
+
+	m_isBoardInitialized = true;
 }
 
 void Game::FreeBoard()
 {
+	if (!m_isBoardInitialized)
+		return;
+
 	for (auto p : player1Pieces)
 		delete p;
 	
 	for (auto p : player2Pieces)
 		delete p;
+
+	m_isBoardInitialized = false;
 }
 
 void Game::Run()
 {
 	if (!m_isInitialized)
 		return;
+
 	m_isPlaying = true;
 	while(m_isPlaying)
 	{
@@ -227,15 +249,17 @@ bool Game::IsMouseButtonPressed(MouseButton button)
 
 void Game::Update(float dt)
 {
-	point2d<int> mouseCell = m_board.WindowToBoardCoordinates(m_mousePos, {m_renderer.cellWidth, m_renderer.cellHeight}); // cell underneath the mouse cursor
-	// Piece* selectedPiece = m_board.GetSelectedPiece();
+	point2d<int> mouseCell = m_board.WindowToBoardCoordinates(m_mousePos, m_renderer->GetCellDim()); // cell underneath the mouse cursor
 	Cell* selectedCell = m_board.GetCell(m_selectedCellPos);
 	m_hoveredCellPos = mouseCell;
 
 	if (IsMouseButtonPressed(MouseButton::LEFT)) // if the left mouse button is pressed
 	{
 		SelectCell(mouseCell);
-		if (m_selectedPiece == nullptr && selectedCell->HasPiece()) { // if we don't have any piece selected
+		if (selectedCell == nullptr)
+			return;
+		if (m_selectedPiece == nullptr && selectedCell->HasPiece()) // if we don't have any piece selected
+		{
 			if (selectedCell->GetPiece()->IsSameTeam(activeTeam) && !selectedCell->GetPiece()->IsCaptured())
 			{
 				m_selectedPiece = selectedCell->GetPiece();
@@ -263,35 +287,36 @@ void Game::Update(float dt)
 void Game::Render()
 {
 	// Draw
-	SDL_SetRenderDrawColor(m_sdlRenderer, 0, 0, 0, 0);
-	SDL_RenderClear(m_sdlRenderer); // Clear the screen
+	m_renderer->Begin();
+	m_renderer->Clear(BLACK);
 
-	m_board.DrawCells(&m_renderer); // Draw the board
-	m_board.HighlightCell(&m_renderer, m_hoveredCellPos); // highlight the cell under the mouse cursor
-	m_board.DrawSelectedCell(&m_renderer, m_selectedCellPos, 7); // highlight the selected cell
+	m_board.DrawCells(m_renderer); // Draw the board
+	m_board.HighlightCell(m_renderer, m_hoveredCellPos); // highlight the cell under the mouse cursor
+	m_board.DrawSelectedCell(m_renderer, m_selectedCellPos, 7); // highlight the selected cell
 	if (m_selectedPiece != nullptr)
 	{
-		m_selectedPiece->DrawMoves(&m_renderer); // draw the selected piece's moves
+		m_selectedPiece->DrawMoves(m_renderer); // draw the selected piece's moves
 	}
 
 	// draw the player 1's pieces
 	for (auto p : player1Pieces)
 	{
-		p->DrawYourself(&m_renderer);
+		p->DrawYourself(m_renderer);
 	}
 
 	// draw the player 2's pieces
 	for (auto p : player2Pieces)
 	{
-		p->DrawYourself(&m_renderer);
+		p->DrawYourself(m_renderer);
 	}
 
-	SDL_RenderPresent(m_sdlRenderer);
+	m_renderer->End();
 }
 
 void Game::SelectCell(point2d<int> cellBoardPosition)
 {
-	m_selectedCellPos = cellBoardPosition;
+	if (m_board.IsPositionValid(cellBoardPosition))
+		m_selectedCellPos = cellBoardPosition;
 }
 
 void Game::SwitchPlayers()

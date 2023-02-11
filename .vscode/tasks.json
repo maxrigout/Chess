@@ -16,11 +16,16 @@
                 "${workspaceFolder}/src/*.cpp",
                 "${workspaceFolder}/src/Chess/*.cpp",
                 "${workspaceFolder}/src/Chess/Pieces/*.cpp",
+                "${workspaceFolder}/src/Renderer2D/SDL/*.cpp",
                 "-o",
                 "${workspaceFolder}/out",
                 "-F/Library/Frameworks",
                 "-framework",
-                "SDL2"
+                "SDL2",
+                "-framework",
+                "SDL2_ttf",
+                "-framework",
+                "SDL2_image"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

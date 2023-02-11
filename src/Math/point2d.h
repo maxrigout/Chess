@@ -46,3 +46,9 @@ struct point2d
 	T x;
 	T y;
 };
+
+template <typename T>
+point2d<T> componentMultiply(const point2d<T>& lhs, const vector2d<T>& rhs)
+{
+	return point2d<T>(lhs.x * rhs.x, lhs.y * rhs.y);
+}

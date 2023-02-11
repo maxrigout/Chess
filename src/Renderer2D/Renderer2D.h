@@ -1,7 +1,9 @@
 #pragma once
+
+#include <string>
+
 #include "Math/point2d.h"
 #include "Math/vector2d.h"
-#include <SDL2/SDL.h>
 
 struct Color
 {
@@ -38,35 +40,26 @@ static const Color VERY_DARK_YELLOW{63, 63, 0, 255};
 static const Color VERY_DARK_CYAN{0, 63, 63, 255};
 static const Color VERY_DARK_MAGENTA{63, 0, 63, 255};
 
-struct Renderer2D
+class Renderer2D
 {
-	SDL_Renderer* renderer;
-	int windowWidth;
-	int windowHeight;
-	int cellWidth;
-	int cellHeight;
-	void DrawCircle(point2d<int> center, int radius, const Color& color) const
-	{
+public:
+	virtual ~Renderer2D() = default;
 
-	}
-	void FillCircle(point2d<int> center, int radius, const Color& color) const
-	{
-		SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-		SDL_Rect rect{center.x - radius, center.y - radius, 2 * radius, 2 * radius};
-		for (int y = 0; y < rect.h; ++y)
-		{
-			// find the 2 extreme points on the circle
-			float cosy = ((float)y / rect.h) * 2.0f * radius - radius;
-			float cos2y = (cosy * cosy) / radius / radius;
-			float cos2x = 1 - cos2y;
-			int x = radius * sqrt(cos2x);
-			point2d<int> left{center.x - x, rect.y + y};
-			point2d<int> right{center.x + x, rect.y + y};
-			SDL_RenderDrawLine(renderer, left.x, left.y, right.x, right.y);
-		}
-	}
-	void DrawDisk(point2d<int> center, int radius, const Color& color) const
-	{
-		return FillCircle(center, radius, color);
-	}
+	virtual void Begin() = 0;
+	virtual void End() = 0;
+	virtual void Clear(const Color& color) const = 0;
+	virtual void DrawDisk(point2d<int> center, int radius, const Color& color) const = 0;
+	virtual void DrawCircle(point2d<int> center, int radius, const Color& color) const = 0;
+	virtual void FillCircle(point2d<int> center, int radius, const Color& color) const = 0;
+	virtual void DrawRect(point2d<int> position, vector2d<int> dimensions, const Color& color) const = 0;
+	virtual void FillRect(point2d<int> position, vector2d<int> dimensions, const Color& color) const = 0;
+	virtual void DrawLine(point2d<int> start, point2d<int> end, const Color& color) const = 0;
+	virtual void DrawText(point2d<int> position, const std::string& text, const Color& color) const = 0;
+
+	virtual vector2d<int> GetWindowDim() const = 0;
+	virtual vector2d<int> GetCellDim() const = 0;
+	virtual vector2d<int> GetViewPortDim() const = 0;
+	virtual void SetWindowDim(vector2d<int> dim) = 0;
+	virtual void SetCellDim(vector2d<int> dim) = 0;
+	virtual void SetViewPortDim(vector2d<int> dim) = 0;
 };

@@ -20,7 +20,8 @@ public:
 	int GetHeight() const { return m_height; }
 	Cell* GetCell(point2d<int> pos);
 
-	point2d<int> WindowToBoardCoordinates(point2d<int> windowCoordinates, point2d<int> cellDims) const;
+	point2d<int> WindowToBoardCoordinates(point2d<int> windowCoordinates, vector2d<int> cellDims) const;
+	bool IsPositionValid(point2d<int> position) const;
 
 	void DrawCells(const Renderer2D* renderer) const;
 	void DrawSelectedCell(const Renderer2D* renderer, point2d<int> cellPos, int width) const;

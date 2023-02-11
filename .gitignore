@@ -1,5 +1,6 @@
 out
 deps/
+fonts/
 *.dSYM
 **/.DS_Store
 .DS_Store

@@ -1,6 +1,7 @@
 #include "Piece.h"
 
 #include <iostream>
+#include <string>
 
 Piece::Piece(Board* board, TEAM nTeam, point2d<int> p, char t, std::vector<vector2d<int>> m, bool s)
 { 
@@ -287,10 +288,11 @@ void Piece::DrawYourself(const Renderer2D* renderer) const
 {
 	// TODO
 	if (!isCaptured) {
-		point2d<int> center{pos.x * renderer->cellWidth + renderer->cellWidth / 2, pos.y * renderer->cellHeight + renderer->cellHeight / 2};
-		renderer->FillCircle(center, renderer->cellWidth / 3, team_color);
-		// renderer->renderer->DrawDisk(pos, team_color);
-		// renderer->renderer->DrawLabel(pos, { piece_type, '\0' }, WHITE);
+		vector2d<int> cell = renderer->GetCellDim();
+		point2d<int> center = componentMultiply(pos, cell) + (cell / 2);
+		// point2d<int> center = { pos.x * cell.w + (cell.w / 2), pos.y * cell.h + (cell.h / 2) };
+		renderer->FillCircle(center, cell.w / 3, team_color);
+		renderer->DrawText(componentMultiply(pos, cell), {piece_type, '\0'}, WHITE);
 	}
 }
 void Piece::Move(const point2d<int>& target)

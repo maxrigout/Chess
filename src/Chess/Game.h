@@ -40,17 +40,18 @@ private:
 	void SwitchPlayers();
 
 	SDL_Window* m_window;
-	SDL_Renderer* m_sdlRenderer;
 	point2d<int> m_mousePos;
 	unsigned int m_mouseButtonState;
 
-	Renderer2D m_renderer;
+	Renderer2D* m_renderer;
 
-	bool m_isInitialized;
+	bool m_isInitialized = false;
+	bool m_isSDLInitialized = false;
+	bool m_isBoardInitialized = false;
 	bool m_isPlaying;
 
-	point2d<int> m_hoveredCellPos{};
-	point2d<int> m_selectedCellPos{2, 0};
+	point2d<int> m_hoveredCellPos{-1, 0};
+	point2d<int> m_selectedCellPos{-1, 0};
 
 	Board m_board;
 	Piece* m_selectedPiece = nullptr;

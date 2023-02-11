@@ -29,39 +29,42 @@ Cell* Board::GetCell(point2d<int> pos)
 	return &m_cells[pos.y * m_width + pos.x];
 }
 
-point2d<int> Board::WindowToBoardCoordinates(point2d<int> windowCoordinates, point2d<int> cellDims) const
+point2d<int> Board::WindowToBoardCoordinates(point2d<int> windowCoordinates, vector2d<int> cellDims) const
 {
-	return point2d<int>{windowCoordinates.x / cellDims.x, windowCoordinates.y / cellDims.y};
+	return point2d<int>{windowCoordinates.x / cellDims.w, windowCoordinates.y / cellDims.h};
+}
+
+bool Board::IsPositionValid(point2d<int> position) const
+{
+	if (position.x < 0 || position.y < 0)
+		return false;
+	if (position.x >= m_width || position.y >= m_height)
+		return false;
+	return true;
 }
 
 void Board::DrawCells(const Renderer2D* renderer) const
 {
-	// SDL_Rect rect;
-	// SDL_RenderGetViewport(renderer->renderer, &rect);
-	// int screenWidth = rect.w;
-	// int screenHeight = rect.h;
-	int screenWidth = renderer->windowWidth;
-	int screenHeight = renderer->windowHeight;
-	int cellWidth = renderer->cellWidth;
-	int cellHeight = renderer->cellHeight;
+	vector2d<int> screen = renderer->GetWindowDim();
+	vector2d<int> cell = renderer->GetCellDim();
 
 	point2d<int> p1 = { 0, 0 };
-	point2d<int> p2 = { 0, screenHeight };
-	vector2d<int> dir = { cellWidth, 0 };
+	point2d<int> p2 = { 0, screen.h };
+	vector2d<int> dir = { cell.w, 0 };
 	for (int j = 0; j < m_width; j++)
 	{
 		p1 = p1 + dir;
 		p2 = p2 + dir;
-		SDL_RenderDrawLine(renderer->renderer, p1.x, p1.y, p2.x, p2.y);
+		renderer->DrawLine(p1, p2, BLACK);
 	}
 	p1 = { 0, 0 };
-	p2 = { screenWidth, 0 };
-	dir = { 0, cellHeight };
+	p2 = { screen.w, 0 };
+	dir = { 0, cell.h };
 	for (int i = 0; i < m_height; i++)
 	{
 		p1 = p1 + dir;
 		p2 = p2 + dir;
-		SDL_RenderDrawLine(renderer->renderer, p1.x, p1.y, p2.x, p2.y);
+		renderer->DrawLine(p1, p2, BLACK);
 	}
 
 	// alternate between black and white cells
@@ -70,18 +73,18 @@ void Board::DrawCells(const Renderer2D* renderer) const
 		for (int i = 0; i < m_width; i++)
 		{
 			Color color = ((i + j) % 2 == 0) ? EVEN_CELL_COLOR : ODD_CELL_COLOR;
-			SDL_Rect rect{i * cellWidth, j * cellHeight, cellWidth, cellHeight};
-			SDL_SetRenderDrawColor(renderer->renderer, color.r, color.g, color.b, color.a);
-			SDL_RenderFillRect(renderer->renderer, &rect);
+			renderer->FillRect({ i * cell.w, j * cell.h }, cell, color);
 		}
 	}
 }
 
 void Board::DrawSelectedCell(const Renderer2D* renderer, point2d<int> cellPos, int width) const
 {
+	if (!IsPositionValid(cellPos))
+		return;
+
 	// option 1
-	// draw the highlight color
-	// draw the 4 rects
+	// draw 4 rects
 	/*
 	__________
 	|___Top___|
@@ -90,61 +93,49 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, point2d<int> cellPos, i
 	|___Bot___|
 
 	*/
-	float aspectRatio = (float)renderer->cellHeight / (float)renderer->cellWidth;
+	vector2d<int> cell = renderer->GetCellDim();
+
+	float aspectRatio = (float)cell.h / (float)cell.w;
 	int height = width * aspectRatio;
-	point2d<int> topLeft{ cellPos.x * renderer->cellWidth, cellPos.y * renderer->cellHeight };
-	point2d<int> topRight{ (cellPos.x + 1) * renderer->cellWidth, cellPos.y * renderer->cellHeight };
 
-	SDL_SetRenderDrawColor(renderer->renderer, DARK_GREEN.r, DARK_GREEN.g, DARK_GREEN.b, DARK_GREEN.a);
+	point2d<int> cellTopLeft{ cellPos.x * cell.w, cellPos.y * cell.h };
+	point2d<int> cellTopRight{ (cellPos.x + 1) * cell.w, cellPos.y * cell.h };
 
-	SDL_Rect topRect{ topLeft.x,
-		topLeft.y,
-		renderer->cellWidth,
-		height
-	};
-	SDL_Rect leftRect{ topLeft.x,
-		topLeft.y + height,
-		width,
-		renderer->cellHeight - (2 * height)
-	};
-	SDL_Rect rightRect{ topRight.x - width,
-		topRight.y + height,
-		width,
-		renderer->cellHeight - (2 * height)
-	};
-	SDL_Rect bottomRect{ topLeft.x,
-		topLeft.y + renderer->cellHeight - height,
-		renderer->cellWidth,height
-	};
+	point2d<int> topTopLeft{ cellTopLeft.x, cellTopLeft.y };
+	vector2d<int> topDim{ cell.w, height };
 
-	SDL_RenderFillRect(renderer->renderer, &topRect);
-	SDL_RenderFillRect(renderer->renderer, &leftRect);
-	SDL_RenderFillRect(renderer->renderer, &rightRect);
-	SDL_RenderFillRect(renderer->renderer, &bottomRect);
+	point2d<int> leftTopLeft{ cellTopLeft.x, cellTopLeft.y + height };
+	vector2d<int> leftDim{ width, cell.h - (2 * height) };
 
+	point2d<int> rightTopLeft{ cellTopRight.x - width, cellTopRight.y + height };
+	vector2d<int> rightDim{ width, cell.h - (2 * height) };
+
+	point2d<int> bottomTopLeft{ cellTopLeft.x, cellTopLeft.y + cell.h - height };
+	vector2d<int> bottomDim{ cell.w, height };
+
+	renderer->FillRect(topTopLeft, topDim, DARK_GREEN); // top rect
+	renderer->FillRect(leftTopLeft, leftDim, DARK_GREEN); // left rect
+	renderer->FillRect(rightTopLeft, rightDim, DARK_GREEN); // right rect
+	renderer->FillRect(bottomTopLeft, bottomDim, DARK_GREEN); // bottom rect
 
 	// option 2
 	// draw smaller and smaller rect
 	// for (int i = 0; i < width; i++)
 	// {
 	// 	SDL_SetRenderDrawColor(renderer->renderer, DARK_GREEN.r, DARK_GREEN.g, DARK_GREEN.b, DARK_GREEN.a);
-	// 	SDL_Rect rect = {cellPos.x * renderer->cellWidth + i, cellPos.y * renderer->cellHeight + i, renderer->cellWidth - 2 * i, renderer->cellHeight - 2 * i};
+	// 	SDL_Rect rect = {cellPos.x * renderer->cell.w + i, cellPos.y * renderer->cell.h + i, renderer->cell.w - 2 * i, renderer->cell.h - 2 * i};
 	// 	SDL_RenderDrawRect(renderer->renderer, &rect);
 	// }
 }
 
 void Board::HighlightCell(const Renderer2D* renderer, point2d<int> cellPos, point2d<int> padding, const Color& color) const
 {
-	if (cellPos.x < 0 || cellPos.x >= m_width)
+	if (!IsPositionValid(cellPos))
 		return;
-	if (cellPos.y < 0 || cellPos.y >= m_height)
-		return;
-	SDL_Rect rect{cellPos.x * renderer->cellWidth + padding.x,
-		cellPos.y * renderer->cellHeight + padding.y,
-		renderer->cellWidth - 2 * padding.x,
-		renderer->cellHeight - 2 * padding.y
-	};
-	SDL_SetRenderDrawColor(renderer->renderer, color.r, color.g, color.b, color.a);
-	SDL_RenderDrawRect(renderer->renderer, &rect);
-	// FillRect(cell_x * cellWidth + pad_x, cell_y * cellHeight + pad_y, cellWidth - 2 * pad_x, cellHeight - 2 * pad_y, color);
+
+	vector2d<int> cell = renderer->GetCellDim();
+
+	renderer->FillRect(	{ cellPos.x * cell.w + padding.x, cellPos.y * cell.h + padding.y },
+						{ cell.w - 2 * padding.x, cell.h - 2 * padding.y },
+						color);
 }

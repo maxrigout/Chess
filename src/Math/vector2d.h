@@ -88,7 +88,14 @@ struct vector2d
 		}
 		return (isColinear && k > 0);
 	}
-
-	T x;
-	T y;
+	union 
+	{
+		T x;
+		T w;
+	};
+	union
+	{
+		T y;
+		T h;
+	};
 };
