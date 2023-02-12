@@ -6,6 +6,8 @@
 AIPlayer::AIPlayer(Board* board, TEAM team, int king_row)
 	: Player(board, team)
 {
+	srand(time(0));
+
 	int pawn_row = 0;
 	if (king_row == 7)
 	{
@@ -84,9 +86,8 @@ void AIPlayer::Play(const Context& context)
 
 Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
 {
-	Move bestMove = moves[0];
 	int max_score = std::numeric_limits<int>::min();
-	int min_score = std::numeric_limits<int>::max();
+	std::vector<Move> bestMoves;
 	for (auto& move : moves)
 	{
 		char old_cell = TestMove(move);
@@ -94,13 +95,18 @@ Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
 		std::cout << "evaluating: " << move.p->Type() << " to " << m_pBoard->GetBoardCoordinates(move.target) << " score: " << score << '\n';
 		if (score > max_score)
 		{
+			bestMoves.clear();
 			std::cout << "found better move\n";
 			max_score = score;
-			bestMove = move;
+		}
+		else if (score == max_score)
+		{
+			bestMoves.push_back(move);
 		}
 		UndoMove(move, old_cell);
 	}
-	return bestMove;
+	// pick a random from the best moves
+	return bestMoves[rand() % bestMoves.size()];
 }
 
 int AIPlayer::EvaluateBoard()
@@ -156,5 +162,5 @@ int AIPlayer::GetPieceValue(char type)
 
 void AIPlayer::DrawLastMove(const Renderer2D* renderer) const
 {
-	renderer->DrawArrow(lastMoveStart, lastMoveEnd, DARK_BLUE);
+	renderer->DrawArrow(lastMoveStart, lastMoveEnd, MAGENTA);
 }
