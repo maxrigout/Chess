@@ -298,7 +298,7 @@ void Player::SelectPiece(const pt2di& position)
 		return;
 	}
 	if (piece->IsSameTeam(m_team))
-		m_selectedPiece = cell->GetPiece();
+		m_selectedPiece = piece;
 }
 
 MoveInfo Player::MoveSelectedPiece(const pt2di& position)

@@ -8,19 +8,24 @@
 #include <vector>
 #include <memory>
 
+struct Context
+{
+	pt2di selectedCellPosition;
+	int processingDelay;
+};
+
 class Player
 {
 public:
 	Player(Board* board, TEAM team);
 	virtual ~Player() = default;
+	virtual void Play(const Context& context) = 0;
 	void CalculateMoves();
 	Piece* GetPieceAtPosition(const pt2di& position);
 	void DrawPieces(const Renderer2D* renderer) const;
 	void DrawSelectedPieceMoves(const Renderer2D* renderer) const;
 	void GuardCells();
 	TEAM GetTeam() const { return m_team; }
-	void UndoMove(const Move& move, char old_cell);
-	char TestMove(const Move& move);
 	bool HasEndedTurn() const { return m_hasTurnEnded; }
 	void BeginTurn() { m_hasTurnEnded = false; }
 	King* GetKing() { return m_king; }
@@ -34,6 +39,8 @@ public:
 	MoveInfo MoveSelectedPiece(const pt2di& position);
 
 protected:
+	void UndoMove(const Move& move, char old_cell);
+	char TestMove(const Move& move);
 	void EndTurn() { m_hasTurnEnded = true; }
 	char& GetCopiedCell(int x, int y) { return board_copy[y * m_board->GetWidth() + x]; }
 	char GetCopiedCell(int x, int y) const { return board_copy[y * m_board->GetWidth() + x]; }

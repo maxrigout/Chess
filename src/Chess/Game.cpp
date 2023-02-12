@@ -215,15 +215,7 @@ void Game::Update(float dt)
 		if (selectedCell == nullptr)
 			return;
 
-		if (!m_activePlayer->IsPieceSelected())
-		{
-			m_activePlayer->SelectPiece(m_selectedCellPos);
-			return;
-		}
-
-		MoveInfo info = m_activePlayer->MoveSelectedPiece(mouseCell);
-		if (info.reason != MoveInfo::NONE)
-			m_activePlayer->SelectPiece(m_selectedCellPos);
+		m_activePlayer->Play({ m_selectedCellPos, 0 });
 	}
 }
 

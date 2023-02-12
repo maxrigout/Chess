@@ -10,7 +10,7 @@ class ChessAI : public Player
 {
 public:
 	ChessAI(Board* board, Player* own_pieces, Player* enemy_pieces);
-	void Play();
+	virtual void Play(const Context& context) override;
 	void CopyBoard();
 	std::string PrintCopy();
 	void GetPossibleMoves();

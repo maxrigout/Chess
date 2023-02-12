@@ -50,56 +50,6 @@ HumanPlayer::HumanPlayer(Board* board, TEAM team, int king_row)
 	// }
 }
 
-/*
-HumanPlayer::HumanPlayer(Board* board, const Player& other)
-{
-	m_board = board;
-	team = other.team;
-	board_copy = nullptr;
-	legal_moves = other.legal_moves;
-	moves_calculated = other.moves_calculated;
-
-	for (auto& piece : other.pieces)
-	{
-		pieces.push_back(new Piece(board, piece));
-	}
-
-	for (auto piece : pieces)
-	{
-		board->GetCell(piece->Pos())->PlacePiece(piece);
-	}
-
-	board_copy = new char* [board->GetWidth()];
-	for (int i = 0; i < board->GetWidth(); i++)
-	{
-		board_copy[i] = new char[board->GetHeight()];
-	}
-}
-HumanPlayer::HumanPlayer(Board* board, Player const* other)
-{
-	m_board = board;
-	team = other->team;
-	board_copy = nullptr;
-	legal_moves = other->legal_moves;
-	moves_calculated = other->moves_calculated;
-
-	for (auto& piece : other->pieces)
-	{
-		pieces.push_back(new Piece(board, piece));
-	}
-
-	for (auto piece : pieces)
-	{
-		board->GetCell(piece->Pos())->PlacePiece(piece);
-	}
-
-	board_copy = new char* [board->GetWidth()];
-	for (int i = 0; i < board->GetWidth(); i++)
-	{
-		board_copy[i] = new char[board->GetHeight()];
-	}
-}
-*/
 HumanPlayer::~HumanPlayer()
 {
 	for (const auto& p : m_pieces)
@@ -107,4 +57,17 @@ HumanPlayer::~HumanPlayer()
 		delete p;
 	}
 	m_pieces.clear();
+}
+
+void HumanPlayer::Play(const Context& context)
+{
+	if (!IsPieceSelected())
+	{
+		SelectPiece(context.selectedCellPosition);
+		return;
+	}
+
+	MoveInfo info = MoveSelectedPiece(context.selectedCellPosition);
+	if (info.reason != MoveInfo::NONE)
+		SelectPiece(context.selectedCellPosition);
 }
