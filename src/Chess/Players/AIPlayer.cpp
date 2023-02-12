@@ -63,10 +63,10 @@ void AIPlayer::Play(const Context& context)
 	//pGame->arrow_end = possibleMoves[r].p->Pos();
 
 	Move move = GetBestMove(possibleMoves);
-	lastMoveStart = move.p->Pos();
-	move.PerformMove();
-	lastMoveEnd = move.p->Pos();
-
+	Piece* pieceToMove = move.piece;
+	lastMoveStart = pieceToMove->Pos();
+	pieceToMove->Move(move.target);
+	lastMoveEnd = pieceToMove->Pos();
 	EndTurn();
 }
 
@@ -92,10 +92,11 @@ Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
 	{
 		char old_cell = TestMove(move);
 		int score = m_king->GetMod(m_team) * EvaluateBoard();
-		std::cout << "evaluating: " << move.p->Type() << " to " << m_pBoard->GetBoardCoordinates(move.target) << " score: " << score << '\n';
+		std::cout << "evaluating: " << move.piece->Type() << " to " << m_pBoard->GetBoardCoordinates(move.target) << " score: " << score << '\n';
 		if (score > max_score)
 		{
 			bestMoves.clear();
+			bestMoves.push_back(move);
 			std::cout << "found better move\n";
 			max_score = score;
 		}
@@ -109,7 +110,7 @@ Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
 	return bestMoves[rand() % bestMoves.size()];
 }
 
-int AIPlayer::EvaluateBoard()
+int AIPlayer::EvaluateBoard() const
 {
 	int out = 0;
 	for (int i = 0; i < m_pBoard->GetWidth(); i++)
@@ -121,13 +122,13 @@ int AIPlayer::EvaluateBoard()
 	}
 	return out;
 }
-int AIPlayer::GetPiecePoints(Piece* p)
+int AIPlayer::GetPiecePoints(Piece* p) const
 {
 	if (p == nullptr)
 		return 0;
 	return GetPiecePoints(p->Type());
 }
-int AIPlayer::GetPiecePoints(char type)
+int AIPlayer::GetPiecePoints(char type) const
 {
 	switch (type)
 	{
@@ -141,7 +142,7 @@ int AIPlayer::GetPiecePoints(char type)
 	}
 	return 0;
 }
-int AIPlayer::GetPieceValue(Piece* p)
+int AIPlayer::GetPieceValue(Piece* p) const
 {
 	int mod = 1;
 	if (p != nullptr)
@@ -153,7 +154,7 @@ int AIPlayer::GetPieceValue(Piece* p)
 	}
 	return mod * GetPiecePoints(p);
 }
-int AIPlayer::GetPieceValue(char type)
+int AIPlayer::GetPieceValue(char type) const
 {
 	int val = (int)type;
 	int mod = val / abs(val);

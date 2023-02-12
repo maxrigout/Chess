@@ -29,9 +29,29 @@ Cell* Board::GetCell(const pt2di& pos)
 	return &m_cells[pos.y * m_width + pos.x];
 }
 
-point2d<int> Board::WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const
+void Board::SetCellDim(const vec2di& dim)
 {
-	return point2d<int>{windowCoordinates.x / cellDims.w, windowCoordinates.y / cellDims.h};
+	m_cellDim = dim;
+}
+
+pt2di Board::WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const
+{
+	return pt2di{windowCoordinates.x / cellDims.w, windowCoordinates.y / cellDims.h};
+}
+
+pt2di Board::BoardToWindowCoordinates(const pt2di& boardCoordinates, const vec2di& cellDims) const
+{
+	return pt2di{boardCoordinates.x * cellDims.w, boardCoordinates.y * cellDims.h};
+}
+
+pt2di Board::WindowToBoardCoordinates(const pt2di& windowCoordinates) const
+{
+	return WindowToBoardCoordinates(windowCoordinates, m_cellDim);
+}
+
+pt2di Board::BoardToWindowCoordinates(const pt2di& boardCoordinates) const
+{
+	return BoardToWindowCoordinates(boardCoordinates, m_cellDim);
 }
 
 bool Board::IsPositionValid(const pt2di& position) const
@@ -53,12 +73,12 @@ void Board::ResetGuard()
 
 void Board::DrawCells(const Renderer2D* renderer) const
 {
-	vector2d<int> screen = renderer->GetWindowDim();
-	vector2d<int> cell = renderer->GetCellDim();
+	vec2di screen = renderer->GetWindowDim();
+	vec2di cell = renderer->GetCellDim();
 
-	point2d<int> p1 = { 0, 0 };
-	point2d<int> p2 = { 0, screen.h };
-	vector2d<int> dir = { cell.w, 0 };
+	pt2di p1 = { 0, 0 };
+	pt2di p2 = { 0, screen.h };
+	vec2di dir = { cell.w, 0 };
 	for (int j = 0; j < m_width; j++)
 	{
 		p1 = p1 + dir;
@@ -101,25 +121,25 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, i
 	|___Bot___|
 
 	*/
-	vector2d<int> cell = renderer->GetCellDim();
+	vec2di cell = renderer->GetCellDim();
 
 	float aspectRatio = (float)cell.h / (float)cell.w;
 	int height = width * aspectRatio;
 
-	point2d<int> cellTopLeft{ cellPos.x * cell.w, cellPos.y * cell.h };
-	point2d<int> cellTopRight{ (cellPos.x + 1) * cell.w, cellPos.y * cell.h };
+	pt2di cellTopLeft{ cellPos.x * cell.w, cellPos.y * cell.h };
+	pt2di cellTopRight{ (cellPos.x + 1) * cell.w, cellPos.y * cell.h };
 
-	point2d<int> topTopLeft{ cellTopLeft.x, cellTopLeft.y };
-	vector2d<int> topDim{ cell.w, height };
+	pt2di topTopLeft{ cellTopLeft.x, cellTopLeft.y };
+	vec2di topDim{ cell.w, height };
 
-	point2d<int> leftTopLeft{ cellTopLeft.x, cellTopLeft.y + height };
-	vector2d<int> leftDim{ width, cell.h - (2 * height) };
+	pt2di leftTopLeft{ cellTopLeft.x, cellTopLeft.y + height };
+	vec2di leftDim{ width, cell.h - (2 * height) };
 
-	point2d<int> rightTopLeft{ cellTopRight.x - width, cellTopRight.y + height };
-	vector2d<int> rightDim{ width, cell.h - (2 * height) };
+	pt2di rightTopLeft{ cellTopRight.x - width, cellTopRight.y + height };
+	vec2di rightDim{ width, cell.h - (2 * height) };
 
-	point2d<int> bottomTopLeft{ cellTopLeft.x, cellTopLeft.y + cell.h - height };
-	vector2d<int> bottomDim{ cell.w, height };
+	pt2di bottomTopLeft{ cellTopLeft.x, cellTopLeft.y + cell.h - height };
+	vec2di bottomDim{ cell.w, height };
 
 	renderer->FillRect(topTopLeft, topDim, DARK_GREEN); // top rect
 	renderer->FillRect(leftTopLeft, leftDim, DARK_GREEN); // left rect
@@ -141,7 +161,7 @@ void Board::HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, cons
 	if (!IsPositionValid(cellPos))
 		return;
 
-	vector2d<int> cell = renderer->GetCellDim();
+	vec2di cell = renderer->GetCellDim();
 
 	renderer->FillRect(	{ cellPos.x * cell.w + padding.x, cellPos.y * cell.h + padding.y },
 						{ cell.w - 2 * padding.x, cell.h - 2 * padding.y },

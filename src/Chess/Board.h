@@ -21,10 +21,17 @@ public:
 	int GetWidth() const { return m_width; }
 	int GetHeight() const { return m_height; }
 	Cell* GetCell(const pt2di& pos);
+	void SetCellDim(const vec2di& dim);
+	const vec2di& GetCellDim() const { return m_cellDim; }
 
 	void ResetGuard();
 
-	point2d<int> WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const;
+	pt2di WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const;
+	pt2di BoardToWindowCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const;
+
+	pt2di WindowToBoardCoordinates(const pt2di& windowCoordinates) const;
+	pt2di BoardToWindowCoordinates(const pt2di& windowCoordinates) const;
+
 	bool IsPositionValid(const pt2di& position) const;
 
 	void DrawCells(const Renderer2D* renderer) const;
@@ -37,4 +44,6 @@ private:
 	Cell* m_cells;
 	int m_width;
 	int m_height;
+
+	vec2di m_cellDim;
 };

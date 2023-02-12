@@ -34,7 +34,7 @@ struct MoveInfo
 
 struct Move
 {
-	Piece* p;
+	Piece* piece;
 	pt2di target;
-	void PerformMove() const;
+	pt2di origin;
 };

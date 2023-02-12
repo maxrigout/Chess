@@ -21,7 +21,7 @@ Pawn::Pawn(Board* board, TEAM nTeam, point2d<int> p)
 }
 bool Pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 {
-	vector2d<int> move_vect(target - pos);
+	vector2d<int> move_vect(target - boardPosition);
 	vector2d<int> move_front(moves[0]);
 	vector2d<int> move_front2(move_front + move_front);
 	vector2d<int> capture_left(move_front + vector2d<int>(-1, 0));
@@ -34,7 +34,7 @@ bool Pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 	}
 	else if (move_vect == move_front)
 	{
-		Cell* target_cell = pBoard->GetCell(pos + move_vect);
+		Cell* target_cell = pBoard->GetCell(boardPosition + move_vect);
 		if (target_cell == nullptr)
 		{
 			return false;
@@ -50,8 +50,8 @@ bool Pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 	}
 	else if (move_vect == move_front2 && first_move)
 	{
-		Cell* target_cell = pBoard->GetCell(pos + move_vect);
-		Cell* intermediate_cell = pBoard->GetCell(pos + move_front);
+		Cell* target_cell = pBoard->GetCell(boardPosition + move_vect);
+		Cell* intermediate_cell = pBoard->GetCell(boardPosition + move_front);
 		if (target_cell == nullptr || intermediate_cell == nullptr)
 		{
 			return false;
@@ -67,7 +67,7 @@ bool Pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 	}
 	else if (move_vect == capture_left || move_vect == capture_right)
 	{
-		Cell* target_cell = pBoard->GetCell(pos + move_vect);
+		Cell* target_cell = pBoard->GetCell(boardPosition + move_vect);
 		if (target_cell == nullptr)
 		{
 			return false;
@@ -85,7 +85,7 @@ bool Pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 }
 bool Pawn::CanGuard(const point2d<int>& target) const
 {
-	vector2d<int> move_vect(target - pos);
+	vector2d<int> move_vect(target - boardPosition);
 	vector2d<int> move_front(moves[0]);
 	vector2d<int> move_front2(move_front + move_front);
 	vector2d<int> capture_left(move_front + vector2d<int>(-1, 0));

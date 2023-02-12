@@ -19,13 +19,14 @@ public:
 	virtual void CalculateMoves();
 	virtual void Move(const pt2di& target);
 	virtual void DrawMoves(const Renderer2D* renderer) const;
+	void UpdateMovement(float dt);
 	void DrawYourself(const Renderer2D* renderer) const;
 	bool IsSameTeam(TEAM t) const { return (team == t); }
 	bool HasMoved() const { return !first_move; }
 	TEAM Team() const { return team; }
 	bool IsCaptured() const { return isCaptured; }
 	bool CapturePiece();
-	pt2di Pos() const { return pos; }
+	pt2di Pos() const { return boardPosition; }
 	char Type() const { return piece_type; }
 	void GuardCells();
 	virtual bool CanGuard(const pt2di& target) const;
@@ -42,7 +43,7 @@ private:
 	void GuardCellsScaled() const;
 
 protected:
-	pt2di pos;
+	pt2di boardPosition;
 	bool move_scaling;
 	std::vector<vec2di> moves;
 	std::vector<pt2di> availableMoves;
@@ -54,6 +55,10 @@ protected:
 	bool isCaptured;
 	bool first_move;
 	bool moves_calculated;
+
+	pt2df m_screenPosition;
+	pt2df m_targetScreenPosition;
+	float m_speed = 1.0f;
 };
 
 #include "Chess/Pieces/Pawn.h"

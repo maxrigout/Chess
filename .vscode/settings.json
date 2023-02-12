@@ -7,6 +7,10 @@
 	},
 	"files.associations": {
 		"iostream": "cpp",
-		"vector": "cpp"
+		"vector": "cpp",
+		"bitset": "cpp",
+		"cstdio": "cpp",
+		"string": "cpp",
+		"string_view": "cpp"
 	},
 }

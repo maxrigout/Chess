@@ -8,6 +8,14 @@ Player::Player(Board* board, TEAM team)
 	m_pBoardCopy = std::make_unique<char[]>(m_pBoard->GetWidth() * m_pBoard->GetHeight());
 }
 
+void Player::UpdatePieces(float dt)
+{
+	for (auto& piece : m_pieces)
+	{
+		piece->UpdateMovement(dt);
+	}
+}
+
 void Player::CalculateMoves()
 {
 	CopyBoard();
@@ -75,12 +83,12 @@ Piece* Player::GetPieceAtPosition(const pt2di& position)
 void Player::UndoMove(const Move& move, char old_cell)
 {
 	GetCopiedCell(move.target.x, move.target.y) = old_cell;
-	GetCopiedCell(move.p->Pos().x, move.p->Pos().y) = move.p->Type() * move.p->GetMod(m_team);
+	GetCopiedCell(move.piece->Pos().x, move.piece->Pos().y) = move.piece->Type() * move.piece->GetMod(m_team);
 }
 
 char Player::TestMove(const Move& move)
 {
-	pt2di s = move.p->Pos();
+	pt2di s = move.piece->Pos();
 	pt2di e = move.target;
 	char piece = GetCopiedCell(s.x, s.y);
 	char old_cell = GetCopiedCell(e.x, e.y);
@@ -235,7 +243,7 @@ bool Player::IsMoveValid(const Move& move) const
 {
 	for (const auto& m : m_legalMoves)
 	{
-		if (move.p == m.p && move.target == m.target)
+		if (move.piece == m.piece && move.target == m.target)
 		{
 			return true;
 		}

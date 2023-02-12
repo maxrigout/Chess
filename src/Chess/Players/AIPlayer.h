@@ -12,14 +12,14 @@ public:
 	AIPlayer(Board* board, TEAM t, int king_row);
 	virtual ~AIPlayer();
 	virtual void Play(const Context& context) override;
-	std::string PrintCopy();
+	std::string PrintCopy() const;
 	std::vector<Move> GetHypotheticalMoves();
-	int EvaluateBoard();
+	int EvaluateBoard() const;
 	Move GetBestMove(const std::vector<Move>& moves);
-	int GetPiecePoints(Piece* p);
-	int GetPiecePoints(char type);
-	int GetPieceValue(Piece* p);
-	int GetPieceValue(char type);
+	int GetPiecePoints(Piece* p) const;
+	int GetPiecePoints(char type) const;
+	int GetPieceValue(Piece* p) const;
+	int GetPieceValue(char type) const;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
 private:

@@ -9,10 +9,13 @@ Piece::Piece(Board* board, TEAM nTeam, pt2di p, char t, const std::vector<vec2di
 	isCaptured = false;
 	pBoard = board; 
 	team = nTeam;
-	pos = p;
+	boardPosition = p;
 	piece_type = t;
 	moves = m;
 	move_scaling = s;
+
+	m_screenPosition = pBoard->BoardToWindowCoordinates(boardPosition);
+	m_targetScreenPosition = m_screenPosition;
 
 	switch (team)
 	{
@@ -35,7 +38,7 @@ bool Piece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 		return false;
 
 	vec2di stepdir;
-	vec2di movevect(target - pos);
+	vec2di movevect(target - boardPosition);
 	bool found_dir = false;
 	int nSteps = 0;
 
@@ -49,7 +52,7 @@ bool Piece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 		{
 			if (movevect == m)
 			{
-				Cell* target_cell = pBoard->GetCell(pos + m);
+				Cell* target_cell = pBoard->GetCell(boardPosition + m);
 				if (target_cell == nullptr)
 				{
 					return false;
@@ -94,7 +97,7 @@ bool Piece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 
 			for (int i = 1; i < nSteps + 1; ++i)
 			{
-				path[i - 1] = pos + (stepdir * i);
+				path[i - 1] = boardPosition + (stepdir * i);
 			}
 			for (auto tile : path)
 			{
@@ -129,7 +132,7 @@ bool Piece::CanGuard(const pt2di& target) const
 		return false;
 
 	vec2di stepdir;
-	vec2di movevect(target - pos);
+	vec2di movevect(target - boardPosition);
 	bool found_dir = false;
 	int nSteps = 0;
 
@@ -143,7 +146,7 @@ bool Piece::CanGuard(const pt2di& target) const
 		{
 			if (movevect == m)
 			{
-				Cell* target_cell = pBoard->GetCell(pos + m);
+				Cell* target_cell = pBoard->GetCell(boardPosition + m);
 				if (target_cell == nullptr)
 				{
 					return false;
@@ -183,7 +186,7 @@ bool Piece::CanGuard(const pt2di& target) const
 
 			for (int i = 1; i < nSteps + 1; ++i)
 			{
-				path[i - 1] = pos + (stepdir * i);
+				path[i - 1] = boardPosition + (stepdir * i);
 			}
 			for (auto tile : path)
 			{
@@ -211,8 +214,8 @@ void Piece::GuardCellsUnscaled() const
 {
 	for (const auto& m : moves)
 	{
-		Cell* cell = pBoard->GetCell(pos + m);
-		if (cell != nullptr && CanGuard(pos + m))
+		Cell* cell = pBoard->GetCell(boardPosition + m);
+		if (cell != nullptr && CanGuard(boardPosition + m))
 			cell->Guard(team);
 	}
 }
@@ -225,7 +228,7 @@ void Piece::GuardCellsScaled() const
 		const int maxDistance = std::max(pBoard->GetWidth(), pBoard->GetHeight());
 		for (int i = 1; i < maxDistance; ++i)
 		{
-			target_cell = pos + (m * i);
+			target_cell = boardPosition + (m * i);
 			if (!CanGuard(target_cell))
 				break;
 			pBoard->GetCell(target_cell)->Guard(team);
@@ -242,6 +245,12 @@ void Piece::GuardCells()
 	moves_calculated = false;
 }
 
+void Piece::UpdateMovement(float dt)
+{
+	vec2df moveVector = m_targetScreenPosition - m_screenPosition;
+	m_screenPosition = m_screenPosition + moveVector * m_speed * dt;
+}
+
 void Piece::DrawMoves(const Renderer2D* renderer) const
 {
 	int padx = 2;
@@ -251,9 +260,9 @@ void Piece::DrawMoves(const Renderer2D* renderer) const
 	{
 		for (auto& m : moves)
 		{
-			if (IsMoveValid(pos + m)) 
+			if (IsMoveValid(boardPosition + m)) 
 			{
-				pBoard->HighlightCell(renderer, pos + m, {padx, pady}, DARK_GREEN);
+				pBoard->HighlightCell(renderer, boardPosition + m, {padx, pady}, DARK_GREEN);
 			}
 		}
 	}
@@ -265,7 +274,7 @@ void Piece::DrawMoves(const Renderer2D* renderer) const
 			pt2di target_cell;
 			for (int i = 1; i < maxDistance; ++i)
 			{
-				target_cell = pos + (m * i);
+				target_cell = boardPosition + (m * i);
 				if (IsMoveValid(target_cell))
 				{
 					pBoard->HighlightCell(renderer, target_cell, {padx, pady}, DARK_GREEN);
@@ -284,22 +293,23 @@ void Piece::DrawYourself(const Renderer2D* renderer) const
 	if (!isCaptured)
 	{
 		vec2di cell = renderer->GetCellDim();
-		pt2di center = componentMultiply(pos, cell) + (cell / 2);
+		pt2di center = m_screenPosition + vec2df(cell) / 2;
 		renderer->FillCircle(center, cell.w / 3, team_color);
-		renderer->DrawText(componentMultiply(pos, cell), {piece_type, '\0'}, WHITE);
+		renderer->DrawText(m_screenPosition, {piece_type, '\0'}, WHITE);
 	}
 }
 
 void Piece::Move(const pt2di& target)
 {
-	Cell* oldcell = pBoard->GetCell(pos);
+	Cell* oldcell = pBoard->GetCell(boardPosition);
 	Cell* newcell = pBoard->GetCell(target);
 	if (oldcell != nullptr && newcell != nullptr)
 	{
-		pos = target;
+		boardPosition = target;
 		oldcell->RemovePiece();
 		newcell->CaptureCell();
 		newcell->PlacePiece(this);
+		m_targetScreenPosition = pBoard->BoardToWindowCoordinates(target);
 		std::cout << "Moved " << piece_type << " from " << pBoard->GetBoardCoordinates(oldcell->GetCoordinates()) << " to " << pBoard->GetBoardCoordinates(newcell->GetCoordinates()) << std::endl;
 	}
 	if (first_move)
@@ -329,10 +339,10 @@ void Piece::CalculateMoves()
 			const int maxDist = 8;
 			for (int i = 1; i < maxDist; ++i)
 			{
-				target_cell = pos + (m * i);
+				target_cell = boardPosition + (m * i);
 				if (IsMoveValid(target_cell))
 				{
-					availableMoves.push_back(pos + m * i);
+					availableMoves.push_back(boardPosition + m * i);
 				}
 				else
 				{
@@ -346,9 +356,9 @@ void Piece::CalculateMoves()
 	{
 		for (auto& m : moves)
 		{
-			if (IsMoveValid(pos + m))
+			if (IsMoveValid(boardPosition + m))
 			{
-				availableMoves.push_back(pos + m);
+				availableMoves.push_back(boardPosition + m);
 			}
 		}
 	}

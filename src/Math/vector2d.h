@@ -12,10 +12,11 @@ struct vector2d
 		y = value2;
 	}
 	
-	vector2d(const vector2d<T>& v)
+	template <typename U>
+	vector2d(const vector2d<U>& v)
 	{
-		x = v.x;
-		y = v.y;
+		x = (T)v.x;
+		y = (T)v.y;
 	}
 
 	template <typename U>
@@ -140,3 +141,5 @@ struct vector2d
 };
 
 typedef vector2d<int> vec2di;
+typedef vector2d<float> vec2df;
+typedef vector2d<double> vec2dd;

@@ -21,6 +21,7 @@ public:
 	virtual ~Player() = default;
 	virtual void Play(const Context& context) = 0;
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
+	void UpdatePieces(float dt);
 	void CalculateMoves();
 	Piece* GetPieceAtPosition(const pt2di& position);
 	void DrawPieces(const Renderer2D* renderer) const;

@@ -96,6 +96,7 @@ void Game::InitBoard()
 	}
 
 	m_renderer->SetCellDim({ cellRenderWidthPx, cellRenderHeightPx });
+	m_board.SetCellDim(m_renderer->GetCellDim());
 
 	// Player set up
 	// the pieces set up should be done in the constructor
@@ -127,7 +128,7 @@ void Game::Run()
 	while(m_isPlaying)
 	{
 		HandleInput();
-		Update(0.16);
+		Update(0.5);
 		Render();
 	}
 }
@@ -201,8 +202,7 @@ bool Game::IsMouseButtonPressed(MouseButton button)
 
 void Game::Update(float dt)
 {
-	pt2di mouseCell = m_board.WindowToBoardCoordinates(m_mousePos, m_renderer->GetCellDim()); // cell underneath the mouse cursor
-	Cell* selectedCell = m_board.GetCell(m_selectedCellPos);
+	pt2di mouseCell = m_board.WindowToBoardCoordinates(m_mousePos); // cell underneath the mouse cursor
 	m_hoveredCellPos = mouseCell;
 
 	if (m_activePlayer->HasEndedTurn())
@@ -211,10 +211,10 @@ void Game::Update(float dt)
 	if (IsMouseButtonPressed(MouseButton::LEFT)) // if the left mouse button is pressed
 	{
 		SelectCell(mouseCell);
-
-		if (selectedCell == nullptr)
-			return;
 	}
+
+	m_player1->UpdatePieces(dt);
+	m_player2->UpdatePieces(dt);
 	m_activePlayer->Play({ m_selectedCellPos, 0 });
 }
 
