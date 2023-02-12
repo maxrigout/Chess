@@ -20,7 +20,7 @@ Board::~Board()
 	delete[] m_cells;
 }
 
-Cell* Board::GetCell(point2d<int> pos)
+Cell* Board::GetCell(const pt2di& pos)
 {
 	if (pos.x < 0 || pos.x >= m_width)
 		return nullptr;
@@ -29,18 +29,26 @@ Cell* Board::GetCell(point2d<int> pos)
 	return &m_cells[pos.y * m_width + pos.x];
 }
 
-point2d<int> Board::WindowToBoardCoordinates(point2d<int> windowCoordinates, vector2d<int> cellDims) const
+point2d<int> Board::WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const
 {
 	return point2d<int>{windowCoordinates.x / cellDims.w, windowCoordinates.y / cellDims.h};
 }
 
-bool Board::IsPositionValid(point2d<int> position) const
+bool Board::IsPositionValid(const pt2di& position) const
 {
 	if (position.x < 0 || position.y < 0)
 		return false;
 	if (position.x >= m_width || position.y >= m_height)
 		return false;
 	return true;
+}
+
+void Board::ResetGuard()
+{
+	for (int i = 0; i < m_width * m_height; ++i)
+	{
+		m_cells[i].ResetGuarded();
+	}
 }
 
 void Board::DrawCells(const Renderer2D* renderer) const
@@ -78,7 +86,7 @@ void Board::DrawCells(const Renderer2D* renderer) const
 	}
 }
 
-void Board::DrawSelectedCell(const Renderer2D* renderer, point2d<int> cellPos, int width) const
+void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width) const
 {
 	if (!IsPositionValid(cellPos))
 		return;
@@ -128,7 +136,7 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, point2d<int> cellPos, i
 	// }
 }
 
-void Board::HighlightCell(const Renderer2D* renderer, point2d<int> cellPos, point2d<int> padding, const Color& color) const
+void Board::HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, const pt2di& padding, const Color& color) const
 {
 	if (!IsPositionValid(cellPos))
 		return;
@@ -138,4 +146,13 @@ void Board::HighlightCell(const Renderer2D* renderer, point2d<int> cellPos, poin
 	renderer->FillRect(	{ cellPos.x * cell.w + padding.x, cellPos.y * cell.h + padding.y },
 						{ cell.w - 2 * padding.x, cell.h - 2 * padding.y },
 						color);
+}
+
+std::string Board::GetBoardCoordinates(const pt2di& position) const
+{
+	if (!IsPositionValid(position))
+		return "";
+	char column = 'a' + position.x;
+	std::string boardCoords = column + std::to_string(m_height - position.y);
+	return boardCoords;
 }

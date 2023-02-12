@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Math/point2d.h"
+#define COPY_EMPTY_CELL 'z'
+
+class Piece;
+
 enum class TEAM
 {
 	ONE,
@@ -25,4 +30,11 @@ struct MoveInfo
 	};
 
 	int reason;
+};
+
+struct Move
+{
+	Piece* p;
+	pt2di target;
+	void PerformMove() const;
 };

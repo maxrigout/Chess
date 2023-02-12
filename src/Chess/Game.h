@@ -3,6 +3,7 @@
 
 #include "Chess/Board.h"
 #include "Chess/Piece.h"
+#include "Chess/Player.h"
 #include "Renderer2D/Renderer2D.h"
 
 enum class MouseButton
@@ -43,7 +44,7 @@ private:
 	point2d<int> m_mousePos;
 	unsigned int m_mouseButtonState;
 
-	Renderer2D* m_renderer;
+	Renderer2D* m_renderer = nullptr;
 
 	bool m_isInitialized = false;
 	bool m_isSDLInitialized = false;
@@ -57,8 +58,11 @@ private:
 	Piece* m_selectedPiece = nullptr;
 	// Cell* m_selectedCell;
 
-	std::vector<Piece*>* activePlayer;
+	// std::vector<Piece*>* activePlayerPieces;
 	TEAM activeTeam = TEAM::NONE;
-	std::vector<Piece*> player1Pieces;
-	std::vector<Piece*> player2Pieces;
+	Player* m_activePlayer;
+	Player* m_player1;
+	Player* m_player2;
+	// std::vector<Piece*> player1Pieces;
+	// std::vector<Piece*> player2Pieces;
 };

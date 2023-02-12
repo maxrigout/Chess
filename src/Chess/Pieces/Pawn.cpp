@@ -83,7 +83,7 @@ bool Pawn::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 	}
 	return false;
 }
-bool Pawn::CanGuard(const point2d<int>& target)
+bool Pawn::CanGuard(const point2d<int>& target) const
 {
 	vector2d<int> move_vect(target - pos);
 	vector2d<int> move_front(moves[0]);

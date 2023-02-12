@@ -17,7 +17,7 @@ Renderer2D_SDL::Renderer2D_SDL(SDL_Renderer* renderer)
 {
 	SDL_Rect viewPortRect;
 	SDL_RenderGetViewport(m_renderer, &viewPortRect);
-	SDL_GetWindowSize(SDL_RenderGetWindow(m_renderer), &m_windowDim.x, &m_windowDim.y);
+	SDL_GetWindowSize(SDL_RenderGetWindow(m_renderer), &m_windowDim.w, &m_windowDim.h);
 	m_viewPortDim = { viewPortRect.w, viewPortRect.h };
 	if (TTF_Init() < 0)
 		std::cout << "Error initializing SDL_ttf: " << TTF_GetError() << std::endl;
@@ -53,7 +53,7 @@ void Renderer2D_SDL::Clear(const Color& color) const
 	SDL_RenderClear(m_renderer);
 }
 
-void Renderer2D_SDL::DrawDisk(point2d<int> center, int radius, const Color& color) const
+void Renderer2D_SDL::DrawDisk(const pt2di& center, int radius, const Color& color) const
 {
 	SetRenderDrawColor(color);
 	SDL_Rect rect{center.x - radius, center.y - radius, 2 * radius, 2 * radius};
@@ -70,18 +70,18 @@ void Renderer2D_SDL::DrawDisk(point2d<int> center, int radius, const Color& colo
 			cos2 = cos * cos;
 		}
 		int x = radius * sqrt(cos2);
-		point2d<int> left{center.x - x, rect.y + y};
-		point2d<int> right{center.x + x, rect.y + y};
+		pt2di left{center.x - x, rect.y + y};
+		pt2di right{center.x + x, rect.y + y};
 		SDL_RenderDrawLine(m_renderer, left.x, left.y, right.x, right.y);
 	}
 }
 
-void Renderer2D_SDL::DrawCircle(point2d<int> center, int radius, const Color& color) const
+void Renderer2D_SDL::DrawCircle(const pt2di& center, int radius, const Color& color) const
 {
 	SetRenderDrawColor(color);
 }
 
-void Renderer2D_SDL::FillCircle(point2d<int> center, int radius, const Color& color) const
+void Renderer2D_SDL::FillCircle(const pt2di& center, int radius, const Color& color) const
 {
 	SetRenderDrawColor(color);
 	SDL_Rect rect{center.x - radius, center.y - radius, 2 * radius, 2 * radius};
@@ -92,38 +92,38 @@ void Renderer2D_SDL::FillCircle(point2d<int> center, int radius, const Color& co
 		float sin2 = (sin * sin) / radius / radius;
 		float cos2 = 1 - sin2;
 		int x = radius * sqrt(cos2);
-		point2d<int> left{center.x - x, rect.y + y};
-		point2d<int> right{center.x + x, rect.y + y};
+		pt2di left{center.x - x, rect.y + y};
+		pt2di right{center.x + x, rect.y + y};
 		SDL_RenderDrawLine(m_renderer, left.x, left.y, right.x, right.y);
 	}
 }
 
-void Renderer2D_SDL::DrawRect(point2d<int> position, vector2d<int> dimensions, const Color& color) const
+void Renderer2D_SDL::DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
 {
 	SetRenderDrawColor(color);
 	SDL_Rect rect{ position.x, position.y, dimensions.w, dimensions.h };
 	SDL_RenderDrawRect(m_renderer, &rect);
 }
 
-void Renderer2D_SDL::FillRect(point2d<int> position, vector2d<int> dimensions, const Color& color) const
+void Renderer2D_SDL::FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
 {
 	SetRenderDrawColor(color);
 	SDL_Rect rect{ position.x, position.y, dimensions.w, dimensions.h };
 	SDL_RenderFillRect(m_renderer, &rect);
 }
 
-void Renderer2D_SDL::DrawLine(point2d<int> start, point2d<int> end, const Color& color) const
+void Renderer2D_SDL::DrawLine(const pt2di& start, const pt2di& end, const Color& color) const
 {
 	SetRenderDrawColor(color);
 	SDL_RenderDrawLine(m_renderer, start.x, start.y, end.x, end.y);
 }
 
-void Renderer2D_SDL::DrawText(point2d<int> position, const std::string& text, const Color& color) const
+void Renderer2D_SDL::DrawText(const pt2di& position, const std::string& text, const Color& color) const
 {
 	// TODO: refactor...
 	// 	cache the messages that are drawn frequently
 	//	add option to specify the offset
-	point2d<int> offset{20, 20};
+	pt2di offset{20, 20};
 	SetRenderDrawColor(color);
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(defaultFont, text.c_str(), toSDL_Color(color));
 	SDL_Texture* message = SDL_CreateTextureFromSurface(m_renderer, surfaceMessage);
@@ -136,28 +136,52 @@ void Renderer2D_SDL::DrawText(point2d<int> position, const std::string& text, co
 	SDL_DestroyTexture(message);
 }
 
+void Renderer2D_SDL::DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const
+{
+	double percent_head = 0.8;
+	double head_width = 3000.0;
+	pt2di head_left, head_right;
+	double ss_x = start.x * m_cellDim.w + m_cellDim.w * 0.5f;
+	double ss_y = start.y * m_cellDim.h + m_cellDim.h * 0.5f;
+	double se_x = end.x * m_cellDim.w + m_cellDim.w * 0.5f;
+	double se_y = end.y * m_cellDim.h + m_cellDim.h * 0.5f;
+	pt2df screenStart(ss_x, ss_y), screenEnd(se_x, se_y);
+	auto PointOnLine = [&](double t)
+	{
+		double x = ss_x * (1.0 - t) + se_x * t;
+		double y = ss_y * (1.0 - t) + se_y * t;
+		return pt2df(x, y);
+	};
 
-vector2d<int> Renderer2D_SDL::GetWindowDim() const
+	head_left = PointOnLine(percent_head) + ((screenEnd - screenStart).Normalize().Rotate90() * head_width);
+	head_right = PointOnLine(percent_head) + ((screenEnd - screenStart).Normalize().Rotate270() * head_width);
+
+	DrawLine({ ss_x, ss_y }, { se_x, se_y }, color);
+	DrawLine({ se_x, se_y} , { head_left.x, head_left.y }, color);
+	DrawLine({ se_x, se_y} , { head_right.x, head_right.y }, color);
+}
+
+const vec2di& Renderer2D_SDL::GetWindowDim() const
 {
 	return m_windowDim;
 }
-vector2d<int> Renderer2D_SDL::GetCellDim() const
+const vec2di& Renderer2D_SDL::GetCellDim() const
 {
 	return m_cellDim;
 }
-vector2d<int> Renderer2D_SDL::GetViewPortDim() const
+const vec2di& Renderer2D_SDL::GetViewPortDim() const
 {
 	return m_viewPortDim;
 }
-void Renderer2D_SDL::SetWindowDim(vector2d<int> dim)
+void Renderer2D_SDL::SetWindowDim(const vec2di& dim)
 {
 	m_windowDim = dim;
 }
-void Renderer2D_SDL::SetCellDim(vector2d<int> dim)
+void Renderer2D_SDL::SetCellDim(const vec2di& dim)
 {
 	m_cellDim = dim;
 }
-void Renderer2D_SDL::SetViewPortDim(vector2d<int> dim)
+void Renderer2D_SDL::SetViewPortDim(const vec2di& dim)
 {
 	m_viewPortDim = dim;
 }

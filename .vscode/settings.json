@@ -6,6 +6,7 @@
 		"editor.semanticHighlighting.enabled": true,
 	},
 	"files.associations": {
-		"iostream": "cpp"
+		"iostream": "cpp",
+		"vector": "cpp"
 	},
 }

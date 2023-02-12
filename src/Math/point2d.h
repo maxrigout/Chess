@@ -9,15 +9,19 @@ struct point2d
 		x = 0;
 		y = 0;
 	}
-	point2d(T v1, T v2)
+
+	template <typename U, typename V>
+	point2d(U v1, V v2)
 	{
-		x = v1;
-		y = v2;
+		x = (T)v1;
+		y = (T)v2;
 	}
-	point2d(const point2d<T>& p)
+
+	template <typename U>
+	point2d(const point2d<U>& p)
 	{
-		x = p.x;
-		y = p.y;
+		x = (T)p.x;
+		y = (T)p.y;
 	}
 
 	bool operator==(const point2d<T>& rhs) const
@@ -52,3 +56,7 @@ point2d<T> componentMultiply(const point2d<T>& lhs, const vector2d<T>& rhs)
 {
 	return point2d<T>(lhs.x * rhs.x, lhs.y * rhs.y);
 }
+
+typedef point2d<int> pt2di;
+typedef point2d<float> pt2df;
+typedef point2d<double> pt2dd;

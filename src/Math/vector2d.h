@@ -1,4 +1,7 @@
 #pragma once
+
+#include <math.h>
+
 template <typename T>
 struct vector2d
 {
@@ -8,16 +11,18 @@ struct vector2d
 		x = value1;
 		y = value2;
 	}
+	
 	vector2d(const vector2d<T>& v)
 	{
 		x = v.x;
 		y = v.y;
 	}
 
-	vector2d<T>& operator=(const vector2d<T>& rhs)
+	template <typename U>
+	vector2d<T>& operator=(const vector2d<U>& rhs)
 	{
-		x = rhs.x;
-		y = rhs.y;
+		x = (T)rhs.x;
+		y = (T)rhs.y;
 		return *this;
 	}
 	bool operator==(const vector2d<T>& v) const
@@ -53,6 +58,40 @@ struct vector2d
 	// returns the norm of the vector
 	T Norm2() const { return (*this) * (*this); }
 	T Norm() const { return sqrt(this->Norm2()); }
+
+	vector2d<T>& Normalize()
+	{
+		T norm = (*this) * (*this);
+		if (norm == 0)
+		{
+			return *this;
+		}
+		*this = *this / norm;
+		return *this;
+	}
+	vector2d<T>& Rotate(double theta)
+	{
+		double c = cos(theta);
+		double s = sin(theta);
+		T tmp = x;
+		x = x * c + y * s;
+		y = tmp * -s + y * c;
+		return *this;
+	};
+	vector2d<T>& Rotate90()
+	{
+		T tmp = x;
+		x = -y;
+		y = tmp;
+		return *this;
+	};
+	vector2d<T>& Rotate270()
+	{
+		T tmp = -x;
+		x = y;
+		y = tmp;
+		return *this;
+	};
 
 	bool IsColinear(const vector2d<T>& v) const
 	{
@@ -99,3 +138,5 @@ struct vector2d
 		T h;
 	};
 };
+
+typedef vector2d<int> vec2di;

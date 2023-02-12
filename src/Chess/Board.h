@@ -10,6 +10,8 @@
 #include "Cell.h"
 #include "Renderer2D/Renderer2D.h"
 
+#include <string>
+
 class Board
 {
 public:
@@ -18,15 +20,19 @@ public:
 
 	int GetWidth() const { return m_width; }
 	int GetHeight() const { return m_height; }
-	Cell* GetCell(point2d<int> pos);
+	Cell* GetCell(const pt2di& pos);
 
-	point2d<int> WindowToBoardCoordinates(point2d<int> windowCoordinates, vector2d<int> cellDims) const;
-	bool IsPositionValid(point2d<int> position) const;
+	void ResetGuard();
+
+	point2d<int> WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const;
+	bool IsPositionValid(const pt2di& position) const;
 
 	void DrawCells(const Renderer2D* renderer) const;
-	void DrawSelectedCell(const Renderer2D* renderer, point2d<int> cellPos, int width) const;
-	void HighlightCell(const Renderer2D* renderer, point2d<int> cellPos, point2d<int> padding = {0, 0}, const Color& color = YELLOW) const;
+	void DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width) const;
+	void HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, const pt2di& padding = {0, 0}, const Color& color = YELLOW) const;
 	
+	std::string GetBoardCoordinates(const pt2di& position) const;
+
 private:
 	Cell* m_cells;
 	int m_width;

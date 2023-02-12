@@ -58,7 +58,7 @@ bool King::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 		}
 	}
 
-	for (auto& m1 : moves)
+	for (const auto& m1 : moves)
 	{
 		if (movevect == m1)
 		{
@@ -95,7 +95,7 @@ void King::DrawMoves(const Renderer2D* renderer) const
 	int padx = 2;
 	int pady = 2;
 
-	for (auto& m : moves)
+	for (const auto& m : moves)
 	{
 		if (IsMoveValid(pos + m))
 		{
@@ -169,7 +169,7 @@ void King::Move(const point2d<int>& target)
 		std::cout << "Moved " << piece_type << std::endl;
 	}
 }
-bool King::CanGuard(const point2d<int>& target)
+bool King::CanGuard(const point2d<int>& target) const
 {
 	// if we're checking for an out of bounds cell
 	if (target.x > pBoard->GetWidth() || target.y > pBoard->GetHeight() || target.x < 0 || target.y < 0)
@@ -184,7 +184,7 @@ bool King::CanGuard(const point2d<int>& target)
 		return false;
 	}
 
-	for (auto& m1 : moves)
+	for (const auto& m1 : moves)
 	{
 		if (movevect == m1)
 		{
@@ -210,7 +210,7 @@ bool King::CheckMate()
 {
 	if (Check())
 	{
-		for (auto& m : moves)
+		for (const auto& m : moves)
 		{
 			if (IsMoveValid(pos+m) && !pBoard->GetCell(pos + m)->IsGuarded())
 			{
@@ -223,4 +223,30 @@ bool King::CheckMate()
 		return false;
 	}
 	return true;
+}
+
+void King::CalculateMoves()
+{
+	availableMoves.clear();
+	for (auto& m : moves)
+	{
+		if (IsMoveValid(pos + m))
+		{
+			availableMoves.push_back(pos + m);
+		}
+	}
+
+	if (first_move) // check for castle
+	{
+
+		if (IsMoveValid(pos + vector2d<int>(2, 0)))
+		{
+			availableMoves.push_back(pos + vector2d<int>(2, 0));
+		}
+		if (IsMoveValid(pos + vector2d<int>(-3, 0)))
+		{
+			availableMoves.push_back(pos + vector2d<int>(-3, 0));
+		}
+	}
+	moves_calculated = true;
 }

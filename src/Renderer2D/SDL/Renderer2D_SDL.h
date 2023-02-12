@@ -14,28 +14,29 @@ public:
 	virtual void Begin();
 	virtual void End();
 	virtual void Clear(const Color& color) const;
-	virtual void DrawDisk(point2d<int> center, int radius, const Color& color) const;
-	virtual void DrawCircle(point2d<int> center, int radius, const Color& color) const;
-	virtual void FillCircle(point2d<int> center, int radius, const Color& color) const;
-	virtual void DrawRect(point2d<int> position, vector2d<int> dimensions, const Color& color) const;
-	virtual void FillRect(point2d<int> position, vector2d<int> dimensions, const Color& color) const;
-	virtual void DrawLine(point2d<int> start, point2d<int> end, const Color& color) const;
-	virtual void DrawText(point2d<int> position, const std::string& text, const Color& color) const;
+	virtual void DrawDisk(const pt2di& center, int radius, const Color& color) const;
+	virtual void DrawCircle(const pt2di& center, int radius, const Color& color) const;
+	virtual void FillCircle(const pt2di& center, int radius, const Color& color) const;
+	virtual void DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const;
+	virtual void FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const;
+	virtual void DrawLine(const pt2di& start, const pt2di& end, const Color& color) const;
+	virtual void DrawText(const pt2di& position, const std::string& text, const Color& color) const;
+	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const;
 
-	virtual vector2d<int> GetWindowDim() const;
-	virtual vector2d<int> GetCellDim() const;
-	virtual vector2d<int> GetViewPortDim() const;
-	virtual void SetWindowDim(vector2d<int> dim);
-	virtual void SetCellDim(vector2d<int> dim);
-	virtual void SetViewPortDim(vector2d<int> dim);
+	virtual const vec2di& GetWindowDim() const;
+	virtual const vec2di& GetCellDim() const;
+	virtual const vec2di& GetViewPortDim() const;
+	virtual void SetWindowDim(const vec2di& dim);
+	virtual void SetCellDim(const vec2di& dim);
+	virtual void SetViewPortDim(const vec2di& dim);
 
 private:
 	void SetRenderDrawColor(const Color& c) const { SDL_SetRenderDrawColor(m_renderer, c.r, c.g, c.b, c.a); }
 
 	SDL_Renderer* m_renderer;
-	vector2d<int> m_windowDim;
-	vector2d<int> m_cellDim;
-	vector2d<int> m_viewPortDim;
+	vec2di m_windowDim;
+	vec2di m_cellDim;
+	vec2di m_viewPortDim;
 
 	TTF_Font* defaultFont = nullptr;
 };
