@@ -100,7 +100,7 @@ void Game::InitBoard()
 	// Player set up
 	// the pieces set up should be done in the constructor
 	m_player1 = new HumanPlayer(&m_board, TEAM::ONE, 7);
-	m_player2 = new HumanPlayer(&m_board, TEAM::TWO, 0);
+	m_player2 = new AIPlayer(&m_board, TEAM::TWO, 0);
 
 	m_activePlayer = m_player1;
 	activeTeam = m_activePlayer->GetTeam();
@@ -232,6 +232,9 @@ void Game::Render()
 
 	m_player1->DrawPieces(m_renderer);
 	m_player2->DrawPieces(m_renderer);
+
+	m_player1->DrawLastMove(m_renderer);
+	m_player2->DrawLastMove(m_renderer);
 
 	m_renderer->End();
 }

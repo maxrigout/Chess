@@ -27,13 +27,13 @@ public:
 	bool CapturePiece();
 	pt2di Pos() const { return pos; }
 	char Type() const { return piece_type; }
-	void GuardCells() const;
+	void GuardCells();
 	virtual bool CanGuard(const pt2di& target) const;
-	int GetMod() const { return ((IsSameTeam(TEAM::ONE)) ? 1 : -1); }
-	std::vector<pt2di> GetLegalMoves();
+	int GetMod(TEAM team) const { return ((IsSameTeam(team)) ? 1 : -1); }
+	const std::vector<pt2di>& GetAvailableMoves();
 	// const std::vector<pt2di>& GetAvailableMoves() const { return availableMoves; }
 	// const std::vector<pt2di>& GetLegalMoves() { return legal_moves; }
-	void AddLegalMove(pt2di m) { legal_moves.push_back(m); }
+	// void AddLegalMove(pt2di m) { legal_moves.push_back(m); }
 	// void ResetLegalMoves() { legal_moves.clear(); }
 	// bool HaveMovesBeenCalculated() const { return moves_calculated; }
 
@@ -46,7 +46,7 @@ protected:
 	bool move_scaling;
 	std::vector<vec2di> moves;
 	std::vector<pt2di> availableMoves;
-	std::vector<pt2di> legal_moves;
+	// std::vector<pt2di> legal_moves;
 	Board* pBoard;
 	TEAM team;
 	Color team_color;

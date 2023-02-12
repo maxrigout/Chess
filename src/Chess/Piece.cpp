@@ -233,12 +233,13 @@ void Piece::GuardCellsScaled() const
 	}
 }
 
-void Piece::GuardCells() const
+void Piece::GuardCells()
 {
 	if (!move_scaling)
 		GuardCellsUnscaled();
 	else
 		GuardCellsScaled();
+	moves_calculated = false;
 }
 
 void Piece::DrawMoves(const Renderer2D* renderer) const
@@ -354,7 +355,9 @@ void Piece::CalculateMoves()
 	moves_calculated = true;
 }
 
-std::vector<pt2di> Piece::GetLegalMoves()
+const std::vector<pt2di>& Piece::GetAvailableMoves()
 {
-	return {};
+	if (!moves_calculated)
+		CalculateMoves();
+	return availableMoves;
 }

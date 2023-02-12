@@ -3,9 +3,9 @@
 #include <iostream>
 
 Player::Player(Board* board, TEAM team)
-	: m_board{ board }, m_team{ team }
+	: m_pBoard{ board }, m_team{ team }
 {
-	board_copy = std::make_unique<char[]>(m_board->GetWidth() * m_board->GetHeight());
+	m_pBoardCopy = std::make_unique<char[]>(m_pBoard->GetWidth() * m_pBoard->GetHeight());
 }
 
 void Player::CalculateMoves()
@@ -61,7 +61,7 @@ void Player::GuardCells()
 
 Piece* Player::GetPieceAtPosition(const pt2di& position)
 {
-	Cell* cell = m_board->GetCell(position);
+	Cell* cell = m_pBoard->GetCell(position);
 	if (cell == nullptr)
 		return nullptr;
 	Piece* piece = cell->GetPiece();
@@ -75,7 +75,7 @@ Piece* Player::GetPieceAtPosition(const pt2di& position)
 void Player::UndoMove(const Move& move, char old_cell)
 {
 	GetCopiedCell(move.target.x, move.target.y) = old_cell;
-	GetCopiedCell(move.p->Pos().x, move.p->Pos().y) = move.p->Type() * move.p->GetMod();
+	GetCopiedCell(move.p->Pos().x, move.p->Pos().y) = move.p->Type() * move.p->GetMod(m_team);
 }
 
 char Player::TestMove(const Move& move)
@@ -92,12 +92,12 @@ char Player::TestMove(const Move& move)
 bool Player::IsCheck() const
 {
 	pt2di king_pos;
-	int team_mod = m_king->GetMod();
+	int team_mod = m_king->GetMod(m_team);
 	int enemy_team_mod = -team_mod;
 	std::vector<pt2di> enemy_pieces_pos;
-	for (int i = 0; i < m_board->GetWidth(); i++)
+	for (int i = 0; i < m_pBoard->GetWidth(); i++)
 	{
-		for (int j = 0; j < m_board->GetHeight(); j++)
+		for (int j = 0; j < m_pBoard->GetHeight(); j++)
 		{
 			char p = GetCopiedCell(i, j);
 			int mod = 1;
@@ -119,7 +119,7 @@ bool Player::IsCheck() const
 
 	auto inBounds = [&](pt2di c)
 	{
-		return (c.x >= 0 && c.x < m_board->GetWidth() && c.y >= 0 && c.y < m_board->GetHeight());
+		return (c.x >= 0 && c.x < m_pBoard->GetWidth() && c.y >= 0 && c.y < m_pBoard->GetHeight());
 	};
 	auto isEmptyCell = [&](pt2di c)
 	{
@@ -245,16 +245,16 @@ bool Player::IsMoveValid(const Move& move) const
 
 void Player::CopyBoard()
 {
-	for (int i = 0; i < m_board->GetWidth(); ++i)
+	for (int i = 0; i < m_pBoard->GetWidth(); ++i)
 	{
-		for (int j = 0; j < m_board->GetHeight(); ++j)
+		for (int j = 0; j < m_pBoard->GetHeight(); ++j)
 		{
-			Piece* p = m_board->GetCell({ i, j })->GetPiece();
+			Piece* p = m_pBoard->GetCell({ i, j })->GetPiece();
 			if (p != nullptr)
 			{
 				if (!p->IsCaptured())
 				{
-					GetCopiedCell(i, j) = p->Type() * p->GetMod();
+					GetCopiedCell(i, j) = p->Type() * p->GetMod(m_team);
 				}
 			}
 			else
@@ -276,7 +276,7 @@ std::vector<Move> Player::GetPossibleMoves()
 	{
 		if (!piece->IsCaptured())
 		{
-			std::vector<pt2di> availableMoves = piece->GetLegalMoves();
+			std::vector<pt2di> availableMoves = piece->GetAvailableMoves();
 			for (const auto& move : availableMoves)
 			{
 				possibleMoves.push_back({ piece, move });
@@ -288,7 +288,7 @@ std::vector<Move> Player::GetPossibleMoves()
 
 void Player::SelectPiece(const pt2di& position)
 {
-	Cell* cell = m_board->GetCell(position);
+	Cell* cell = m_pBoard->GetCell(position);
 	if (cell == nullptr)
 		return;
 	Piece* piece = cell->GetPiece();

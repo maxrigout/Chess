@@ -6,37 +6,25 @@
 
 #include <vector>
 
-class ChessAI : public Player
+class AIPlayer : public Player
 {
 public:
-	ChessAI(Board* board, Player* own_pieces, Player* enemy_pieces);
+	AIPlayer(Board* board, TEAM t, int king_row);
+	virtual ~AIPlayer();
 	virtual void Play(const Context& context) override;
-	void CopyBoard();
 	std::string PrintCopy();
-	void GetPossibleMoves();
 	std::vector<Move> GetHypotheticalMoves();
-	char TestMove(const Move& move);
-	void UndoMove(const Move& move, char old_cell);
 	int EvaluateBoard();
-	Move GetBestMove();
+	Move GetBestMove(const std::vector<Move>& moves);
 	int GetPiecePoints(Piece* p);
 	int GetPiecePoints(char type);
 	int GetPieceValue(Piece* p);
 	int GetPieceValue(char type);
-	bool IsCheck();
-
-	TEAM Team() { return team; }
+	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
 private:
-	Board* pBoard;
-	char** board_copy;
-	Piece*** board_hard_copy;
 	int boardScore;
-	bool ready;
-	TEAM team;
-	std::vector<Move> possibleMoves;
-	Player* player;
-	Player* enemy;
+
 	pt2di lastMoveStart{};
 	pt2di lastMoveEnd{};
 };

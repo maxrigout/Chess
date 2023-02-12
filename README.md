@@ -51,7 +51,7 @@ Custom chess engine, using SDL.
 - [x] Project refactor
 - [x] Renderer refactor
 - [x] Text (label for the pieces)
-- [ ] AI (AlphaBeta)
+- [x] AI (AlphaBeta)
 - [ ] Better graphics
 - [ ] Window and input system
 - [ ] Setup script

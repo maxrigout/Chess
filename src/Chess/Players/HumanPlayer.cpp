@@ -21,20 +21,20 @@ HumanPlayer::HumanPlayer(Board* board, TEAM team, int king_row)
 		pawn_row = king_row + 1;
 	}
 	Piece *t1, *t2, *b1, *b2, *h1, *h2, *q, *p;
-	t1 = new	Rook	(m_board, team, { 0, king_row });
-	h1 = new	Knight	(m_board, team, { 1, king_row });
-	b1 = new	Bishop	(m_board, team, { 2, king_row });
-	q = new		Queen	(m_board, team, { 3, king_row });
-	m_king = new	King	(m_board, team, { 4, king_row });
-	b2 = new	Bishop	(m_board, team, { 5, king_row });
-	h2 = new	Knight	(m_board, team, { 6, king_row });
-	t2 = new	Rook	(m_board, team, { 7, king_row });
+	t1 = new	Rook	(m_pBoard, team, { 0, king_row });
+	h1 = new	Knight	(m_pBoard, team, { 1, king_row });
+	b1 = new	Bishop	(m_pBoard, team, { 2, king_row });
+	q = new		Queen	(m_pBoard, team, { 3, king_row });
+	m_king = new	King	(m_pBoard, team, { 4, king_row });
+	b2 = new	Bishop	(m_pBoard, team, { 5, king_row });
+	h2 = new	Knight	(m_pBoard, team, { 6, king_row });
+	t2 = new	Rook	(m_pBoard, team, { 7, king_row });
 
 	m_pieces = { t1, h1, b1, q, m_king, b2, h2, t2 };
 
-	for (int i = 0; i < m_board->GetWidth(); i++)
+	for (int i = 0; i < m_pBoard->GetWidth(); i++)
 	{
-		p = new Pawn(m_board, team, { i, pawn_row });
+		p = new Pawn(m_pBoard, team, { i, pawn_row });
 		m_pieces.push_back(p);
 	}
 
@@ -42,12 +42,6 @@ HumanPlayer::HumanPlayer(Board* board, TEAM team, int king_row)
 	{
 		board->GetCell(piece->Pos())->PlacePiece(piece);
 	}
-
-	// board_copy = new char* [board->GetWidth()];
-	// for (int i = 0; i < board->GetWidth(); i++)
-	// {
-	// 	board_copy[i] = new char[board->GetHeight()];
-	// }
 }
 
 HumanPlayer::~HumanPlayer()
