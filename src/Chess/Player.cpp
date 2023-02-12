@@ -41,6 +41,15 @@ void Player::DrawPieces(const Renderer2D* renderer) const
 	}
 }
 
+void Player::DrawSelectedPieceMoves(const Renderer2D* renderer) const
+{
+	if (m_selectedPiece != nullptr)
+	{
+		m_selectedPiece->DrawMoves(renderer);
+	}
+}
+
+
 void Player::GuardCells()
 {
 	for (const auto& p : m_pieces) 
@@ -277,32 +286,30 @@ std::vector<Move> Player::GetPossibleMoves()
 	return possibleMoves;
 }
 
-// std::vector<Move> Player::GetPossibleMoves()
-// {
-// 	// the algorithm is as follows:
-// 	// for each piece,
-// 	// verify that each allowed move for that piece, does not cause a "check"
-// 	std::vector<Move> possibleMoves;
-// 	std::cout << "calculating moves\n";
-// 	for (const auto& piece : m_pieces)
-// 	{
-// 		if (!piece->IsCaptured())
-// 		{
-// 			piece->ResetLegalMoves();
-// 			piece->CalculateMoves();
-// 			for (auto& move : piece->GetAvailableMoves())
-// 			{
-// 				char old_cell = TestMove({ piece, move });
-// 				if (!IsCheck())
-// 				{
-// 					piece->AddLegalMove(move);
-// 					possibleMoves.push_back({ piece, move });
-// 				}
-// 				GetCopiedCell(move.x, move.y) = old_cell;
-// 				GetCopiedCell(piece->Pos().x, piece->Pos().y) = piece->Type() * piece->GetMod();
+void Player::SelectPiece(const pt2di& position)
+{
+	Cell* cell = m_board->GetCell(position);
+	if (cell == nullptr)
+		return;
+	Piece* piece = cell->GetPiece();
+	if (piece == nullptr)
+	{
+		m_selectedPiece = nullptr;
+		return;
+	}
+	if (piece->IsSameTeam(m_team))
+		m_selectedPiece = cell->GetPiece();
+}
 
-// 			}
-// 		}
-// 	}
-// 	return possibleMoves;
-// }
+MoveInfo Player::MoveSelectedPiece(const pt2di& position)
+{
+	if (!m_selectedPiece->IsMoveValid(position)) // if we selected a piece and the move is valid
+	{
+		return { MoveInfo::INVALID_MOVE };
+	}
+	m_selectedPiece->Move(position); // move the piece
+	m_selectedPiece = nullptr;
+	EndTurn();// end the current player's turn and allow the other player to play
+
+	return { MoveInfo::NONE };
+}

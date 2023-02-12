@@ -16,6 +16,7 @@ public:
 	void CalculateMoves();
 	Piece* GetPieceAtPosition(const pt2di& position);
 	void DrawPieces(const Renderer2D* renderer) const;
+	void DrawSelectedPieceMoves(const Renderer2D* renderer) const;
 	void GuardCells();
 	TEAM GetTeam() const { return m_team; }
 	void UndoMove(const Move& move, char old_cell);
@@ -28,6 +29,9 @@ public:
 	bool IsCheckMate() const;
 	bool IsMoveValid(const Move& move) const;
 	std::vector<Move> GetPossibleMoves();
+	bool IsPieceSelected() { return m_selectedPiece != nullptr; }
+	void SelectPiece(const pt2di& position);
+	MoveInfo MoveSelectedPiece(const pt2di& position);
 
 protected:
 	void EndTurn() { m_hasTurnEnded = true; }
@@ -37,8 +41,11 @@ protected:
 	std::unique_ptr<char[]> board_copy;
 	Board* m_board = nullptr;
 	TEAM m_team = TEAM::NONE;
+
 	std::vector<Piece*> m_pieces;
 	King* m_king = nullptr;
+	Piece* m_selectedPiece = nullptr;
+
 	std::vector<Move> m_legalMoves;
 	bool m_movesCalculated = false;
 

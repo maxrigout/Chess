@@ -55,7 +55,7 @@ private:
 	point2d<int> m_selectedCellPos{-1, 0};
 
 	Board m_board;
-	Piece* m_selectedPiece = nullptr;
+	// Piece* m_selectedPiece = nullptr;
 	// Cell* m_selectedCell;
 
 	// std::vector<Piece*>* activePlayerPieces;

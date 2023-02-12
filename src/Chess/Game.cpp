@@ -103,7 +103,7 @@ void Game::InitBoard()
 	m_player2 = new HumanPlayer(&m_board, TEAM::TWO, 0);
 
 	m_activePlayer = m_player1;
-	activeTeam = m_player1->GetTeam();
+	activeTeam = m_activePlayer->GetTeam();
 	m_isBoardInitialized = true;
 }
 
@@ -215,27 +215,15 @@ void Game::Update(float dt)
 		if (selectedCell == nullptr)
 			return;
 
-		if (m_selectedPiece == nullptr)
+		if (!m_activePlayer->IsPieceSelected())
 		{
-			m_selectedPiece = m_activePlayer->GetPieceAtPosition(m_selectedCellPos);
+			m_activePlayer->SelectPiece(m_selectedCellPos);
 			return;
 		}
 
-		if (m_selectedPiece->IsMoveValid(mouseCell)) // if we selected a piece and the move is valid
-		{
-			m_selectedPiece->Move(mouseCell); // move the piece
-			SwitchPlayers(); // end the current player's turn and allow the other player to play
-		}
-		else if (!m_selectedPiece->IsMoveValid(mouseCell)) // if we selected a piece and the move isn't valid
-		{
-			m_selectedPiece = nullptr;
-			if (selectedCell->HasPiece()) { // check to see if we can select another piece
-				if (selectedCell->GetPiece()->IsSameTeam(activeTeam) && !selectedCell->GetPiece()->IsCaptured())
-				{
-					m_selectedPiece = selectedCell->GetPiece();
-				}
-			}
-		}
+		MoveInfo info = m_activePlayer->MoveSelectedPiece(mouseCell);
+		if (info.reason != MoveInfo::NONE)
+			m_activePlayer->SelectPiece(m_selectedCellPos);
 	}
 }
 
@@ -248,11 +236,8 @@ void Game::Render()
 	m_board.DrawCells(m_renderer); // Draw the board
 	m_board.HighlightCell(m_renderer, m_hoveredCellPos); // highlight the cell under the mouse cursor
 	m_board.DrawSelectedCell(m_renderer, m_selectedCellPos, 7); // highlight the selected cell
-	
-	if (m_selectedPiece != nullptr)
-	{
-		m_selectedPiece->DrawMoves(m_renderer); // draw the selected piece's moves
-	}
+	// draw the selected piece's moves
+	m_activePlayer->DrawSelectedPieceMoves(m_renderer);
 
 	m_player1->DrawPieces(m_renderer);
 	m_player2->DrawPieces(m_renderer);
@@ -270,8 +255,7 @@ void Game::SelectCell(pt2di cellBoardPosition)
 
 void Game::SwitchPlayers()
 {
-	m_selectedPiece = nullptr; // de-select the piece
-
+	std::cout << "switching players\n";
 	static int player = 0;
 	// reset the guarded cells
 	m_board.ResetGuard();
@@ -282,11 +266,11 @@ void Game::SwitchPlayers()
 
 	// switch players
 	player = (player + 1) % 2;
+	std::cout << "player " << player << "'s turn\n";
 	if (player == 0)
 		m_activePlayer = m_player1;
 	else
 		m_activePlayer = m_player2;
-
 	m_activePlayer->BeginTurn();
 	activeTeam = m_activePlayer->GetTeam();
 }
