@@ -214,9 +214,8 @@ void Game::Update(float dt)
 
 		if (selectedCell == nullptr)
 			return;
-
-		m_activePlayer->Play({ m_selectedCellPos, 0 });
 	}
+	m_activePlayer->Play({ m_selectedCellPos, 0 });
 }
 
 void Game::Render()
