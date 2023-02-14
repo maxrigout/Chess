@@ -1,16 +1,17 @@
 #pragma once
-#include "Chess/Piece.h"
+#include "SlowPiece.h"
 
-class King : public Piece
+class King : public SlowPiece
 {
 public:
-	King(Board* board, TEAM nTeam = TEAM::NONE, point2d<int> p = { -1, -1 });
+	King(Board* pBoard, TEAM team, const pt2di& initialBoardPosition);
 	virtual ~King() = default;
-	virtual bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo) const override;
-	virtual void DrawMoves(const Renderer2D* renderer) const override;
-	virtual void Move(const point2d<int>& target) override;
-	virtual bool CanGuard(const point2d<int>& target) const override;
+	virtual bool IsMoveValid(const pt2di& target, MoveInfo& info = MainInfo) const override;
+	// virtual void DrawMoves(const Renderer2D* renderer) const override;
+	virtual void Move(const pt2di& target) override;
+	virtual bool CanGuard(const pt2di& target) const override;
+	virtual void CalculateAvailableMoves() override;
+	
 	bool Check();
 	bool CheckMate();
-	virtual void CalculateMoves() override;
 };

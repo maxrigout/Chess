@@ -1,11 +1,60 @@
 #include "Player.h"
+#include "Chess/Pieces/Pawn.h"
+#include "Chess/Pieces/Rook.h"
+#include "Chess/Pieces/Knight.h"
+#include "Chess/Pieces/Bishop.h"
+#include "Chess/Pieces/Queen.h"
+#include "Chess/Pieces/King.h"
 
 #include <iostream>
 
-Player::Player(Board* board, TEAM team)
+Player::Player(Board* board, TEAM team, int king_row)
 	: m_pBoard{ board }, m_team{ team }
 {
 	m_pBoardCopy = std::make_unique<char[]>(m_pBoard->GetWidth() * m_pBoard->GetHeight());
+
+	int pawn_row = 0;
+	PAWN_DIRECTION pawn_direction = PAWN_DIRECTION::DOWN;
+	if (king_row == 7)
+	{
+		pawn_row = 6;
+		pawn_direction = PAWN_DIRECTION::UP;
+	}
+	else
+	{
+		pawn_row = king_row + 1;
+	}
+	Piece *r1, *r2, *b1, *b2, *k1, *k2, *q, *p;
+	r1 = new	Rook	(m_pBoard, team, { 0, king_row });
+	k1 = new	Knight	(m_pBoard, team, { 1, king_row });
+	b1 = new	Bishop	(m_pBoard, team, { 2, king_row });
+	q = new		Queen	(m_pBoard, team, { 3, king_row });
+	m_king = new	King	(m_pBoard, team, { 4, king_row });
+	b2 = new	Bishop	(m_pBoard, team, { 5, king_row });
+	k2 = new	Knight	(m_pBoard, team, { 6, king_row });
+	r2 = new	Rook	(m_pBoard, team, { 7, king_row });
+
+	m_pieces = { r1, k1, b1, q, m_king, b2, k2, r2 };
+
+	for (int i = 0; i < m_pBoard->GetWidth(); ++i)
+	{
+		p = new Pawn(m_pBoard, team, { i, pawn_row }, pawn_direction);
+		m_pieces.push_back(p);
+	}
+
+	for (const auto& piece : m_pieces)
+	{
+		board->GetCell(piece->Pos())->PlacePiece(piece);
+	}
+}
+
+Player::~Player()
+{
+	for (const auto& p : m_pieces)
+	{
+		delete p;
+	}
+	m_pieces.clear();
 }
 
 void Player::UpdatePieces(float dt)
@@ -64,6 +113,7 @@ void Player::GuardCells()
 	{
 		if (!p->IsCaptured())
 			p->GuardCells();
+		p->ResetAvailableMoves();
 	}
 }
 
@@ -98,6 +148,12 @@ char Player::TestMove(const Move& move)
 }
 
 bool Player::IsCheck() const
+{
+	pt2di kingPosition = m_king->Pos();
+	return m_pBoard->GetCell(kingPosition)->IsGuarded();
+}
+
+bool Player::IsCheck2() const
 {
 	pt2di king_pos;
 	int team_mod = m_king->GetMod(m_team);
@@ -311,7 +367,8 @@ void Player::SelectPiece(const pt2di& position)
 
 MoveInfo Player::MoveSelectedPiece(const pt2di& position)
 {
-	if (!m_selectedPiece->IsMoveValid(position)) // if we selected a piece and the move is valid
+	// we don't want to move the piece if the move is invalid
+	if (!m_selectedPiece->IsMoveValid(position))
 	{
 		return { MoveInfo::INVALID_MOVE };
 	}

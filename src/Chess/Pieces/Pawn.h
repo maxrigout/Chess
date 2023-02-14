@@ -1,11 +1,18 @@
 #pragma once
-#include "Chess/Piece.h"
+#include "Chess/Pieces/SlowPiece.h"
 
-class Pawn : public Piece
+enum class PAWN_DIRECTION {
+	UP,
+	DOWN,
+};
+
+class Pawn : public SlowPiece
 {
 public:
-	Pawn(Board* board, TEAM nTeam = TEAM::NONE, point2d<int> p = { -1, -1 });
+	Pawn(Board* pBoard, TEAM team, const pt2di& initialBoardPosition, PAWN_DIRECTION direction);
 	virtual ~Pawn() = default;
-	bool IsMoveValid(const point2d<int>& target, MoveInfo& info = MainInfo) const override;
-	bool CanGuard(const point2d<int>& target) const override;
+	virtual bool IsMoveValid(const pt2di& target, MoveInfo& info = MainInfo) const override;
+	virtual bool CanGuard(const pt2di& target) const override;
+	virtual void GuardCells() const override;
+
 };

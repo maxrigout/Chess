@@ -28,6 +28,12 @@ struct point2d
 	{
 		return (x == rhs.x && y == rhs.y);
 	}
+
+	bool operator!=(const point2d<T>& rhs) const
+	{
+		return !(*this == rhs);
+	}
+
 	point2d<T> operator=(const point2d<T>& rhs)
 	{
 		x = rhs.x;

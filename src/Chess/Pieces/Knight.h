@@ -1,11 +1,11 @@
 #pragma once
-#include "Chess/Piece.h"
+#include "Chess/Pieces/SlowPiece.h"
 
-class Knight : public Piece
+class Knight : public SlowPiece
 {
 public:
-	Knight(Board* board, TEAM nTeam = TEAM::NONE, point2d<int> p = { -1, -1 })
-		: Piece(board, nTeam, p, 'H', { {1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1} }, false)
+	Knight(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
+		: SlowPiece(pBoard, 'H', team, initialBoardPosition, { {1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1} })
 	{}
 	virtual ~Knight() = default;
 };

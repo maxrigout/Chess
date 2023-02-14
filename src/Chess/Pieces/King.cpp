@@ -2,19 +2,19 @@
 
 #include <iostream>
 
-King::King(Board* board, TEAM nTeam, point2d<int> p)
-	: Piece(board, nTeam, p, 'K', { {1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {1, 0}, {-1, 0}, {0, -1}, {0, 1} }, false)
+King::King(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
+	: SlowPiece(pBoard, 'K', team, initialBoardPosition, { {1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {1, 0}, {-1, 0}, {0, -1}, {0, 1} })
 {}
 
-bool King::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
+bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 {
 	// if we're checking for an out of bounds cell
-	if (target.x > pBoard->GetWidth() || target.y > pBoard->GetHeight() || target.x < 0 || target.y < 0)
+	if (target.x > m_pBoard->GetWidth() || target.y > m_pBoard->GetHeight() || target.x < 0 || target.y < 0)
 	{
 		info.reason = MoveInfo::INVALID_CELL;
 		return false;
 	}
-	vector2d<int> movevect(target - boardPosition);
+	vector2d<int> movevect(target - m_boardPosition);
 
 	// if we're checking against the current piece position
 	if (movevect.x == 0 && movevect.y == 0)
@@ -23,15 +23,15 @@ bool King::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 		return false;
 	}
 
-	if (first_move) // check castle
+	if (m_isFirstMove) // check castle
 	{
 		if (movevect == vector2d<int>(2, 0))
 		{
-			Piece* rightTower = pBoard->GetCell(boardPosition + vector2d<int>(3, 0))->GetPiece();
+			Piece* rightTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(3, 0))->GetPiece();
 			if (rightTower != nullptr)
 			{
-				Cell* c1 = pBoard->GetCell(boardPosition + vector2d<int>(2, 0));
-				Cell* c2 = pBoard->GetCell(boardPosition + vector2d<int>(1, 0));
+				Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(2, 0));
+				Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(1, 0));
 				if (!rightTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty())
 				{
 					return true;
@@ -42,12 +42,12 @@ bool King::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 		}
 		else if (movevect == vector2d<int>(-3, 0))
 		{
-			Piece* leftTower = pBoard->GetCell(boardPosition + vector2d<int>(-4, 0))->GetPiece();
+			Piece* leftTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-4, 0))->GetPiece();
 			if (leftTower != nullptr)
 			{
-				Cell* c1 = pBoard->GetCell(boardPosition + vector2d<int>(-3, 0));
-				Cell* c2 = pBoard->GetCell(boardPosition + vector2d<int>(-2, 0));
-				Cell* c3 = pBoard->GetCell(boardPosition + vector2d<int>(-1, 0));
+				Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-3, 0));
+				Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-2, 0));
+				Cell* c3 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-1, 0));
 				if (!leftTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty() && c3->IsEmpty())
 				{
 					return true;
@@ -58,22 +58,22 @@ bool King::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 		}
 	}
 
-	for (const auto& m1 : moves)
+	for (const auto& m1 : m_moves)
 	{
 		if (movevect == m1)
 		{
-			Cell* target_cell = pBoard->GetCell(boardPosition + m1);
+			Cell* target_cell = m_pBoard->GetCell(m_boardPosition + m1);
 			if (target_cell == nullptr)
 			{
 				info.reason = MoveInfo::INVALID_CELL;
 				return false;
 			}
-			else if (target_cell->HasPiece() && target_cell->IsSameTeam(team))
+			else if (target_cell->HasPiece() && target_cell->IsSameTeam(m_team))
 			{
 				info.reason = MoveInfo::ALREADY_OCCUPIED | MoveInfo::SAME_TEAM;
 				return false;
 			}
-			else if (target_cell->HasPiece() && !target_cell->IsSameTeam(team) && target_cell->IsGuarded())
+			else if (target_cell->HasPiece() && !target_cell->IsSameTeam(m_team) && target_cell->IsGuarded())
 			{
 				info.reason = MoveInfo::CELL_GUARDED;
 				return false;
@@ -90,93 +90,96 @@ bool King::IsMoveValid(const point2d<int>& target, MoveInfo& info) const
 	info.reason = MoveInfo::INVALID_MOVE;
 	return false;
 }
-void King::DrawMoves(const Renderer2D* renderer) const
+
+// void King::DrawMoves(const Renderer2D* renderer) const
+// {
+// 	int padx = 2;
+// 	int pady = 2;
+
+// 	for (const auto& m : m_moves)
+// 	{
+// 		if (IsMoveValid(m_boardPosition + m))
+// 		{
+// 			m_pBoard->HighlightCell(renderer, m_boardPosition + m, {padx, pady}, DARK_GREEN);
+// 		}
+// 	}
+
+// 	if (m_isFirstMove) // check for castle
+// 	{
+
+// 		if (IsMoveValid(m_boardPosition + vector2d<int>(2, 0)))
+// 		{
+// 			m_pBoard->HighlightCell(renderer, m_boardPosition + vector2d<int>(2, 0), {padx, pady}, DARK_GREEN);
+// 		}
+// 		if (IsMoveValid(m_boardPosition + vector2d<int>(-3, 0)))
+// 		{
+// 			m_pBoard->HighlightCell(renderer, m_boardPosition + vector2d<int>(-3, 0), {padx, pady}, DARK_GREEN);
+// 		}
+
+
+
+
+// 		Piece* rightTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(3, 0))->GetPiece();
+// 		if (rightTower != nullptr)
+// 		{
+// 			Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(2, 0));
+// 			Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(1, 0));
+// 			if (!rightTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty())
+// 			{
+// 				m_pBoard->HighlightCell(renderer, m_boardPosition + vector2d<int>(2, 0), {padx, pady}, DARK_GREEN);
+// 			}
+// 		}
+// 		Piece* leftTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-4, 0))->GetPiece();
+// 		if (leftTower != nullptr)
+// 		{
+// 			Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-3, 0));
+// 			Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-2, 0));
+// 			Cell* c3 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-1, 0));
+// 			if (!leftTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty() && c3->IsEmpty())
+// 			{
+// 				m_pBoard->HighlightCell(renderer, m_boardPosition + vector2d<int>(-3, 0), {padx, pady}, DARK_GREEN);
+// 			}
+// 		}
+// 	}
+// }
+
+void King::Move(const pt2di& target)
 {
-	int padx = 2;
-	int pady = 2;
-
-	for (const auto& m : moves)
+	Cell* oldcell = m_pBoard->GetCell(m_boardPosition);
+	Cell* newcell = m_pBoard->GetCell(target);
+	vector2d<int> movevect(target - m_boardPosition);
+	if (m_isFirstMove)
 	{
-		if (IsMoveValid(boardPosition + m))
-		{
-			pBoard->HighlightCell(renderer, boardPosition + m, {padx, pady}, DARK_GREEN);
-		}
-	}
-
-	if (first_move) // check for castle
-	{
-
-		if (IsMoveValid(boardPosition + vector2d<int>(2, 0)))
-		{
-			pBoard->HighlightCell(renderer, boardPosition + vector2d<int>(2, 0), {padx, pady}, DARK_GREEN);
-		}
-		if (IsMoveValid(boardPosition + vector2d<int>(-3, 0)))
-		{
-			pBoard->HighlightCell(renderer, boardPosition + vector2d<int>(-3, 0), {padx, pady}, DARK_GREEN);
-		}
-
-
-
-
-		Piece* rightTower = pBoard->GetCell(boardPosition + vector2d<int>(3, 0))->GetPiece();
-		if (rightTower != nullptr)
-		{
-			Cell* c1 = pBoard->GetCell(boardPosition + vector2d<int>(2, 0));
-			Cell* c2 = pBoard->GetCell(boardPosition + vector2d<int>(1, 0));
-			if (!rightTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty())
-			{
-				pBoard->HighlightCell(renderer, boardPosition + vector2d<int>(2, 0), {padx, pady}, DARK_GREEN);
-			}
-		}
-		Piece* leftTower = pBoard->GetCell(boardPosition + vector2d<int>(-4, 0))->GetPiece();
-		if (leftTower != nullptr)
-		{
-			Cell* c1 = pBoard->GetCell(boardPosition + vector2d<int>(-3, 0));
-			Cell* c2 = pBoard->GetCell(boardPosition + vector2d<int>(-2, 0));
-			Cell* c3 = pBoard->GetCell(boardPosition + vector2d<int>(-1, 0));
-			if (!leftTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty() && c3->IsEmpty())
-			{
-				pBoard->HighlightCell(renderer, boardPosition + vector2d<int>(-3, 0), {padx, pady}, DARK_GREEN);
-			}
-		}
-	}
-}
-void King::Move(const point2d<int>& target)
-{
-	Cell* oldcell = pBoard->GetCell(boardPosition);
-	Cell* newcell = pBoard->GetCell(target);
-	vector2d<int> movevect(target - boardPosition);
-	if (first_move)
-	{
-		first_move = false;
+		m_isFirstMove = false;
 		if (movevect == vector2d<int>(2, 0))
 		{
-			Piece* rightTower = pBoard->GetCell(boardPosition + vector2d<int>(3, 0))->GetPiece();
+			Piece* rightTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(3, 0))->GetPiece();
 			rightTower->Move(rightTower->Pos() + vector2d<int>(-2, 0));
 		}
 		else if (movevect == vector2d<int>(-3, 0))
 		{
-			Piece* leftTower = pBoard->GetCell(boardPosition + vector2d<int>(-4, 0))->GetPiece();
+			Piece* leftTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-4, 0))->GetPiece();
 			leftTower->Move(leftTower->Pos() + vector2d<int>(2, 0));
 		}
 	}
 	if (oldcell != nullptr && newcell != nullptr)
 	{
-		boardPosition = target;
+		m_boardPosition = target;
 		oldcell->RemovePiece();
 		newcell->CaptureCell();
 		newcell->PlacePiece(this);
-		std::cout << "Moved " << piece_type << std::endl;
+		std::cout << "Moved " << m_pieceType << std::endl;
 	}
 }
-bool King::CanGuard(const point2d<int>& target) const
+
+bool King::CanGuard(const pt2di& target) const
 {
 	// if we're checking for an out of bounds cell
-	if (target.x > pBoard->GetWidth() || target.y > pBoard->GetHeight() || target.x < 0 || target.y < 0)
+	if (target.x > m_pBoard->GetWidth() || target.y > m_pBoard->GetHeight() || target.x < 0 || target.y < 0)
 	{
 		return false;
 	}
-	vector2d<int> movevect(target - boardPosition);
+	vector2d<int> movevect(target - m_boardPosition);
 
 	// if we're checking against the current piece position
 	if (movevect.x == 0 && movevect.y == 0)
@@ -184,16 +187,16 @@ bool King::CanGuard(const point2d<int>& target) const
 		return false;
 	}
 
-	for (const auto& m1 : moves)
+	for (const auto& m1 : m_moves)
 	{
 		if (movevect == m1)
 		{
-			Cell* target_cell = pBoard->GetCell(boardPosition + m1);
+			Cell* target_cell = m_pBoard->GetCell(m_boardPosition + m1);
 			if (target_cell == nullptr)
 			{
 				return false;
 			}
-			else if (target_cell->HasPiece() && target_cell->IsSameTeam(team))
+			else if (target_cell->HasPiece() && target_cell->IsSameTeam(m_team))
 			{
 				return true;
 			}
@@ -204,15 +207,15 @@ bool King::CanGuard(const point2d<int>& target) const
 }
 bool King::Check()
 {
-	return pBoard->GetCell(boardPosition)->IsGuarded();
+	return m_pBoard->GetCell(m_boardPosition)->IsGuarded();
 }
 bool King::CheckMate()
 {
 	if (Check())
 	{
-		for (const auto& m : moves)
+		for (const auto& m : m_moves)
 		{
-			if (IsMoveValid(boardPosition+m) && !pBoard->GetCell(boardPosition + m)->IsGuarded())
+			if (IsMoveValid(m_boardPosition+m) && !m_pBoard->GetCell(m_boardPosition + m)->IsGuarded())
 			{
 				return false;
 			}
@@ -225,28 +228,31 @@ bool King::CheckMate()
 	return true;
 }
 
-void King::CalculateMoves()
+void King::CalculateAvailableMoves()
 {
-	availableMoves.clear();
-	for (auto& m : moves)
+	if (m_isMovesCalculated)
+		return;
+
+	m_availableMoves.clear();
+	for (auto& m : m_moves)
 	{
-		if (IsMoveValid(boardPosition + m))
+		if (IsMoveValid(m_boardPosition + m))
 		{
-			availableMoves.push_back(boardPosition + m);
+			m_availableMoves.push_back(m_boardPosition + m);
 		}
 	}
 
-	if (first_move) // check for castle
+	if (m_isFirstMove) // check for castle
 	{
 
-		if (IsMoveValid(boardPosition + vector2d<int>(2, 0)))
+		if (IsMoveValid(m_boardPosition + vector2d<int>(2, 0)))
 		{
-			availableMoves.push_back(boardPosition + vector2d<int>(2, 0));
+			m_availableMoves.push_back(m_boardPosition + vector2d<int>(2, 0));
 		}
-		if (IsMoveValid(boardPosition + vector2d<int>(-3, 0)))
+		if (IsMoveValid(m_boardPosition + vector2d<int>(-3, 0)))
 		{
-			availableMoves.push_back(boardPosition + vector2d<int>(-3, 0));
+			m_availableMoves.push_back(m_boardPosition + vector2d<int>(-3, 0));
 		}
 	}
-	moves_calculated = true;
+	m_isMovesCalculated = true;
 }

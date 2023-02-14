@@ -26,18 +26,22 @@ struct vector2d
 		y = (T)rhs.y;
 		return *this;
 	}
-	bool operator==(const vector2d<T>& v) const
+	bool operator==(const vector2d<T>& rhs) const
 	{
-		return (v.x == x && v.y == y);
+		return (x == rhs.x && y == rhs.y);
+	}
+	bool operator!=(const vector2d<T>& rhs) const
+	{
+		return !(*this == rhs);
 	}
 
-	vector2d<T> operator+(const vector2d<T>& v) const
+	vector2d<T> operator+(const vector2d<T>& rhs) const
 	{
-		return vector2d<T>(x + v.x, y + v.y);
+		return vector2d<T>(x + rhs.x, y + rhs.y);
 	}
-	vector2d<T> operator-(const vector2d<T>& v) const
+	vector2d<T> operator-(const vector2d<T>& rhs) const
 	{
-		return vector2d<T>(x - v.x, y - v.y);
+		return vector2d<T>(x - rhs.x, y - rhs.y);
 	}
 
 	// dot product

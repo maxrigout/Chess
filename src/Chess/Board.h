@@ -24,6 +24,7 @@ public:
 	void SetCellDim(const vec2di& dim);
 	const vec2di& GetCellDim() const { return m_cellDim; }
 
+	void GuardCell(const pt2di& position, TEAM team);
 	void ResetGuard();
 
 	pt2di WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const;
@@ -35,7 +36,7 @@ public:
 	bool IsPositionValid(const pt2di& position) const;
 
 	void DrawCells(const Renderer2D* renderer) const;
-	void DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width) const;
+	void DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width, const Color& color) const;
 	void HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, const pt2di& padding = {0, 0}, const Color& color = YELLOW) const;
 	
 	std::string GetBoardCoordinates(const pt2di& position) const;

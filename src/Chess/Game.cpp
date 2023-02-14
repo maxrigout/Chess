@@ -14,7 +14,6 @@
 
 
 Game::Game()
-	: m_board(8, 8)
 {
 	
 }
@@ -40,7 +39,7 @@ void Game::InitSDL(int width, int height)
 
 	// SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
 
-	m_window = SDL_CreateWindow(
+	m_pWindow = SDL_CreateWindow(
 		"Chess", // window title
 		SDL_WINDOWPOS_UNDEFINED, // window x
 		SDL_WINDOWPOS_UNDEFINED, // window y
@@ -49,11 +48,11 @@ void Game::InitSDL(int width, int height)
 		0
 	);
 
-	if (m_renderer != nullptr)
-		delete m_renderer;
+	if (m_pRenderer != nullptr)
+		delete m_pRenderer;
 	
-	m_renderer = new Renderer2D_SDL(SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
-	//m_renderer->SetWindowDim({ width, height }); // optional
+	m_pRenderer = new Renderer2D_SDL(SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+	//m_pRenderer->SetWindowDim({ width, height }); // optional
 
 	m_isSDLInitialized = true;
 }
@@ -63,7 +62,7 @@ void Game::FreeSDL()
 	if (!m_isSDLInitialized)
 		return;
 
-	SDL_DestroyWindow(m_window);
+	SDL_DestroyWindow(m_pWindow);
 	SDL_Quit();
 
 	m_isSDLInitialized = false;
@@ -74,11 +73,13 @@ void Game::InitBoard()
 	if (m_isBoardInitialized)
 		return;
 
-	int width, height;
-	SDL_GetWindowSize(m_window, &width, &height);
+	m_pBoard = new Board(8, 8);
 
-	int boardWidth = m_board.GetWidth();
-	int boardHeight = m_board.GetHeight();
+	int width, height;
+	SDL_GetWindowSize(m_pWindow, &width, &height);
+
+	int boardWidth = m_pBoard->GetWidth();
+	int boardHeight = m_pBoard->GetHeight();
 
 	bool square_cells = true; // if we want the cells to be square
 
@@ -95,16 +96,17 @@ void Game::InitBoard()
 		cellRenderHeightPx = height / boardHeight;
 	}
 
-	m_renderer->SetCellDim({ cellRenderWidthPx, cellRenderHeightPx });
-	m_board.SetCellDim(m_renderer->GetCellDim());
+	m_pRenderer->SetCellDim({ cellRenderWidthPx, cellRenderHeightPx });
+	m_pBoard->SetCellDim(m_pRenderer->GetCellDim());
 
 	// Player set up
 	// the pieces set up should be done in the constructor
-	m_player1 = new HumanPlayer(&m_board, TEAM::ONE, 7);
-	m_player2 = new AIPlayer(&m_board, TEAM::TWO, 0);
+	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE, 7);
+	m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO, 0);
 
-	m_activePlayer = m_player1;
-	activeTeam = m_activePlayer->GetTeam();
+	m_pActivePlayer = m_pPlayer1;
+	m_pActivePlayer->BeginTurn();
+	m_activeTeam = m_pActivePlayer->GetTeam();
 	m_isBoardInitialized = true;
 }
 
@@ -113,8 +115,8 @@ void Game::FreeBoard()
 	if (!m_isBoardInitialized)
 		return;
 
-	delete m_player1;
-	delete m_player2;
+	delete m_pPlayer1;
+	delete m_pPlayer2;
 
 	m_isBoardInitialized = false;
 }
@@ -202,10 +204,10 @@ bool Game::IsMouseButtonPressed(MouseButton button)
 
 void Game::Update(float dt)
 {
-	pt2di mouseCell = m_board.WindowToBoardCoordinates(m_mousePos); // cell underneath the mouse cursor
+	pt2di mouseCell = m_pBoard->WindowToBoardCoordinates(m_mousePos); // cell underneath the mouse cursor
 	m_hoveredCellPos = mouseCell;
 
-	if (m_activePlayer->HasEndedTurn())
+	if (m_pActivePlayer->HasEndedTurn())
 		SwitchPlayers();
 
 	if (IsMouseButtonPressed(MouseButton::LEFT)) // if the left mouse button is pressed
@@ -213,35 +215,35 @@ void Game::Update(float dt)
 		SelectCell(mouseCell);
 	}
 
-	m_player1->UpdatePieces(dt);
-	m_player2->UpdatePieces(dt);
-	m_activePlayer->Play({ m_selectedCellPos, 0 });
+	m_pPlayer1->UpdatePieces(dt);
+	m_pPlayer2->UpdatePieces(dt);
+	m_pActivePlayer->Play({ m_selectedCellPos, 0 });
 }
 
 void Game::Render()
 {
 	// Draw
-	m_renderer->Begin();
-	m_renderer->Clear(BLACK);
+	m_pRenderer->Begin();
+	m_pRenderer->Clear(BLACK);
 
-	m_board.DrawCells(m_renderer); // Draw the board
-	m_board.HighlightCell(m_renderer, m_hoveredCellPos); // highlight the cell under the mouse cursor
-	m_board.DrawSelectedCell(m_renderer, m_selectedCellPos, 7); // highlight the selected cell
+	m_pBoard->DrawCells(m_pRenderer); // Draw the board
+	m_pBoard->HighlightCell(m_pRenderer, m_hoveredCellPos); // highlight the cell under the mouse cursor
+	m_pBoard->DrawSelectedCell(m_pRenderer, m_selectedCellPos, 7, DARK_GREEN); // highlight the selected cell
 	// draw the selected piece's moves
-	m_activePlayer->DrawSelectedPieceMoves(m_renderer);
+	m_pActivePlayer->DrawSelectedPieceMoves(m_pRenderer);
 
-	m_player1->DrawPieces(m_renderer);
-	m_player2->DrawPieces(m_renderer);
+	m_pPlayer1->DrawPieces(m_pRenderer);
+	m_pPlayer2->DrawPieces(m_pRenderer);
 
-	m_player1->DrawLastMove(m_renderer);
-	m_player2->DrawLastMove(m_renderer);
+	m_pPlayer1->DrawLastMove(m_pRenderer);
+	m_pPlayer2->DrawLastMove(m_pRenderer);
 
-	m_renderer->End();
+	m_pRenderer->End();
 }
 
-void Game::SelectCell(pt2di cellBoardPosition)
+void Game::SelectCell(const pt2di& cellBoardPosition)
 {
-	if (!m_board.IsPositionValid(cellBoardPosition))
+	if (!m_pBoard->IsPositionValid(cellBoardPosition))
 		return;
 
 	m_selectedCellPos = cellBoardPosition;
@@ -252,9 +254,9 @@ void Game::SwitchPlayers()
 	std::cout << "switching players\n";
 	static int player = 0;
 	// reset the guarded cells
-	m_board.ResetGuard();
+	m_pBoard->ResetGuard();
 	// we need to guard the cells before switching players
-	m_activePlayer->GuardCells();
+	m_pActivePlayer->GuardCells();
 
 	// should check for check / checkmate here
 
@@ -262,9 +264,9 @@ void Game::SwitchPlayers()
 	player = (player + 1) % 2;
 	std::cout << "player " << player << "'s turn\n";
 	if (player == 0)
-		m_activePlayer = m_player1;
+		m_pActivePlayer = m_pPlayer1;
 	else
-		m_activePlayer = m_player2;
-	m_activePlayer->BeginTurn();
-	activeTeam = m_activePlayer->GetTeam();
+		m_pActivePlayer = m_pPlayer2;
+	m_pActivePlayer->BeginTurn();
+	m_activeTeam = m_pActivePlayer->GetTeam();
 }

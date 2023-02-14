@@ -1,11 +1,11 @@
 #pragma once
-#include "Chess/Piece.h"
+#include "FastPiece.h"
 
-class Queen : public Piece
+class Queen : public FastPiece
 {
 public:
-	Queen(Board* board, TEAM nTeam = TEAM::NONE, point2d<int> p = { -1, -1 })
-		: Piece(board, nTeam, p, 'Q', { {1, 1}, {1, -1}, {0, 1}, {1, 0}, {0, -1 }, {-1, 0}, {-1, -1}, {-1, 1} }, true)
+	Queen(Board* board, TEAM team, const pt2di& initialBoardPosition)
+		: FastPiece(board, 'Q', team, initialBoardPosition, { {1, 1}, {1, -1}, {0, 1}, {1, 0}, {0, -1 }, {-1, 0}, {-1, -1}, {-1, 1} })
 	{}
 	virtual ~Queen() = default;
 };

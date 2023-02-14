@@ -63,6 +63,13 @@ bool Board::IsPositionValid(const pt2di& position) const
 	return true;
 }
 
+void Board::GuardCell(const pt2di& position, TEAM team)
+{
+	if (!IsPositionValid(position))
+		return;
+	GetCell(position)->Guard(team);
+}
+
 void Board::ResetGuard()
 {
 	for (int i = 0; i < m_width * m_height; ++i)
@@ -102,11 +109,14 @@ void Board::DrawCells(const Renderer2D* renderer) const
 		{
 			Color color = ((i + j) % 2 == 0) ? EVEN_CELL_COLOR : ODD_CELL_COLOR;
 			renderer->FillRect({ i * cell.w, j * cell.h }, cell, color);
+			if (m_cells[j * m_width + i].IsGuarded())
+				HighlightCell(renderer, {i, j}, {15, 15}, RED);
+				// DrawSelectedCell(renderer, {i, j}, 5, DARK_BLUE);
 		}
 	}
 }
 
-void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width) const
+void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width, const Color& color) const
 {
 	if (!IsPositionValid(cellPos))
 		return;
@@ -141,10 +151,10 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, i
 	pt2di bottomTopLeft{ cellTopLeft.x, cellTopLeft.y + cell.h - height };
 	vec2di bottomDim{ cell.w, height };
 
-	renderer->FillRect(topTopLeft, topDim, DARK_GREEN); // top rect
-	renderer->FillRect(leftTopLeft, leftDim, DARK_GREEN); // left rect
-	renderer->FillRect(rightTopLeft, rightDim, DARK_GREEN); // right rect
-	renderer->FillRect(bottomTopLeft, bottomDim, DARK_GREEN); // bottom rect
+	renderer->FillRect(topTopLeft, topDim, color); // top rect
+	renderer->FillRect(leftTopLeft, leftDim, color); // left rect
+	renderer->FillRect(rightTopLeft, rightDim, color); // right rect
+	renderer->FillRect(bottomTopLeft, bottomDim, color); // bottom rect
 
 	// option 2
 	// draw smaller and smaller rect

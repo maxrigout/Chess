@@ -4,11 +4,14 @@
 #include "Chess/Common.h"
 #include "Chess/Board.h"
 #include "Chess/Piece.h"
+#include "Chess/Pieces/King.h"
+
+#include "DebugLogger.h"
 
 #include <vector>
 #include <memory>
 
-struct Context
+struct PlayingContext
 {
 	pt2di selectedCellPosition;
 	int processingDelay;
@@ -17,9 +20,9 @@ struct Context
 class Player
 {
 public:
-	Player(Board* board, TEAM team);
-	virtual ~Player() = default;
-	virtual void Play(const Context& context) = 0;
+	Player(Board* board, TEAM team, int king_row);
+	virtual ~Player();
+	virtual void Play(const PlayingContext& context) = 0;
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
 	void UpdatePieces(float dt);
 	void CalculateMoves();
@@ -46,6 +49,7 @@ protected:
 	void EndTurn() { m_hasTurnEnded = true; }
 	char& GetCopiedCell(int x, int y) { return m_pBoardCopy[y * m_pBoard->GetWidth() + x]; }
 	char GetCopiedCell(int x, int y) const { return m_pBoardCopy[y * m_pBoard->GetWidth() + x]; }
+	bool IsCheck2() const;
 
 	std::unique_ptr<char[]> m_pBoardCopy;
 	Board* m_pBoard = nullptr;

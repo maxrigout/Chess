@@ -9,7 +9,7 @@ class HumanPlayer : public Player
 {
 public:
 	HumanPlayer(Board* board, TEAM t, int king_row);
-	~HumanPlayer();
-	virtual void Play(const Context& context) override;
+	virtual ~HumanPlayer();
+	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override {}
 };

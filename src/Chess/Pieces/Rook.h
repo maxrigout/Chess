@@ -1,11 +1,11 @@
 #pragma once
-#include "Chess/Piece.h"
+#include "FastPiece.h"
 
-class Rook : public Piece
+class Rook : public FastPiece
 {
 public:
-	Rook(Board* board, TEAM nTeam = TEAM::NONE, point2d<int> p = { -1, -1 })
-		: Piece(board, nTeam, p, 'R', { { 0, 1 } , {1, 0}, {0, -1 }, {-1, 0} }, true)
+	Rook(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
+		: FastPiece(pBoard, 'R', team, initialBoardPosition, { { 0, 1 } , {1, 0}, {0, -1 }, {-1, 0} })
 	{}
 	virtual ~Rook() = default;
 };

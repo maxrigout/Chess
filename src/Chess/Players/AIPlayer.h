@@ -11,7 +11,8 @@ class AIPlayer : public Player
 public:
 	AIPlayer(Board* board, TEAM t, int king_row);
 	virtual ~AIPlayer();
-	virtual void Play(const Context& context) override;
+	virtual void Play(const PlayingContext& context) override;
+	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 	std::string PrintCopy() const;
 	std::vector<Move> GetHypotheticalMoves();
 	int EvaluateBoard() const;
@@ -20,7 +21,6 @@ public:
 	int GetPiecePoints(char type) const;
 	int GetPieceValue(Piece* p) const;
 	int GetPieceValue(char type) const;
-	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
 private:
 	int boardScore;

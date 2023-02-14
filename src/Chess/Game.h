@@ -37,32 +37,26 @@ private:
 
 	bool IsMouseButtonPressed(MouseButton button);
 
-	void SelectCell(point2d<int> cellBoardPosition);
+	void SelectCell(const pt2di& cellBoardPosition);
 	void SwitchPlayers();
 
-	SDL_Window* m_window;
-	point2d<int> m_mousePos;
+	SDL_Window* m_pWindow;
+	pt2di m_mousePos;
 	unsigned int m_mouseButtonState;
 
-	Renderer2D* m_renderer = nullptr;
+	Renderer2D* m_pRenderer = nullptr;
 
 	bool m_isInitialized = false;
 	bool m_isSDLInitialized = false;
 	bool m_isBoardInitialized = false;
 	bool m_isPlaying;
 
-	point2d<int> m_hoveredCellPos{-1, 0};
-	point2d<int> m_selectedCellPos{-1, 0};
+	pt2di m_hoveredCellPos{-1, 0};
+	pt2di m_selectedCellPos{-1, 0};
 
-	Board m_board;
-	// Piece* m_selectedPiece = nullptr;
-	// Cell* m_selectedCell;
-
-	// std::vector<Piece*>* activePlayerPieces;
-	TEAM activeTeam = TEAM::NONE;
-	Player* m_activePlayer;
-	Player* m_player1;
-	Player* m_player2;
-	// std::vector<Piece*> player1Pieces;
-	// std::vector<Piece*> player2Pieces;
+	Board* m_pBoard;
+	TEAM m_activeTeam = TEAM::NONE;
+	Player* m_pActivePlayer;
+	Player* m_pPlayer1;
+	Player* m_pPlayer2;
 };
