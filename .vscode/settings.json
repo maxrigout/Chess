@@ -11,6 +11,7 @@
 		"bitset": "cpp",
 		"cstdio": "cpp",
 		"string": "cpp",
-		"string_view": "cpp"
+		"string_view": "cpp",
+		"__node_handle": "cpp"
 	},
 }

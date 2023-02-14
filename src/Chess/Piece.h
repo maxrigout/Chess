@@ -33,6 +33,7 @@ public:
 	int GetMod(TEAM team) const { return ((IsSameTeam(team)) ? 1 : -1); }
 	const std::vector<pt2di>& GetAvailableMoves();
 	void ResetAvailableMoves();
+	void AddAvailableMove(const pt2di& move); // only used when the king is in check
 
 private:
 

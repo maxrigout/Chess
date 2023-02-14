@@ -67,10 +67,16 @@ void Player::UpdatePieces(float dt)
 
 void Player::CalculateMoves()
 {
+	m_legalMoves.clear();
 	CopyBoard();
 	if (GetKing()->Check())
 	{
+		std::cout << "Check!\n";
 		std::vector<Move> possibleMoves = GetPossibleMoves();
+		for (auto& piece : m_pieces)
+		{
+			piece->ResetAvailableMoves();
+		}
 		for (const auto& move : possibleMoves)
 		{
 			char old_cell = TestMove(move);
@@ -78,6 +84,7 @@ void Player::CalculateMoves()
 			if (!IsCheck())
 			{
 				m_legalMoves.push_back(move);
+				move.piece->AddAvailableMove(move.target);
 			}
 			// undo the move
 			UndoMove(move, old_cell);
@@ -367,6 +374,9 @@ void Player::SelectPiece(const pt2di& position)
 
 MoveInfo Player::MoveSelectedPiece(const pt2di& position)
 {
+	// TODO: verify the move performed won't cause your own king in "check"
+	if (!IsMoveLegal(position))
+		return { MoveInfo::INVALID_MOVE };
 	// we don't want to move the piece if the move is invalid
 	if (!m_selectedPiece->IsMoveValid(position))
 	{
@@ -377,4 +387,14 @@ MoveInfo Player::MoveSelectedPiece(const pt2di& position)
 	EndTurn();// end the current player's turn and allow the other player to play
 
 	return { MoveInfo::NONE };
+}
+
+bool Player::IsMoveLegal(const pt2di& target) const
+{
+	for (const auto& move : m_legalMoves)
+	{
+		if (move.target == target)
+			return true;
+	}
+	return false;
 }

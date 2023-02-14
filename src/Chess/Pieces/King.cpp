@@ -170,6 +170,7 @@ void King::Move(const pt2di& target)
 		newcell->PlacePiece(this);
 		std::cout << "Moved " << m_pieceType << std::endl;
 	}
+	Piece::Move(target);
 }
 
 bool King::CanGuard(const pt2di& target) const
@@ -205,10 +206,12 @@ bool King::CanGuard(const pt2di& target) const
 	}
 	return false;
 }
+
 bool King::Check()
 {
 	return m_pBoard->GetCell(m_boardPosition)->IsGuarded();
 }
+
 bool King::CheckMate()
 {
 	if (Check())

@@ -50,6 +50,7 @@ protected:
 	char& GetCopiedCell(int x, int y) { return m_pBoardCopy[y * m_pBoard->GetWidth() + x]; }
 	char GetCopiedCell(int x, int y) const { return m_pBoardCopy[y * m_pBoard->GetWidth() + x]; }
 	bool IsCheck2() const;
+	bool IsMoveLegal(const pt2di& target) const;
 
 	std::unique_ptr<char[]> m_pBoardCopy;
 	Board* m_pBoard = nullptr;

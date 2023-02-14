@@ -94,3 +94,9 @@ void Piece::ResetAvailableMoves()
 	m_availableMoves.clear();
 	m_isMovesCalculated = false;
 }
+
+void Piece::AddAvailableMove(const pt2di& target)
+{
+	m_availableMoves.push_back(target);
+	m_isMovesCalculated = true;
+}
