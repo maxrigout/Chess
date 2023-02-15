@@ -66,7 +66,7 @@ bool Pawn::IsMoveValid(const pt2di& target, MoveInfo& info) const
 	return false;
 }
 
-bool Pawn::CanGuard(const pt2di& target) const
+bool Pawn::CanAttack(const pt2di& target) const
 {
 	vec2di move_vect(target - m_boardPosition);
 	const vec2di& move_front = m_moves[0];
@@ -80,13 +80,13 @@ bool Pawn::CanGuard(const pt2di& target) const
 	return move_vect != capture_left && move_vect != capture_right;
 }
 
-void Pawn::GuardCells() const
+void Pawn::AttackCells() const
 {
 	const vec2di& move_front = m_moves[0];
 	vec2di capture_left_dir(move_front + vec2di(-1, 0));
 	vec2di capture_right_dir(move_front + vec2di(1, 0));
 	pt2di left = m_boardPosition + capture_left_dir;
 	pt2di right = m_boardPosition + capture_right_dir;
-	m_pBoard->GuardCell(left, m_team);
-	m_pBoard->GuardCell(right, m_team);
+	m_pBoard->AttackCell(left, m_team);
+	m_pBoard->AttackCell(right, m_team);
 }

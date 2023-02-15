@@ -38,7 +38,7 @@ bool SlowPiece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 	return false;
 }
 
-bool SlowPiece::CanGuard(const pt2di& target) const
+bool SlowPiece::CanAttack(const pt2di& target) const
 {
 	// if we're checking against the current piece position
 	if (target == m_boardPosition)
@@ -63,15 +63,12 @@ bool SlowPiece::CanGuard(const pt2di& target) const
 	return false;
 }
 
-void SlowPiece::GuardCells() const
+void SlowPiece::AttackCells() const
 {
 	for (const auto& move : m_moves)
 	{
 		pt2di target = m_boardPosition + move;
-		m_pBoard->GuardCell(target, m_team);
-		// Cell* cell = m_pBoard->GetCell(target);
-		// if (cell != nullptr && CanGuard(target))
-		// 	cell->Guard(m_team);
+		m_pBoard->AttackCell(target, m_team);
 	}
 }
 

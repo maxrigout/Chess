@@ -8,8 +8,8 @@ public:
 	virtual ~FastPiece() = default;
 
 	virtual bool IsMoveValid(const pt2di& target, MoveInfo& info = MainInfo) const override;
-	virtual bool CanGuard(const pt2di& target) const override;
-	virtual void GuardCells() const override;
+	virtual bool CanAttack(const pt2di& target) const override;
+	virtual void AttackCells() const override;
 	virtual void CalculateAvailableMoves() override;
 
 private:

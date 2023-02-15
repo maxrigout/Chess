@@ -114,12 +114,12 @@ void Player::DrawSelectedPieceMoves(const Renderer2D* renderer) const
 }
 
 
-void Player::GuardCells()
+void Player::AttackCells()
 {
 	for (const auto& p : m_pieces) 
 	{
 		if (!p->IsCaptured())
-			p->GuardCells();
+			p->AttackCells();
 		p->ResetAvailableMoves();
 	}
 }
@@ -157,7 +157,7 @@ char Player::TestMove(const Move& move)
 bool Player::IsCheck() const
 {
 	pt2di kingPosition = m_king->Pos();
-	return m_pBoard->GetCell(kingPosition)->IsGuarded();
+	return m_pBoard->GetCell(kingPosition)->IsAttacked();
 }
 
 // bool Player::IsHypotheticalCheck() const

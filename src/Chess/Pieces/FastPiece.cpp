@@ -16,7 +16,7 @@ bool FastPiece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 	return false;
 }
 
-bool FastPiece::CanGuard(const pt2di& target) const
+bool FastPiece::CanAttack(const pt2di& target) const
 {
 	// if we're checking for an out of bounds cell
 	if (!m_pBoard->IsPositionValid(target))
@@ -81,7 +81,7 @@ bool FastPiece::CanGuard(const pt2di& target) const
 	return false;
 }
 
-void FastPiece::GuardCells() const
+void FastPiece::AttackCells() const
 {
 	for (const auto& m : m_moves)
 	{
@@ -90,9 +90,9 @@ void FastPiece::GuardCells() const
 		for (int i = 1; i < maxDistance; ++i)
 		{
 			target_cell = m_boardPosition + (m * i);
-			if (!CanGuard(target_cell))
+			if (!CanAttack(target_cell))
 				break;
-			m_pBoard->GetCell(target_cell)->Guard(m_team);
+			m_pBoard->AttackCell(target_cell, m_team);
 			if (m_pBoard->GetCell(target_cell)->GetPiece() != nullptr)
 				break;
 		}

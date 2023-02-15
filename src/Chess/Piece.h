@@ -18,8 +18,8 @@ public:
 	virtual bool IsMoveValid(const pt2di& target, MoveInfo& info = MainInfo) const = 0;
 	virtual void CalculateAvailableMoves() = 0;
 	virtual void Move(const pt2di& target);
-	virtual void GuardCells() const = 0;
-	virtual bool CanGuard(const pt2di& target) const = 0;
+	virtual void AttackCells() const = 0;
+	virtual bool CanAttack(const pt2di& target) const = 0;
 	void UpdateMovement(float dt);
 	void DrawMoves(const Renderer2D* renderer) const;
 	void DrawYourself(const Renderer2D* renderer) const;

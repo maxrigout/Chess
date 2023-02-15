@@ -63,18 +63,18 @@ bool Board::IsPositionValid(const pt2di& position) const
 	return true;
 }
 
-void Board::GuardCell(const pt2di& position, TEAM team)
+void Board::AttackCell(const pt2di& position, TEAM team)
 {
 	if (!IsPositionValid(position))
 		return;
-	GetCell(position)->Guard(team);
+	GetCell(position)->Attack(team);
 }
 
-void Board::ResetGuard()
+void Board::ResetAttack()
 {
 	for (int i = 0; i < m_width * m_height; ++i)
 	{
-		m_cells[i].ResetGuarded();
+		m_cells[i].ResetAttacked();
 	}
 }
 

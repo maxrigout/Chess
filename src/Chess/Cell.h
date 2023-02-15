@@ -19,14 +19,14 @@ public:
 	bool IsSameTeam(TEAM t) const;
 	Piece* GetPiece() const { return piece; }
 	point2d<int> GetCoordinates() const { return coordinates; }
-	bool IsGuarded() { return guarded != TEAM::NONE; }
-	void Guard(TEAM t) { guarded = t; }
-	void ResetGuarded() { guarded = TEAM::NONE; }
+	bool IsAttacked() { return m_attack != TEAM::NONE; }
+	void Attack(TEAM t) { m_attack = t; }
+	void ResetAttacked() { m_attack = TEAM::NONE; }
 
 protected:
 	point2d<int> coordinates;
 	Piece* piece = nullptr;
-	TEAM guarded = TEAM::NONE;
+	TEAM m_attack = TEAM::NONE;
 
 	friend class Board;
 };

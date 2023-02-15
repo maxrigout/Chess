@@ -105,7 +105,7 @@ void Game::InitBoard()
 	m_pPlayer2 = new HumanPlayer(m_pBoard, TEAM::TWO, 0);
 
 	m_pActivePlayer = m_pPlayer1;
-	m_pPlayer2->GuardCells();
+	m_pPlayer2->AttackCells();
 	m_pActivePlayer->BeginTurn();
 	m_activeTeam = m_pActivePlayer->GetTeam();
 	m_isBoardInitialized = true;
@@ -255,9 +255,9 @@ void Game::SwitchPlayers()
 	std::cout << "switching players\n";
 	static int player = 0;
 	// reset the guarded cells
-	m_pBoard->ResetGuard();
+	m_pBoard->ResetAttack();
 	// we need to guard the cells before switching players
-	m_pActivePlayer->GuardCells();
+	m_pActivePlayer->AttackCells();
 
 	// should check for check / checkmate here
 

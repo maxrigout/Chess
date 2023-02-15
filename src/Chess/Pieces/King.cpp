@@ -73,12 +73,12 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 				info.reason = MoveInfo::ALREADY_OCCUPIED | MoveInfo::SAME_TEAM;
 				return false;
 			}
-			else if (target_cell->HasPiece() && !target_cell->IsSameTeam(m_team) && target_cell->IsGuarded())
+			else if (target_cell->HasPiece() && !target_cell->IsSameTeam(m_team) && target_cell->IsAttacked())
 			{
 				info.reason = MoveInfo::CELL_GUARDED;
 				return false;
 			}
-			else if (!target_cell->IsGuarded())
+			else if (!target_cell->IsAttacked())
 			{
 				info.reason = MoveInfo::NONE;
 				return true;
@@ -173,13 +173,12 @@ void King::Move(const pt2di& target)
 	Piece::Move(target);
 }
 
-bool King::CanGuard(const pt2di& target) const
+bool King::CanAttack(const pt2di& target) const
 {
 	// if we're checking for an out of bounds cell
-	if (target.x > m_pBoard->GetWidth() || target.y > m_pBoard->GetHeight() || target.x < 0 || target.y < 0)
-	{
+	if (m_pBoard->IsPositionValid(target))
 		return false;
-	}
+
 	vector2d<int> movevect(target - m_boardPosition);
 
 	// if we're checking against the current piece position
@@ -209,7 +208,7 @@ bool King::CanGuard(const pt2di& target) const
 
 bool King::Check()
 {
-	return m_pBoard->GetCell(m_boardPosition)->IsGuarded();
+	return m_pBoard->GetCell(m_boardPosition)->IsAttacked();
 }
 
 bool King::CheckMate()
@@ -218,7 +217,7 @@ bool King::CheckMate()
 	{
 		for (const auto& m : m_moves)
 		{
-			if (IsMoveValid(m_boardPosition+m) && !m_pBoard->GetCell(m_boardPosition + m)->IsGuarded())
+			if (IsMoveValid(m_boardPosition+m) && !m_pBoard->GetCell(m_boardPosition + m)->IsAttacked())
 			{
 				return false;
 			}

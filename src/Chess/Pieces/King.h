@@ -9,7 +9,7 @@ public:
 	virtual bool IsMoveValid(const pt2di& target, MoveInfo& info = MainInfo) const override;
 	// virtual void DrawMoves(const Renderer2D* renderer) const override;
 	virtual void Move(const pt2di& target) override;
-	virtual bool CanGuard(const pt2di& target) const override;
+	virtual bool CanAttack(const pt2di& target) const override;
 	virtual void CalculateAvailableMoves() override;
 	
 	bool Check();

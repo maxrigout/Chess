@@ -29,7 +29,7 @@ public:
 	Piece* GetPieceAtPosition(const pt2di& position);
 	void DrawPieces(const Renderer2D* renderer) const;
 	void DrawSelectedPieceMoves(const Renderer2D* renderer) const;
-	void GuardCells();
+	void AttackCells();
 	TEAM GetTeam() const { return m_team; }
 	bool HasEndedTurn() const { return m_hasTurnEnded; }
 	void BeginTurn() { m_hasTurnEnded = false; CalculateMoves(); }

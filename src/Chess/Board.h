@@ -24,8 +24,8 @@ public:
 	void SetCellDim(const vec2di& dim);
 	const vec2di& GetCellDim() const { return m_cellDim; }
 
-	void GuardCell(const pt2di& position, TEAM team);
-	void ResetGuard();
+	void AttackCell(const pt2di& position, TEAM team);
+	void ResetAttack();
 
 	pt2di WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const;
 	pt2di BoardToWindowCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const;
