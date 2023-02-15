@@ -1,21 +1,13 @@
 #include "Cell.h"
 #include "Chess/Piece.h"
 
-bool Cell::PlacePiece(Piece* p)
+void Cell::PlacePiece(Piece* p)
 {
-	if (piece != nullptr)
-		return false;
-
 	piece = p;
-	return true;
 }
-bool Cell::RemovePiece()
+void Cell::RemovePiece()
 {
-	if (piece == nullptr)
-		return false;
-
 	piece = nullptr;
-	return true;
 }
 bool Cell::IsSameTeam(TEAM t) const
 {
@@ -24,12 +16,11 @@ bool Cell::IsSameTeam(TEAM t) const
 
 	return (piece->IsSameTeam(t));
 }
-bool Cell::CaptureCell()
+void Cell::CaptureCell()
 {
 	if (piece == nullptr)
-		return false;
+		return;
 
 	piece->CapturePiece();
 	piece = nullptr;
-	return true;
 }

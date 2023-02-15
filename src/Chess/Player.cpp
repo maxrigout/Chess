@@ -57,6 +57,20 @@ Player::~Player()
 	m_pieces.clear();
 }
 
+std::string Player::GetCopyAsString() const
+{
+	std::string out("");
+	for (int j = 0; j < m_pBoard->GetHeight(); j++)
+	{
+		for (int i = 0; i < m_pBoard->GetWidth(); i++)
+		{
+			out += GetCopiedCell(i, j);
+		}
+		out += '\n';
+	}
+	return out;
+}
+
 void Player::UpdatePieces(float dt)
 {
 	for (auto& piece : m_pieces)
@@ -112,7 +126,6 @@ void Player::DrawSelectedPieceMoves(const Renderer2D* renderer) const
 		m_selectedPiece->DrawMoves(renderer);
 	}
 }
-
 
 void Player::AttackCells()
 {
@@ -193,6 +206,7 @@ bool Player::IsHypotheticalCheck() const
 		}
 	}
 
+	// utility lambdas
 	auto inBounds = [&](const pt2di& c)
 	{
 		return (c.x >= 0 && c.x < m_pBoard->GetWidth() && c.y >= 0 && c.y < m_pBoard->GetHeight());
@@ -202,64 +216,64 @@ bool Player::IsHypotheticalCheck() const
 		return (GetCopiedCell(c.x, c.y) == COPY_EMPTY_CELL);
 	};
 
+	// queen is not included because we can check for threats from a queen with the bishop and the rook.
 	std::vector<vector2d<int>> dir_bishop = { {-1, 1}, {1, 1}, {-1, -1}, {1, -1} };
 	std::vector<vector2d<int>> dir_rook = { {1, 0}, {0, 1}, {-1, 0}, {0, -1} };
 	std::vector<vector2d<int>> dir_knight = { {1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1} };
 	std::vector<vector2d<int>> dir_king = { {1, 0}, {0, 1}, {-1, 0}, {0, -1}, {-1, 1}, {1, 1}, {-1, -1}, {1, -1} };
-	std::vector<vector2d<int>> dir_pawn = { {-1, -1}, {1, -1} };
+	std::vector<vector2d<int>> dir_pawn = { {-1, -1}, {1, -1} }; // pawns can only attack in diagonals
 
+	// check if there's a bishop or a queen
 	for (auto& d : dir_bishop)
 	{
 		bool blocked = false;
 		for (int i = 1; i < 9; i++)
 		{
 			pt2di cell = king_pos + d * i;
-			if (inBounds(cell))
+			if (!inBounds(cell))
+				break;
+
+			if (!isEmptyCell(cell))
 			{
-				if (!isEmptyCell(cell))
+				char piece = GetCopiedCell(cell.x, cell.y) * enemy_team_mod;
+				switch (piece)
 				{
-					char piece = GetCopiedCell(cell.x, cell.y) * enemy_team_mod;
-					switch (piece)
-					{
-					case 'B': return true;
-					case 'Q': return true;
-					default: blocked = true; break;
-					}
+				case 'B': return true;
+				case 'Q': return true;
+				default: blocked = true; break;
 				}
 			}
-			else
-			{
+			if (blocked)
 				break;
-			}
-			if (blocked) break;
 		}
 	}
+
+	// check if there's a rook or a queen
 	for (auto& d : dir_rook)
 	{
 		bool blocked = false;
 		for (int i = 1; i < 9; i++)
 		{
 			pt2di cell = king_pos + d * i;
-			if (inBounds(cell))
+			if (!inBounds(cell))
+				break;
+
+			if (!isEmptyCell(cell))
 			{
-				if (!isEmptyCell(cell))
+				char piece = GetCopiedCell(cell.x, cell.y) * enemy_team_mod;
+				switch (piece)
 				{
-					char piece = GetCopiedCell(cell.x, cell.y) * enemy_team_mod;
-					switch (piece)
-					{
-					case 'R': return true;
-					case 'Q': return true;
-					default: blocked = true; break;
-					}
+				case 'R': return true;
+				case 'Q': return true;
+				default: blocked = true; break;
 				}
 			}
-			else
-			{
+			if (blocked)
 				break;
-			}
-			if (blocked) break;
 		}
 	}
+
+	// check if there's a knight
 	for (auto& d : dir_knight)
 	{
 		pt2di cell = king_pos + d;
@@ -273,6 +287,8 @@ bool Player::IsHypotheticalCheck() const
 			}
 		}
 	}
+
+	// check if there's a king
 	for (auto& d : dir_king)
 	{
 		pt2di cell = king_pos + d;
@@ -286,6 +302,8 @@ bool Player::IsHypotheticalCheck() const
 			}
 		}
 	}
+
+	// check if there's a pawn
 	for (auto& d : dir_pawn)
 	{
 		pt2di cell = king_pos + d * enemy_team_mod;

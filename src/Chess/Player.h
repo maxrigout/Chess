@@ -24,6 +24,7 @@ public:
 	virtual ~Player();
 	virtual void Play(const PlayingContext& context) = 0;
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
+	std::string GetCopyAsString() const;
 	void UpdatePieces(float dt);
 	void CalculateMoves();
 	Piece* GetPieceAtPosition(const pt2di& position);

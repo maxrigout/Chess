@@ -36,20 +36,6 @@ void AIPlayer::Play(const PlayingContext& context)
 	EndTurn();
 }
 
-// std::string AIPlayer::PrintCopy()
-// {
-// 	std::string out("");
-// 	for (int j = 0; j < pBoard->GetHeight(); j++)
-// 	{
-// 		for (int i = 0; i < pBoard->GetWidth(); i++)
-// 		{
-// 			out += board_copy[i][j];
-// 		}
-// 		out += '\n';
-// 	}
-// 	return out;
-// }
-
 Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
 {
 	int max_score = std::numeric_limits<int>::min();

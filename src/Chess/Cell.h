@@ -11,20 +11,20 @@ public:
 	Cell() = default;
 	~Cell() = default;
 
-	bool PlacePiece(Piece *p);
-	bool RemovePiece();
-	bool CaptureCell();
+	void PlacePiece(Piece *p);
+	void RemovePiece();
+	void CaptureCell();
 	bool HasPiece() const { return (piece != nullptr); }
 	bool IsEmpty() const { return (piece == nullptr); }
 	bool IsSameTeam(TEAM t) const;
 	Piece* GetPiece() const { return piece; }
-	point2d<int> GetCoordinates() const { return coordinates; }
+	const pt2di& GetCoordinates() const { return coordinates; }
 	bool IsAttacked() { return m_attack != TEAM::NONE; }
 	void Attack(TEAM t) { m_attack = t; }
 	void ResetAttacked() { m_attack = TEAM::NONE; }
 
 protected:
-	point2d<int> coordinates;
+	pt2di coordinates;
 	Piece* piece = nullptr;
 	TEAM m_attack = TEAM::NONE;
 

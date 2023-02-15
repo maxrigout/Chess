@@ -109,6 +109,7 @@ void Board::DrawCells(const Renderer2D* renderer) const
 		{
 			Color color = ((i + j) % 2 == 0) ? EVEN_CELL_COLOR : ODD_CELL_COLOR;
 			renderer->FillRect({ i * cell.w, j * cell.h }, cell, color);
+			// if we want to draw the cells that are attacked
 			// if (m_cells[j * m_width + i].IsGuarded())
 			// 	HighlightCell(renderer, {i, j}, {15, 15}, RED);
 			// 	DrawSelectedCell(renderer, {i, j}, 5, DARK_BLUE);
@@ -182,6 +183,7 @@ std::string Board::GetBoardCoordinates(const pt2di& position) const
 {
 	if (!IsPositionValid(position))
 		return "";
+
 	char column = 'a' + position.x;
 	std::string boardCoords = column + std::to_string(m_height - position.y);
 	return boardCoords;
