@@ -14,19 +14,19 @@ public:
 	void PlacePiece(Piece *p);
 	void RemovePiece();
 	void CaptureCell();
-	bool HasPiece() const { return (piece != nullptr); }
-	bool IsEmpty() const { return (piece == nullptr); }
+	bool HasPiece() const { return (m_piece != nullptr); }
+	bool IsEmpty() const { return (m_piece == nullptr); }
 	bool IsSameTeam(TEAM t) const;
-	Piece* GetPiece() const { return piece; }
-	const pt2di& GetCoordinates() const { return coordinates; }
-	bool IsAttacked() { return m_attack != TEAM::NONE; }
-	void Attack(TEAM t) { m_attack = t; }
-	void ResetAttacked() { m_attack = TEAM::NONE; }
+	Piece* GetPiece() const { return m_piece; }
+	const pt2di& GetCoordinates() const { return m_coordinates; }
+	bool IsAttacked() const { return m_attackedBy != TEAM::NONE; }
+	void Attack(TEAM t) { m_attackedBy = t; }
+	void ResetAttacked() { m_attackedBy = TEAM::NONE; }
 
 protected:
-	pt2di coordinates;
-	Piece* piece = nullptr;
-	TEAM m_attack = TEAM::NONE;
+	pt2di m_coordinates;
+	Piece* m_piece = nullptr;
+	TEAM m_attackedBy = TEAM::NONE;
 
 	friend class Board;
 };

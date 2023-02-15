@@ -10,7 +10,7 @@ Board::Board(int width, int height)
 	{
 		for (int y = 0; y < height; ++y)
 		{
-			m_cells[y * width + x].coordinates = { x, y };
+			m_cells[y * width + x].m_coordinates = { x, y };
 		}
 	}
 }

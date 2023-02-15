@@ -3,24 +3,24 @@
 
 void Cell::PlacePiece(Piece* p)
 {
-	piece = p;
+	m_piece = p;
 }
 void Cell::RemovePiece()
 {
-	piece = nullptr;
+	m_piece = nullptr;
 }
 bool Cell::IsSameTeam(TEAM t) const
 {
-	if (piece == nullptr)
+	if (m_piece == nullptr)
 		return true;
 
-	return (piece->IsSameTeam(t));
+	return (m_piece->IsSameTeam(t));
 }
 void Cell::CaptureCell()
 {
-	if (piece == nullptr)
+	if (m_piece == nullptr)
 		return;
 
-	piece->CapturePiece();
-	piece = nullptr;
+	m_piece->CapturePiece();
+	m_piece = nullptr;
 }

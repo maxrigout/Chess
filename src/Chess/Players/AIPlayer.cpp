@@ -30,9 +30,9 @@ void AIPlayer::Play(const PlayingContext& context)
 
 	Move move = GetBestMove(possibleMoves);
 	Piece* pieceToMove = move.piece;
-	lastMoveStart = pieceToMove->Pos();
+	m_lastMoveStart = pieceToMove->Pos();
 	pieceToMove->Move(move.target);
-	lastMoveEnd = pieceToMove->Pos();
+	m_lastMoveEnd = pieceToMove->Pos();
 	EndTurn();
 }
 
@@ -115,5 +115,5 @@ int AIPlayer::GetPieceValue(char type) const
 
 void AIPlayer::DrawLastMove(const Renderer2D* renderer) const
 {
-	renderer->DrawArrow(lastMoveStart, lastMoveEnd, MAGENTA);
+	renderer->DrawArrow(m_lastMoveStart, m_lastMoveEnd, MAGENTA);
 }

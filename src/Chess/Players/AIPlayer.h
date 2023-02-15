@@ -23,8 +23,8 @@ public:
 	int GetPieceValue(char type) const;
 
 private:
-	int boardScore;
+	int m_boardScore;
 
-	pt2di lastMoveStart{};
-	pt2di lastMoveEnd{};
+	pt2di m_lastMoveStart{};
+	pt2di m_lastMoveEnd{};
 };

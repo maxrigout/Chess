@@ -173,11 +173,6 @@ bool Player::IsCheck() const
 	return m_pBoard->GetCell(kingPosition)->IsAttacked();
 }
 
-// bool Player::IsHypotheticalCheck() const
-// {
-
-// }
-
 bool Player::IsHypotheticalCheck() const
 {
 	pt2di king_pos;
