@@ -109,9 +109,9 @@ void Board::DrawCells(const Renderer2D* renderer) const
 		{
 			Color color = ((i + j) % 2 == 0) ? EVEN_CELL_COLOR : ODD_CELL_COLOR;
 			renderer->FillRect({ i * cell.w, j * cell.h }, cell, color);
-			if (m_cells[j * m_width + i].IsGuarded())
-				HighlightCell(renderer, {i, j}, {15, 15}, RED);
-				// DrawSelectedCell(renderer, {i, j}, 5, DARK_BLUE);
+			// if (m_cells[j * m_width + i].IsGuarded())
+			// 	HighlightCell(renderer, {i, j}, {15, 15}, RED);
+			// 	DrawSelectedCell(renderer, {i, j}, 5, DARK_BLUE);
 		}
 	}
 }

@@ -3,6 +3,12 @@
 #include <iostream>
 #include <string>
 
+int GenerateUniquePieceId()
+{
+	static int id = 0;
+	return id++;
+}
+
 Piece::Piece(Board* pBoard, char type, TEAM team, const pt2di& initialBoardPosition, const std::vector<vec2di>& moves)
 {
 	m_isFirstMove = true;
@@ -13,6 +19,7 @@ Piece::Piece(Board* pBoard, char type, TEAM team, const pt2di& initialBoardPosit
 	m_boardPosition = initialBoardPosition;
 	m_pieceType = type;
 	m_moves = moves;
+	m_id = GenerateUniquePieceId();
 
 	m_screenPosition = m_pBoard->BoardToWindowCoordinates(m_boardPosition);
 	m_targetScreenPosition = m_screenPosition;

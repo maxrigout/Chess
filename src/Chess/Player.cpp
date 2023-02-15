@@ -81,11 +81,11 @@ void Player::CalculateMoves()
 		{
 			char old_cell = TestMove(move);
 			// if the move take the king out of check
-			if (!IsCheck())
+			if (!IsHypotheticalCheck())
 			{
 				m_legalMoves.push_back(move);
 				move.piece->AddAvailableMove(move.target);
-			}
+			}	
 			// undo the move
 			UndoMove(move, old_cell);
 		}
@@ -160,7 +160,12 @@ bool Player::IsCheck() const
 	return m_pBoard->GetCell(kingPosition)->IsGuarded();
 }
 
-bool Player::IsCheck2() const
+// bool Player::IsHypotheticalCheck() const
+// {
+
+// }
+
+bool Player::IsHypotheticalCheck() const
 {
 	pt2di king_pos;
 	int team_mod = m_king->GetMod(m_team);
@@ -188,11 +193,11 @@ bool Player::IsCheck2() const
 		}
 	}
 
-	auto inBounds = [&](pt2di c)
+	auto inBounds = [&](const pt2di& c)
 	{
 		return (c.x >= 0 && c.x < m_pBoard->GetWidth() && c.y >= 0 && c.y < m_pBoard->GetHeight());
 	};
-	auto isEmptyCell = [&](pt2di c)
+	auto isEmptyCell = [&](const pt2di& c)
 	{
 		return (GetCopiedCell(c.x, c.y) == COPY_EMPTY_CELL);
 	};
@@ -347,10 +352,22 @@ std::vector<Move> Player::GetPossibleMoves()
 	{
 		if (!piece->IsCaptured())
 		{
+			// make sure we copy the available moves because we're resetting it after
 			std::vector<pt2di> availableMoves = piece->GetAvailableMoves();
+			piece->ResetAvailableMoves();
 			for (const auto& move : availableMoves)
 			{
-				possibleMoves.push_back({ piece, move });
+				// verify the move won't put yourself in check
+				Move m = { piece, move };
+				char old_cell = TestMove(m);
+				// if the move take the king out of check
+				if (!IsHypotheticalCheck())
+				{
+					piece->AddAvailableMove(m.target);
+					possibleMoves.push_back(m);
+				}
+				// undo the move
+				UndoMove(m, old_cell);
 			}
 		}
 	}
@@ -374,26 +391,25 @@ void Player::SelectPiece(const pt2di& position)
 
 MoveInfo Player::MoveSelectedPiece(const pt2di& position)
 {
-	// TODO: verify the move performed won't cause your own king in "check"
-	if (!IsMoveLegal(position))
+	if (!IsMoveLegal(m_selectedPiece, position))
 		return { MoveInfo::INVALID_MOVE };
+
 	// we don't want to move the piece if the move is invalid
 	if (!m_selectedPiece->IsMoveValid(position))
-	{
 		return { MoveInfo::INVALID_MOVE };
-	}
+
 	m_selectedPiece->Move(position); // move the piece
-	m_selectedPiece = nullptr;
+	m_selectedPiece = nullptr; // deselect the piece
 	EndTurn();// end the current player's turn and allow the other player to play
 
 	return { MoveInfo::NONE };
 }
 
-bool Player::IsMoveLegal(const pt2di& target) const
+bool Player::IsMoveLegal(const Piece* piece, const pt2di& target) const
 {
 	for (const auto& move : m_legalMoves)
 	{
-		if (move.target == target)
+		if (move.target == target && move.piece->GetId() == piece->GetId())
 			return true;
 	}
 	return false;

@@ -33,7 +33,8 @@ public:
 	int GetMod(TEAM team) const { return ((IsSameTeam(team)) ? 1 : -1); }
 	const std::vector<pt2di>& GetAvailableMoves();
 	void ResetAvailableMoves();
-	void AddAvailableMove(const pt2di& move); // only used when the king is in check
+	void AddAvailableMove(const pt2di& move); // used by the player to control which moves are available to the piece
+	int GetId() const { return m_id; }
 
 private:
 
@@ -48,6 +49,7 @@ protected:
 	bool m_isCaptured;
 	bool m_isFirstMove;
 	bool m_isMovesCalculated;
+	int m_id;
 
 	pt2df m_screenPosition;
 	pt2df m_targetScreenPosition;
