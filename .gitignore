@@ -4,3 +4,8 @@ fonts/
 *.dSYM
 **/.DS_Store
 .DS_Store
+
+.vs/
+bin/
+obj/
+*.dll
