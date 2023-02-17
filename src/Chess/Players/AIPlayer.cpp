@@ -6,7 +6,7 @@
 #include "Chess/Pieces/Queen.h"
 #include "Chess/Pieces/King.h"
 
-#include <iostream>
+#include "DebugLogger.h"
 
 AIPlayer::AIPlayer(Board* board, TEAM team, int king_row)
 	: Player(board, team, king_row)
@@ -43,8 +43,11 @@ std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
 	std::vector<Move> bestMoves;
 	for (auto& move : moves)
 	{
-		char old_cell = TestMove(move);
-		int score = m_king->GetMod(m_team) * EvaluateBoard();
+		// char old_cell = TestMove(move);
+		// int score = m_king->GetMod(m_team) * EvaluateBoard();
+		TestMove2(move);
+		int score = m_king->GetMod(m_team) * EvaluateBoard2();
+		// std::cout << "(" << EvaluateBoard2() << ") - (" << EvaluateBoard() << ")" << std::endl;
 		// std::cout << "evaluating: " << move.piece->Type() << " to " << m_pBoard->GetBoardCoordinates(move.target) << " score: " << score << '\n';
 		
 		// TODO: calculate the opponent's moves
@@ -61,12 +64,38 @@ std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
 		{
 			bestMoves.push_back(move);
 		}
-		UndoMove(move, old_cell);
+		// UndoMove(move, old_cell);
+		UndoMove2();
 	}
 	// pick a random from the best moves
 	return bestMoves;
 }
 
+void AIPlayer::TestMove2(const Move& move)
+{
+	m_movesStack.push(move);
+	move.piece->Move(move.target);
+}
+void AIPlayer::UndoMove2()
+{
+	Move lastMove = m_movesStack.top();
+	m_movesStack.pop();
+	Piece* movedPiece = lastMove.piece;
+	std::cout << "undoing moving " << movedPiece->Type() << " from " << m_pBoard->GetBoardCoordinates(lastMove.target) << " to " << m_pBoard->GetBoardCoordinates(lastMove.origin) << std::endl;
+	if (movedPiece->Pos() != lastMove.target)
+		LOG_DEBUG("an error might have occured");
+
+	movedPiece->Move(lastMove.origin);
+
+	Piece* capturedPiece = lastMove.capturedPiece;
+	if (capturedPiece != nullptr)
+	{
+		std::cout << "resetting captured piece: " << capturedPiece->Type() << " at " << m_pBoard->GetBoardCoordinates(lastMove.target) << std::endl;
+		capturedPiece->ResetCaptured();
+		m_pBoard->GetCell(lastMove.target)->PlacePiece(capturedPiece);
+	}
+}
+	
 
 int AIPlayer::EvaluateBoard() const
 {
@@ -81,11 +110,24 @@ int AIPlayer::EvaluateBoard() const
 	return out;
 }
 
-int AIPlayer::GetPiecePoints(Piece* p) const
+int AIPlayer::EvaluateBoard2() const
 {
-	if (p == nullptr)
+	int out = 0;
+	for (int i = 0; i < m_pBoard->GetWidth(); i++)
+	{
+		for (int j = 0; j < m_pBoard->GetHeight(); j++)
+		{
+			out += GetPieceValue(m_pBoard->GetCell({ i, j })->GetPiece());
+		}
+	}
+	return out;
+}
+
+int AIPlayer::GetPiecePoints(Piece* piece) const
+{
+	if (piece == nullptr)
 		return 0;
-	return GetPiecePoints(p->Type());
+	return GetPiecePoints(piece->Type());
 }
 
 int AIPlayer::GetPiecePoints(char type) const
@@ -102,17 +144,14 @@ int AIPlayer::GetPiecePoints(char type) const
 	return 0;
 }
 
-int AIPlayer::GetPieceValue(Piece* p) const
+int AIPlayer::GetPieceValue(Piece* piece) const
 {
+	if (piece == nullptr)
+		return 0;
 	int mod = 1;
-	if (p != nullptr)
-	{
-		if (p->IsSameTeam(m_team))
-		{
-			mod = -1;
-		}
-	}
-	return mod * GetPiecePoints(p);
+	if (!piece->IsSameTeam(m_team))
+		mod = -1;
+	return mod * GetPiecePoints(piece->Type());
 }
 
 int AIPlayer::GetPieceValue(char type) const

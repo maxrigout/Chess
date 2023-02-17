@@ -64,29 +64,26 @@ void Piece::Move(const pt2di& target)
 {
 	Cell* oldcell = m_pBoard->GetCell(m_boardPosition);
 	Cell* newcell = m_pBoard->GetCell(target);
-	if (oldcell != nullptr && newcell != nullptr)
-	{
-		m_boardPosition = target;
-		oldcell->RemovePiece();
-		newcell->CaptureCell();
-		newcell->PlacePiece(this);
-		m_targetScreenPosition = m_pBoard->BoardToWindowCoordinates(target);
-		std::cout << "Moved " << m_pieceType << " from " << m_pBoard->GetBoardCoordinates(oldcell->GetCoordinates()) << " to " << m_pBoard->GetBoardCoordinates(newcell->GetCoordinates()) << std::endl;
-	}
-	if (m_isFirstMove)
-	{
-		m_isFirstMove = false;
-	}
+	if (oldcell == nullptr || newcell == nullptr)
+		return;
+
+	m_boardPosition = target;
+	oldcell->RemovePiece();
+	newcell->CaptureCell();
+	newcell->PlacePiece(this);
+	m_targetScreenPosition = m_pBoard->BoardToWindowCoordinates(target);
+	std::cout << "Moved " << m_pieceType << " from " << m_pBoard->GetBoardCoordinates(oldcell->GetCoordinates()) << " to " << m_pBoard->GetBoardCoordinates(newcell->GetCoordinates()) << std::endl;
+	m_isFirstMove = false;
 }
 
-bool Piece::CapturePiece()
+void Piece::Capture()
 {
-	if (!m_isCaptured)
-	{
-		m_isCaptured = true;
-		return true;
-	}
-	return false;
+	m_isCaptured = true;
+}
+
+void Piece::ResetCaptured()
+{
+	m_isCaptured = false;
 }
 
 const std::vector<pt2di>& Piece::GetAvailableMoves()

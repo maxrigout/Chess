@@ -30,6 +30,6 @@ void Cell::CaptureCell()
 	if (m_piece == nullptr)
 		return;
 
-	m_piece->CapturePiece();
+	m_piece->Capture();
 	m_piece = nullptr;
 }

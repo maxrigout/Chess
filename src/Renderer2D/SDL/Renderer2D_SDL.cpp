@@ -136,29 +136,45 @@ void Renderer2D_SDL::DrawText(const pt2di& position, const std::string& text, co
 	SDL_DestroyTexture(message);
 }
 
+void Renderer2D_SDL::DrawText(const pt2di& topLeft, const pt2di& dims, const std::string& text, const Color& color) const
+{
+	SetRenderDrawColor(color);
+	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(defaultFont, text.c_str(), toSDL_Color(color));
+	SDL_Texture* message = SDL_CreateTextureFromSurface(m_renderer, surfaceMessage);
+	// SDL_Rect dest{ topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y };
+	SDL_Rect dest{ topLeft.x, topLeft.y, dims.x, dims.y };
+
+	SDL_RenderCopy(m_renderer, message, NULL, &dest);
+
+	// TODO: store the text in a map
+	SDL_FreeSurface(surfaceMessage);
+	SDL_DestroyTexture(message);
+}
+
 void Renderer2D_SDL::DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const
 {
-	double percent_head = 0.8;
-	double head_width = 3000.0;
-	pt2di head_left, head_right;
-	double ss_x = start.x * m_cellDim.w + m_cellDim.w * 0.5f;
-	double ss_y = start.y * m_cellDim.h + m_cellDim.h * 0.5f;
-	double se_x = end.x * m_cellDim.w + m_cellDim.w * 0.5f;
-	double se_y = end.y * m_cellDim.h + m_cellDim.h * 0.5f;
-	pt2df screenStart(ss_x, ss_y), screenEnd(se_x, se_y);
-	auto PointOnLine = [&](double t)
-	{
-		double x = ss_x * (1.0 - t) + se_x * t;
-		double y = ss_y * (1.0 - t) + se_y * t;
-		return pt2df(x, y);
-	};
+	const double headBaseSize = 30.0;
+	const double headHeight = 30.0;
+	pt2dd screenStart(start.x * m_cellDim.w + m_cellDim.w / 2, start.y * m_cellDim.h + m_cellDim.h / 2), 
+		screenEnd(end.x * m_cellDim.w + m_cellDim.w / 2, end.y * m_cellDim.h + m_cellDim.h / 2);
+	vec2dd arrowVector = screenEnd - screenStart;
+	vec2dd arrowDir = arrowVector / arrowVector.Norm();
+	// go back by headHeight units:
+	pt2dd arrowBase = screenEnd - (arrowDir * headHeight);
+	// rotate by 90 degrees
+	/*
+	(cos, -sin) -> (0, -1)
+	(sin,  cos)    (1,  0)
+	*/
+	vec2dd headBaseDir = { -arrowDir.y, arrowDir.x };
+	// move by headBaseSize units
+	pt2di left = arrowBase + headBaseDir * headBaseSize / 2;
+	pt2di right = arrowBase - headBaseDir * headBaseSize / 2;
 
-	head_left = PointOnLine(percent_head) + ((screenEnd - screenStart).Normalize().Rotate90() * head_width);
-	head_right = PointOnLine(percent_head) + ((screenEnd - screenStart).Normalize().Rotate270() * head_width);
-
-	DrawLine({ ss_x, ss_y }, { se_x, se_y }, color);
-	DrawLine({ se_x, se_y} , { head_left.x, head_left.y }, color);
-	DrawLine({ se_x, se_y} , { head_right.x, head_right.y }, color);
+	SetRenderDrawColor(color);
+	SDL_RenderDrawLine(m_renderer, screenStart.x, screenStart.y, screenEnd.x, screenEnd.y);
+	SDL_RenderDrawLine(m_renderer, screenEnd.x, screenEnd.y, left.x, left.y);
+	SDL_RenderDrawLine(m_renderer, screenEnd.x, screenEnd.y, right.x, right.y);
 }
 
 const vec2di& Renderer2D_SDL::GetWindowDim() const

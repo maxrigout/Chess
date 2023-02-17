@@ -233,6 +233,8 @@ void Game::Render()
 	// draw the selected piece's moves
 	m_pActivePlayer->DrawSelectedPieceMoves(m_pRenderer);
 
+	m_pBoard->DrawCellLabels(m_pRenderer, DARK_GREY);
+
 	m_pPlayer1->DrawPieces(m_pRenderer);
 	m_pPlayer2->DrawPieces(m_pRenderer);
 
@@ -263,11 +265,13 @@ void Game::SwitchPlayers()
 
 	// switch players
 	player = (player + 1) % 2;
-	std::cout << "player " << player << "'s turn\n";
 	if (player == 0)
 		m_pActivePlayer = m_pPlayer1;
 	else
 		m_pActivePlayer = m_pPlayer2;
 	m_pActivePlayer->BeginTurn();
 	m_activeTeam = m_pActivePlayer->GetTeam();
+	if (m_pActivePlayer->IsCheckMate())
+		std::cout << "checkmate\n";
+	std::cout << "player " << player << "'s turn\n";
 }

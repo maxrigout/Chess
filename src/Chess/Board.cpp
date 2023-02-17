@@ -131,6 +131,21 @@ void Board::DrawCells(const Renderer2D* renderer) const
 	}
 }
 
+void Board::DrawCellLabels(const Renderer2D* renderer, const Color& color) const
+{
+	renderer->DrawText({ 0 , 0 }, { 15, 15 }, GetBoardCoordinates({ 0, 0 }), color);
+	for (int i = 1; i < m_width; ++i)
+	{
+		// draw the letter
+		renderer->DrawText({ renderer->GetCellDim().x * i , 0 }, { 8, 15 }, { (char)('a' + i), '\0' }, color);
+	}
+	for (int j = 1; j < m_height; ++j)
+	{
+		// draw the number
+		renderer->DrawText({ 0 , j * renderer->GetCellDim().y }, { 8, 15 }, std::to_string(m_height - j), color);
+	}
+}
+
 void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width, const Color& color) const
 {
 	if (!IsPositionValid(cellPos))

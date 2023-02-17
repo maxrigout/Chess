@@ -5,6 +5,7 @@
 #include "Chess/Common.h"
 
 #include <vector>
+#include <stack>
 
 class AIPlayer : public Player
 {
@@ -23,8 +24,14 @@ private:
 	int GetPieceValue(Piece* p) const;
 	int GetPieceValue(char type) const;
 
+	void TestMove2(const Move& move);
+	void UndoMove2();
+	int EvaluateBoard2() const;
+
 	int m_boardScore;
 
 	pt2di m_lastMoveStart{};
 	pt2di m_lastMoveEnd{};
+
+	std::stack<Move> m_movesStack;
 };

@@ -27,7 +27,8 @@ public:
 	bool IsSameTeam(TEAM t) const { return (m_team == t); }
 	bool HasMoved() const { return !m_isFirstMove; }
 	bool IsCaptured() const { return m_isCaptured; }
-	bool CapturePiece();
+	void Capture();
+	void ResetCaptured();
 	const pt2di& Pos() const { return m_boardPosition; }
 	char Type() const { return m_pieceType; }
 	int GetMod(TEAM team) const { return ((IsSameTeam(team)) ? 1 : -1); }

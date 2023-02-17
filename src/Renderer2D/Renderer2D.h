@@ -55,6 +55,7 @@ public:
 	virtual void FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const = 0;
 	virtual void DrawLine(const pt2di& start, const pt2di& end, const Color& color) const = 0;
 	virtual void DrawText(const pt2di& position, const std::string& text, const Color& color) const = 0;
+	virtual void DrawText(const pt2di& topLeft, const pt2di& bottomRight, const std::string& text, const Color& color) const = 0;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const = 0;
 
 	virtual const vec2di& GetWindowDim() const = 0;

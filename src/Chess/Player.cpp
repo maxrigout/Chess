@@ -381,19 +381,21 @@ std::vector<Move> Player::GetPossibleMoves()
 		// make sure we copy the available moves because we're resetting it after
 		std::vector<pt2di> availableMoves = piece->GetAvailableMoves();
 		piece->ResetAvailableMoves();
-		for (const auto& move : availableMoves)
+		for (const auto& availableMove : availableMoves)
 		{
 			// verify the move won't put yourself in check
-			Move m = { piece, move };
-			char old_cell = TestMove(m);
+			Move move = { piece, availableMove, piece->Pos(), nullptr };
+			char old_cell = TestMove(move);
 			// if the move take the king out of check
 			if (!IsHypotheticalCheck())
 			{
-				piece->AddAvailableMove(m.target);
-				possibleMoves.push_back(m);
+				if (m_pBoard->GetCell(move.target)->HasPiece())
+					move.capturedPiece = m_pBoard->GetCell(move.target)->GetPiece();
+				piece->AddAvailableMove(move.target);
+				possibleMoves.push_back(move);
 			}
 			// undo the move
-			UndoMove(m, old_cell);
+			UndoMove(move, old_cell);
 		}
 	}
 	return possibleMoves;

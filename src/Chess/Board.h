@@ -39,6 +39,7 @@ public:
 	void DrawCells(const Renderer2D* renderer) const;
 	void DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, int width, const Color& color) const;
 	void HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, const pt2di& padding = {0, 0}, const Color& color = YELLOW) const;
+	void DrawCellLabels(const Renderer2D* renderer, const Color& color) const;
 	
 	std::string GetBoardCoordinates(const pt2di& position) const;
 

@@ -37,4 +37,5 @@ struct Move
 	Piece* piece;
 	pt2di target;
 	pt2di origin;
+	Piece* capturedPiece;
 };
