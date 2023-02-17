@@ -50,7 +50,7 @@ Custom chess engine, using SDL.
 * Open the project in VS Code.
 * Go to Terminal > Run Build Task to build the project.
 
-### Windows (with Visual Studio)
+### Windows (with Visual Studio 2022)
 * Copy the SDL2 and SDL2_ttf headers inside "deps/include/SDL2" and "deps/include/SDL2_ttf" respectively.
 * Add the following .lib files to the deps/libraries folder:
     * SDL2.lib
