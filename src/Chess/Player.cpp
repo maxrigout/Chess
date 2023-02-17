@@ -363,25 +363,25 @@ std::vector<Move> Player::GetPossibleMoves()
 	std::cout << "calculating moves\n";
 	for (const auto& piece : m_pieces)
 	{
-		if (!piece->IsCaptured())
+		if (piece->IsCaptured())
+			continue;
+
+		// make sure we copy the available moves because we're resetting it after
+		std::vector<pt2di> availableMoves = piece->GetAvailableMoves();
+		piece->ResetAvailableMoves();
+		for (const auto& move : availableMoves)
 		{
-			// make sure we copy the available moves because we're resetting it after
-			std::vector<pt2di> availableMoves = piece->GetAvailableMoves();
-			piece->ResetAvailableMoves();
-			for (const auto& move : availableMoves)
+			// verify the move won't put yourself in check
+			Move m = { piece, move };
+			char old_cell = TestMove(m);
+			// if the move take the king out of check
+			if (!IsHypotheticalCheck())
 			{
-				// verify the move won't put yourself in check
-				Move m = { piece, move };
-				char old_cell = TestMove(m);
-				// if the move take the king out of check
-				if (!IsHypotheticalCheck())
-				{
-					piece->AddAvailableMove(m.target);
-					possibleMoves.push_back(m);
-				}
-				// undo the move
-				UndoMove(m, old_cell);
+				piece->AddAvailableMove(m.target);
+				possibleMoves.push_back(m);
 			}
+			// undo the move
+			UndoMove(m, old_cell);
 		}
 	}
 	return possibleMoves;
