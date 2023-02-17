@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Math/point2d.h"
-#define COPY_EMPTY_CELL 'z'
+#define COPY_EMPTY_CELL '.'
 
 class Piece;
 

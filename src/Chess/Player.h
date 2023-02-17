@@ -24,16 +24,16 @@ public:
 	virtual ~Player();
 	virtual void Play(const PlayingContext& context) = 0;
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
-	std::string GetCopyAsString() const;
 	void UpdatePieces(float dt);
+	bool HasEndedTurn() const { return m_hasTurnEnded; }
+	void BeginTurn() { m_hasTurnEnded = false; CalculateMoves(); }
+	std::string GetCopyAsString() const;
 	void CalculateMoves();
 	Piece* GetPieceAtPosition(const pt2di& position);
 	void DrawPieces(const Renderer2D* renderer) const;
 	void DrawSelectedPieceMoves(const Renderer2D* renderer) const;
 	void AttackCells();
 	TEAM GetTeam() const { return m_team; }
-	bool HasEndedTurn() const { return m_hasTurnEnded; }
-	void BeginTurn() { m_hasTurnEnded = false; CalculateMoves(); }
 	King* GetKing() { return m_king; }
 	void CopyBoard();
 	bool IsCheck() const;

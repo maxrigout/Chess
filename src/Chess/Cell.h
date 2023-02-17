@@ -9,6 +9,7 @@ class Cell
 {
 public:
 	Cell() = default;
+	Cell(const Cell& other);
 	~Cell() = default;
 
 	void PlacePiece(Piece *p);

@@ -19,7 +19,7 @@ AIPlayer::~AIPlayer() = default;
 void AIPlayer::Play(const PlayingContext& context)
 {
 	CopyBoard();
-	//std::cout << PrintCopy();
+	std::cout << GetCopyAsString();
 	std::vector<Move> possibleMoves = GetPossibleMoves();
 
 	// RandomPlay
@@ -28,7 +28,8 @@ void AIPlayer::Play(const PlayingContext& context)
 	//possibleMoves[r].p->Move(possibleMoves[r].target);
 	//pGame->arrow_end = possibleMoves[r].p->Pos();
 
-	Move move = GetBestMove(possibleMoves);
+	std::vector<Move> bestMoves = GetBestMove(possibleMoves);
+	Move move = bestMoves[rand() % bestMoves.size()];
 	Piece* pieceToMove = move.piece;
 	m_lastMoveStart = pieceToMove->Pos();
 	pieceToMove->Move(move.target);
@@ -36,7 +37,7 @@ void AIPlayer::Play(const PlayingContext& context)
 	EndTurn();
 }
 
-Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
+std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
 {
 	int max_score = std::numeric_limits<int>::min();
 	std::vector<Move> bestMoves;
@@ -44,7 +45,11 @@ Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
 	{
 		char old_cell = TestMove(move);
 		int score = m_king->GetMod(m_team) * EvaluateBoard();
-		std::cout << "evaluating: " << move.piece->Type() << " to " << m_pBoard->GetBoardCoordinates(move.target) << " score: " << score << '\n';
+		// std::cout << "evaluating: " << move.piece->Type() << " to " << m_pBoard->GetBoardCoordinates(move.target) << " score: " << score << '\n';
+		
+		// TODO: calculate the opponent's moves
+		// call GetBestMove(opponent's moves)
+		
 		if (score > max_score)
 		{
 			bestMoves.clear();
@@ -59,8 +64,9 @@ Move AIPlayer::GetBestMove(const std::vector<Move>& moves)
 		UndoMove(move, old_cell);
 	}
 	// pick a random from the best moves
-	return bestMoves[rand() % bestMoves.size()];
+	return bestMoves;
 }
+
 
 int AIPlayer::EvaluateBoard() const
 {
@@ -74,12 +80,14 @@ int AIPlayer::EvaluateBoard() const
 	}
 	return out;
 }
+
 int AIPlayer::GetPiecePoints(Piece* p) const
 {
 	if (p == nullptr)
 		return 0;
 	return GetPiecePoints(p->Type());
 }
+
 int AIPlayer::GetPiecePoints(char type) const
 {
 	switch (type)
@@ -90,10 +98,10 @@ int AIPlayer::GetPiecePoints(char type) const
 	case 'R': return 50;
 	case 'Q': return 90;
 	case 'K': return 900;
-	default: return 0;
 	}
 	return 0;
 }
+
 int AIPlayer::GetPieceValue(Piece* p) const
 {
 	int mod = 1;
@@ -106,6 +114,7 @@ int AIPlayer::GetPieceValue(Piece* p) const
 	}
 	return mod * GetPiecePoints(p);
 }
+
 int AIPlayer::GetPieceValue(char type) const
 {
 	int val = (int)type;

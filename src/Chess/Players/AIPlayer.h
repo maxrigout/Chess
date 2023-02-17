@@ -13,16 +13,16 @@ public:
 	virtual ~AIPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
-	std::string PrintCopy() const;
+
+private:
 	std::vector<Move> GetHypotheticalMoves();
 	int EvaluateBoard() const;
-	Move GetBestMove(const std::vector<Move>& moves);
+	std::vector<Move> GetBestMove(const std::vector<Move>& moves);
 	int GetPiecePoints(Piece* p) const;
 	int GetPiecePoints(char type) const;
 	int GetPieceValue(Piece* p) const;
 	int GetPieceValue(char type) const;
 
-private:
 	int m_boardScore;
 
 	pt2di m_lastMoveStart{};

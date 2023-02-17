@@ -16,6 +16,7 @@ class Board
 {
 public:
 	Board(int width, int height);
+	Board(const Board& other);
 	~Board();
 
 	int GetWidth() const { return m_width; }

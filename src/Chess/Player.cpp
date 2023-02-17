@@ -59,15 +59,27 @@ Player::~Player()
 
 std::string Player::GetCopyAsString() const
 {
-	std::string out("");
+	std::string out("+");
+	for (int i = 0; i < m_pBoard->GetWidth(); i++)
+	{
+		out += '-';
+	}
+	out += "+\n";
 	for (int j = 0; j < m_pBoard->GetHeight(); j++)
 	{
+		out += "|";
 		for (int i = 0; i < m_pBoard->GetWidth(); i++)
 		{
 			out += GetCopiedCell(i, j);
 		}
-		out += '\n';
+		out += "|\n";
 	}
+	out += '+';
+	for (int i = 0; i < m_pBoard->GetWidth(); i++)
+	{
+		out += '-';
+	}
+	out += "+\n";
 	return out;
 }
 

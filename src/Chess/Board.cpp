@@ -5,12 +5,26 @@ Board::Board(int width, int height)
 {
 	m_width = width;
 	m_height = height;
-	m_cells = new Cell[width * height];
-	for (int x = 0; x < width; ++x)
+	m_cells = new Cell[m_width * m_height];
+	for (int y = 0; y < m_height; ++y)
 	{
-		for (int y = 0; y < height; ++y)
+		for (int x = 0; x < m_width; ++x)
 		{
-			m_cells[y * width + x].m_coordinates = { x, y };
+			m_cells[y * m_width + x].m_coordinates = { x, y };
+		}
+	}
+}
+
+Board::Board(const Board& other)
+{
+	m_width = other.m_width;
+	m_height = other.m_height;
+	m_cells = new Cell[m_width * m_height];
+	for (int y = 0; y < m_height; ++y)
+	{
+		for (int x = 0; x < m_width; ++x)
+		{
+			m_cells[y * m_width + x] = Cell(other.m_cells[y * m_width + x]);
 		}
 	}
 }
@@ -110,7 +124,7 @@ void Board::DrawCells(const Renderer2D* renderer) const
 			Color color = ((i + j) % 2 == 0) ? EVEN_CELL_COLOR : ODD_CELL_COLOR;
 			renderer->FillRect({ i * cell.w, j * cell.h }, cell, color);
 			// if we want to draw the cells that are attacked
-			// if (m_cells[j * m_width + i].IsGuarded())
+			// if (m_cells[j * m_width + i].IsAttacked())
 			// 	HighlightCell(renderer, {i, j}, {15, 15}, RED);
 			// 	DrawSelectedCell(renderer, {i, j}, 5, DARK_BLUE);
 		}
