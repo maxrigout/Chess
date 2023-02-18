@@ -22,7 +22,7 @@ Renderer2D_SDL::Renderer2D_SDL(SDL_Renderer* renderer)
 	if (TTF_Init() < 0)
 		std::cout << "Error initializing SDL_ttf: " << TTF_GetError() << std::endl;
 
-	defaultFont = TTF_OpenFont("fonts/Vanilla Caramel.otf", 64);
+	defaultFont = TTF_OpenFont("resources/fonts/Vanilla Caramel.otf", 64);
 	// defaultFont = TTF_OpenFont("Fonts/VirtualNote.ttf", 64);
 	if (defaultFont == nullptr)
 	{

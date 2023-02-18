@@ -34,12 +34,18 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
    |-- includes
       | Contains all the 3rd party libraries used for linking
       |
+ |-- resources
+   |-- Contains all the resources needed to render the game
+   |
    |-- fonts
       | Contains all the fonts
       |
-   |-- src
-      | Contains all the source code for the project
+   |-- graphics
+      | Contains all the graphics
       |
+ |-- src
+   | Contains the source code for the project
+   |
 ```
 * Add a font to the fonts folder. (You might need to change the font that's loaded in src/Renderer2D/SDL/Renderer2D_SDL.cpp, line 25, wip)
 

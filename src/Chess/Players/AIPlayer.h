@@ -38,8 +38,8 @@ private:
 
 	int m_boardScore;
 
-	pt2di m_lastMoveStart{};
-	pt2di m_lastMoveEnd{};
+	pt2di m_lastMoveStart{-1, -1};
+	pt2di m_lastMoveEnd{-2, -2};
 
 	std::stack<Move> m_movesStack;
 
