@@ -1,5 +1,5 @@
 # Chess
-Custom chess engine, using SDL.
+Custom chess engine, using SDL. It features an AI using the Minimax algorithm with AlphaBeta pruning.
 
 ## Dependencies
 | Name | Url |
@@ -69,7 +69,7 @@ Custom chess engine, using SDL.
 - [x] Text (label for the pieces)
 - [x] AI (AlphaBeta)
 - [ ] Better graphics
-- [ ] Better AI
+- [x] Better AI
 - [ ] Window and input system
 - [ ] Setup script
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
