@@ -14,7 +14,11 @@ AIPlayer::AIPlayer(Board* board, TEAM team, int king_row)
 	srand(time(0));
 }
 
-AIPlayer::~AIPlayer() = default;
+AIPlayer::~AIPlayer()
+{
+	if (m_playThread.joinable())
+		m_playThread.join();
+}
 
 void AIPlayer::Play(const PlayingContext& context)
 {

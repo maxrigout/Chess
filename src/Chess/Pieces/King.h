@@ -13,5 +13,4 @@ public:
 	virtual void CalculateAvailableMoves() override;
 	
 	bool Check();
-	bool CheckMate();
 };

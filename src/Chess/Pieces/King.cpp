@@ -9,7 +9,7 @@ King::King(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
 bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 {
 	// if we're checking for an out of bounds cell
-	if (m_pBoard->IsPositionValid(target))
+	if (!m_pBoard->IsPositionValid(target))
 	{
 		info.reason = MoveInfo::INVALID_CELL;
 		return false;
@@ -181,58 +181,19 @@ void King::Move(const pt2di& target)
 bool King::CanAttack(const pt2di& target) const
 {
 	// if we're checking for an out of bounds cell
-	if (m_pBoard->IsPositionValid(target))
+	if (!m_pBoard->IsPositionValid(target))
 		return false;
-
-	vector2d<int> movevect(target - m_boardPosition);
 
 	// if we're checking against the current piece position
-	if (movevect.x == 0 && movevect.y == 0)
-	{
+	if (target == m_boardPosition)
 		return false;
-	}
 
-	for (const auto& m1 : m_moves)
-	{
-		if (movevect == m1)
-		{
-			Cell* target_cell = m_pBoard->GetCell(m_boardPosition + m1);
-			if (target_cell == nullptr)
-			{
-				return false;
-			}
-			else if (target_cell->HasPiece() && target_cell->IsSameTeam(m_team))
-			{
-				return true;
-			}
-			break;
-		}
-	}
-	return false;
+	return IsMoveValid(target);
 }
 
 bool King::Check()
 {
 	return m_pBoard->GetCell(m_boardPosition)->IsAttacked();
-}
-
-bool King::CheckMate()
-{
-	if (Check())
-	{
-		for (const auto& m : m_moves)
-		{
-			if (IsMoveValid(m_boardPosition+m) && !m_pBoard->GetCell(m_boardPosition + m)->IsAttacked())
-			{
-				return false;
-			}
-		}
-	}
-	else
-	{
-		return false;
-	}
-	return true;
 }
 
 void King::CalculateAvailableMoves()
