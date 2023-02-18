@@ -36,6 +36,8 @@ public:
 	void ResetAvailableMoves();
 	void AddAvailableMove(const pt2di& move); // used by the player to control which moves are available to the piece
 	int GetId() const { return m_id; }
+	bool IsFirstMove() { return m_isFirstMove; }
+	void ReseFirstMove() { m_isFirstMove = true; }
 
 private:
 

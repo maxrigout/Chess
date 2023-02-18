@@ -9,3 +9,5 @@ fonts/
 bin/
 obj/
 *.dll
+
+src/Utils/

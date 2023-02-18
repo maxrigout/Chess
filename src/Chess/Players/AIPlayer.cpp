@@ -18,6 +18,18 @@ AIPlayer::~AIPlayer() = default;
 
 void AIPlayer::Play(const PlayingContext& context)
 {
+	// create a thread is it's not playing
+	if (!m_isPlaying)
+	{
+		if (m_playThread.joinable())
+			m_playThread.join();
+		m_playThread = std::thread(&AIPlayer::PlayThread, this);
+	}
+}
+
+void AIPlayer::PlayThread()
+{
+	m_isPlaying = true;
 	CopyBoard();
 	std::cout << GetCopyAsString();
 	std::vector<Move> possibleMoves = GetPossibleMoves();
@@ -28,13 +40,14 @@ void AIPlayer::Play(const PlayingContext& context)
 	//possibleMoves[r].p->Move(possibleMoves[r].target);
 	//pGame->arrow_end = possibleMoves[r].p->Pos();
 
-	std::vector<Move> bestMoves = GetBestMove(possibleMoves);
+	std::vector<Move> bestMoves = GetBestMoves2(possibleMoves);
 	Move move = bestMoves[rand() % bestMoves.size()];
 	Piece* pieceToMove = move.piece;
 	m_lastMoveStart = pieceToMove->Pos();
 	pieceToMove->Move(move.target);
 	m_lastMoveEnd = pieceToMove->Pos();
 	EndTurn();
+	m_isPlaying = false;
 }
 
 std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
@@ -71,6 +84,112 @@ std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
 	return bestMoves;
 }
 
+std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
+{
+	int max_score = std::numeric_limits<int>::min();
+	std::vector<Move> bestMoves;
+	for (const auto& move : moves)
+	{
+		TestMove2(move);
+		int score = alphabeta(3, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
+		// int score = minimax(3, false);
+		if (score > max_score)
+		{
+			std::cout << "found better move\n";
+			max_score = score;
+			bestMoves.clear();
+		}
+		if (score >= max_score)
+			bestMoves.push_back(move);
+		UndoMove2();
+	}
+	return bestMoves;
+}
+
+int AIPlayer::minimax(int depth, bool isMaximizingPlayer)
+{
+	// TODO: properly handle checkmates
+	if (depth == 0 || IsCheckMate())
+		return EvaluateBoard2();
+
+	if (isMaximizingPlayer)
+	{
+		int max_score = std::numeric_limits<int>::min();
+		std::vector<Move> moves = GetPossibleMoves();
+		for (const auto& move : moves)
+		{
+			TestMove2(move);
+			int score = minimax(depth - 1, !isMaximizingPlayer);
+			if (score > max_score)
+				max_score = score;
+			UndoMove2();
+		}
+		return max_score;
+	}
+	else
+	{
+		int min_score = std::numeric_limits<int>::max();
+		m_enemyPlayer->CalculateMoves();
+		if (m_enemyPlayer->IsCheckMate())
+			return 10000;
+		std::vector<Move> moves = m_enemyPlayer->GetPossibleMoves();
+		for (const auto& move : moves)
+		{
+			TestMove2(move);
+			int score = minimax(depth - 1, !isMaximizingPlayer);
+			if (score < min_score)
+				min_score = score;
+			UndoMove2();
+		}
+		return min_score;
+	}
+	return 0;
+}
+
+int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
+{
+	// TODO: properly handle checkmates
+	if (depth == 0 || IsCheckMate())
+		return EvaluateBoard2();
+
+	int score = 0;
+	if (isMaximizingPlayer)
+	{
+		score = std::numeric_limits<int>::min();
+		std::vector<Move> moves = GetPossibleMoves();
+		for (const auto& move : moves)
+		{
+			TestMove2(move);
+			score = std::max(score, alphabeta(depth - 1, alpha, beta, !isMaximizingPlayer));
+			UndoMove2();
+			if (score > beta)
+                break; // (* β cutoff *)
+            alpha = std::max(alpha, score);
+		}
+	}
+	else
+	{
+		score = std::numeric_limits<int>::max();
+		m_enemyPlayer->CalculateMoves();
+		if (m_enemyPlayer->IsCheckMate())
+		{
+			std::cout << "checkmate\n";
+			return 10000;
+		}
+		std::vector<Move> moves = m_enemyPlayer->GetPossibleMoves();
+		for (const auto& move : moves)
+		{
+			TestMove2(move);
+			int score = std::min(score, alphabeta(depth - 1, alpha, beta, !isMaximizingPlayer));
+			UndoMove2();
+			if (score < alpha)
+                break; //(* α cutoff *)
+            beta = std::min(beta, score);
+		}
+	}
+	return score;
+}
+
 void AIPlayer::TestMove2(const Move& move)
 {
 	m_movesStack.push(move);
@@ -81,16 +200,21 @@ void AIPlayer::UndoMove2()
 	Move lastMove = m_movesStack.top();
 	m_movesStack.pop();
 	Piece* movedPiece = lastMove.piece;
-	std::cout << "undoing moving " << movedPiece->Type() << " from " << m_pBoard->GetBoardCoordinates(lastMove.target) << " to " << m_pBoard->GetBoardCoordinates(lastMove.origin) << std::endl;
+	// std::cout << "undoing moving " << movedPiece->Type() << " from " << m_pBoard->GetBoardCoordinates(lastMove.target) << " to " << m_pBoard->GetBoardCoordinates(lastMove.origin) << std::endl;
 	if (movedPiece->Pos() != lastMove.target)
 		LOG_DEBUG("an error might have occured");
 
 	movedPiece->Move(lastMove.origin);
 
+	// reset the first move
+	if (lastMove.wasFirstMove)
+		movedPiece->ReseFirstMove();
+
+	// reset the captured piece
 	Piece* capturedPiece = lastMove.capturedPiece;
 	if (capturedPiece != nullptr)
 	{
-		std::cout << "resetting captured piece: " << capturedPiece->Type() << " at " << m_pBoard->GetBoardCoordinates(lastMove.target) << std::endl;
+		// std::cout << "resetting captured piece: " << capturedPiece->Type() << " at " << m_pBoard->GetBoardCoordinates(lastMove.target) << std::endl;
 		capturedPiece->ResetCaptured();
 		m_pBoard->GetCell(lastMove.target)->PlacePiece(capturedPiece);
 	}

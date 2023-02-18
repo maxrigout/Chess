@@ -9,7 +9,7 @@ King::King(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
 bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 {
 	// if we're checking for an out of bounds cell
-	if (target.x > m_pBoard->GetWidth() || target.y > m_pBoard->GetHeight() || target.x < 0 || target.y < 0)
+	if (m_pBoard->IsPositionValid(target))
 	{
 		info.reason = MoveInfo::INVALID_CELL;
 		return false;
@@ -28,33 +28,37 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 		if (movevect == vector2d<int>(2, 0))
 		{
 			Piece* rightTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(3, 0))->GetPiece();
-			if (rightTower != nullptr)
+			if (rightTower == nullptr)
 			{
-				Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(2, 0));
-				Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(1, 0));
-				if (!rightTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty())
-				{
-					return true;
-				}
+				info.reason = MoveInfo::INVALID_MOVE;
+				return false;
 			}
-			info.reason = MoveInfo::INVALID_MOVE;
-			return false;
+			Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(2, 0));
+			Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(1, 0));
+			if (rightTower->HasMoved() || !c1->IsEmpty() || !c2->IsEmpty())
+			{
+				info.reason = MoveInfo::INVALID_MOVE;
+				return false;
+			}
+			return true;
 		}
 		else if (movevect == vector2d<int>(-3, 0))
 		{
 			Piece* leftTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-4, 0))->GetPiece();
-			if (leftTower != nullptr)
+			if (leftTower == nullptr)
 			{
-				Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-3, 0));
-				Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-2, 0));
-				Cell* c3 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-1, 0));
-				if (!leftTower->HasMoved() && c1->IsEmpty() && c2->IsEmpty() && c3->IsEmpty())
-				{
-					return true;
-				}
+				info.reason = MoveInfo::INVALID_MOVE;
+				return false;
 			}
-			info.reason = MoveInfo::INVALID_MOVE;
-			return false;
+			Cell* c1 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-3, 0));
+			Cell* c2 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-2, 0));
+			Cell* c3 = m_pBoard->GetCell(m_boardPosition + vector2d<int>(-1, 0));
+			if (leftTower->HasMoved() || !c1->IsEmpty() || !c2->IsEmpty() || !c3->IsEmpty())
+			{
+				info.reason = MoveInfo::INVALID_MOVE;
+				return false;
+			}
+			return true;
 		}
 	}
 
@@ -154,6 +158,7 @@ void King::Move(const pt2di& target)
 		if (movevect == vector2d<int>(2, 0))
 		{
 			Piece* rightTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(3, 0))->GetPiece();
+			if (rightTower == nullptr)
 			rightTower->Move(rightTower->Pos() + vector2d<int>(-2, 0));
 		}
 		else if (movevect == vector2d<int>(-3, 0))

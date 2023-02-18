@@ -104,6 +104,8 @@ void Game::InitBoard()
 	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE, 7);
 	m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO, 0);
 
+	((AIPlayer*)m_pPlayer2)->SetEnemyPlayer(m_pPlayer1);
+
 	m_pActivePlayer = m_pPlayer1;
 	m_pPlayer2->AttackCells();
 	m_pActivePlayer->BeginTurn();

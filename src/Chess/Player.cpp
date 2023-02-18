@@ -93,6 +93,10 @@ void Player::UpdatePieces(float dt)
 
 void Player::CalculateMoves()
 {
+	for (auto& piece : m_pieces)
+	{
+		piece->CalculateAvailableMoves();
+	}
 	m_legalMoves.clear();
 	CopyBoard();
 	if (GetKing()->Check())
@@ -372,7 +376,7 @@ std::vector<Move> Player::GetPossibleMoves()
 	// for each piece,
 	// verify that each allowed move for that piece, does not cause a "check"
 	std::vector<Move> possibleMoves;
-	std::cout << "calculating moves\n";
+	// std::cout << "calculating moves\n";
 	for (const auto& piece : m_pieces)
 	{
 		if (piece->IsCaptured())
@@ -384,7 +388,7 @@ std::vector<Move> Player::GetPossibleMoves()
 		for (const auto& availableMove : availableMoves)
 		{
 			// verify the move won't put yourself in check
-			Move move = { piece, availableMove, piece->Pos(), nullptr };
+			Move move = { piece, availableMove, piece->Pos(), nullptr, piece->IsFirstMove() };
 			char old_cell = TestMove(move);
 			// if the move take the king out of check
 			if (!IsHypotheticalCheck())

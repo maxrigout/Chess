@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <stack>
+#include <thread>
 
 class AIPlayer : public Player
 {
@@ -15,15 +16,22 @@ public:
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
+	void SetEnemyPlayer(Player* player) { m_enemyPlayer = player; }
+
 private:
 	std::vector<Move> GetHypotheticalMoves();
 	int EvaluateBoard() const;
 	std::vector<Move> GetBestMove(const std::vector<Move>& moves);
-	int GetPiecePoints(Piece* p) const;
+	int GetPiecePoints(Piece* piece) const;
 	int GetPiecePoints(char type) const;
-	int GetPieceValue(Piece* p) const;
+	int GetPieceValue(Piece* piece) const;
 	int GetPieceValue(char type) const;
 
+	void PlayThread();
+	int minimax(int depth, bool isMaximizingPlayer);
+	int alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer);
+
+	std::vector<Move> GetBestMoves2(const std::vector<Move>& moves);
 	void TestMove2(const Move& move);
 	void UndoMove2();
 	int EvaluateBoard2() const;
@@ -34,4 +42,9 @@ private:
 	pt2di m_lastMoveEnd{};
 
 	std::stack<Move> m_movesStack;
+
+	Player* m_enemyPlayer = nullptr;
+
+	std::thread m_playThread;
+	bool m_isPlaying = false;
 };

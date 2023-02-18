@@ -72,7 +72,7 @@ void Piece::Move(const pt2di& target)
 	newcell->CaptureCell();
 	newcell->PlacePiece(this);
 	m_targetScreenPosition = m_pBoard->BoardToWindowCoordinates(target);
-	std::cout << "Moved " << m_pieceType << " from " << m_pBoard->GetBoardCoordinates(oldcell->GetCoordinates()) << " to " << m_pBoard->GetBoardCoordinates(newcell->GetCoordinates()) << std::endl;
+	// std::cout << "Moved " << m_pieceType << " from " << m_pBoard->GetBoardCoordinates(oldcell->GetCoordinates()) << " to " << m_pBoard->GetBoardCoordinates(newcell->GetCoordinates()) << std::endl;
 	m_isFirstMove = false;
 }
 

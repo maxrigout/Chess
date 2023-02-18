@@ -38,4 +38,5 @@ struct Move
 	pt2di target;
 	pt2di origin;
 	Piece* capturedPiece;
+	bool wasFirstMove = false;
 };
