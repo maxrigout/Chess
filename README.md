@@ -76,6 +76,6 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 
 ## Issues to resolve
 - [x] The King's moves aren't properly calculated when using the AIPlayer.
-- [ ] The AIPlayer is using the "real" board and "real" other player to do its calculations.
+- [ ] The AIPlayer is using the "real" board and the "real" opponent to do its calculations.
 - [ ] Cannot undo a "castle" move.
 - [ ] The pieces are moved when the AIPlayer is testing moves.
