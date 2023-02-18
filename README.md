@@ -4,9 +4,9 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 ## Dependencies
 | Name | Url |
 | ---- | --- |
-| SDL2 | [https://github.com/libsdl-org/SDL]() |
-| SDL2_ttf | [https://github.com/libsdl-org/SDL_ttf]() |
-| ~~SDL2_image~~ | ~~[https://github.com/libsdl-org/SDL_image]()~~ |
+| SDL2 | [https://github.com/libsdl-org/SDL](https://github.com/libsdl-org/SDL) |
+| SDL2_ttf | [https://github.com/libsdl-org/SDL_ttf](https://github.com/libsdl-org/SDL_ttf) |
+| ~~SDL2_image~~ | ~~[https://github.com/libsdl-org/SDL_image](https://github.com/libsdl-org/SDL_image)~~ |
 
 * Once the dependencies are installed create the following directories at the root of the project:
     * deps/include
