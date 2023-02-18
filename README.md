@@ -1,5 +1,5 @@
 # Chess
-Custom chess engine, using SDL. It features an AI using the Minimax algorithm with AlphaBeta pruning.
+Custom chess engine, using SDL. It features an AI using the Minimax algorithm with AlphaBeta pruning. The AI's moves calculations are done on a separate thread.
 
 ## Dependencies
 | Name | Url |
@@ -73,3 +73,9 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 - [ ] Window and input system
 - [ ] Setup script
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
+
+## Issues to resolve
+- [ ] The King's moves aren't properly calculated when using the AIPlayer.
+- [ ] The AIPlayer is using the "real" board and "real" other player to do its calculations.
+- [ ] Cannot undo a "castle" move.
+- [ ] The pieces are moved when the AIPlayer is testing moves.

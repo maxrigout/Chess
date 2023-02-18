@@ -16,7 +16,7 @@ public:
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
-	void SetEnemyPlayer(Player* player) { m_enemyPlayer = player; }
+	void SetOpponentPlayer(Player* player) { m_opponentPlayer = player; }
 
 private:
 	std::vector<Move> GetHypotheticalMoves();
@@ -43,7 +43,7 @@ private:
 
 	std::stack<Move> m_movesStack;
 
-	Player* m_enemyPlayer = nullptr;
+	Player* m_opponentPlayer = nullptr;
 
 	std::thread m_playThread;
 	bool m_isPlaying = false;

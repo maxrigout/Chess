@@ -129,10 +129,10 @@ int AIPlayer::minimax(int depth, bool isMaximizingPlayer)
 	else
 	{
 		int min_score = std::numeric_limits<int>::max();
-		m_enemyPlayer->CalculateMoves();
-		if (m_enemyPlayer->IsCheckMate())
+		m_opponentPlayer->CalculateMoves();
+		if (m_opponentPlayer->IsCheckMate())
 			return 10000;
-		std::vector<Move> moves = m_enemyPlayer->GetPossibleMoves();
+		std::vector<Move> moves = m_opponentPlayer->GetPossibleMoves();
 		for (const auto& move : moves)
 		{
 			TestMove2(move);
@@ -170,13 +170,13 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 	else
 	{
 		score = std::numeric_limits<int>::max();
-		m_enemyPlayer->CalculateMoves();
-		if (m_enemyPlayer->IsCheckMate())
+		m_opponentPlayer->CalculateMoves();
+		if (m_opponentPlayer->IsCheckMate())
 		{
 			std::cout << "checkmate\n";
 			return 10000;
 		}
-		std::vector<Move> moves = m_enemyPlayer->GetPossibleMoves();
+		std::vector<Move> moves = m_opponentPlayer->GetPossibleMoves();
 		for (const auto& move : moves)
 		{
 			TestMove2(move);
