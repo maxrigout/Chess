@@ -50,6 +50,7 @@ private:
 	bool m_isSDLInitialized = false;
 	bool m_isBoardInitialized = false;
 	bool m_isPlaying;
+	bool m_isGameOver = false;
 
 	pt2di m_hoveredCellPos{-1, 0};
 	pt2di m_selectedCellPos{-1, 0};

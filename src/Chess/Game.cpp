@@ -220,7 +220,8 @@ void Game::Update(float dt)
 
 	m_pPlayer1->UpdatePieces(dt);
 	m_pPlayer2->UpdatePieces(dt);
-	m_pActivePlayer->Play({ m_selectedCellPos, 0 });
+	if (!m_isGameOver)
+		m_pActivePlayer->Play({ m_selectedCellPos, 0 });
 }
 
 void Game::Render()
@@ -274,6 +275,10 @@ void Game::SwitchPlayers()
 	m_pActivePlayer->BeginTurn();
 	m_activeTeam = m_pActivePlayer->GetTeam();
 	if (m_pActivePlayer->IsCheckMate())
+	{
 		std::cout << "checkmate\n";
+		m_isGameOver = true;
+		return;
+	}
 	std::cout << "player " << player << "'s turn\n";
 }

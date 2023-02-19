@@ -160,7 +160,10 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 	if (isMaximizingPlayer)
 	{
 		score = std::numeric_limits<int>::min();
+		CalculateMoves();
 		std::vector<Move> moves = GetPossibleMoves();
+		if (moves.size() == 0)
+			return -10000;
 		for (const auto& move : moves)
 		{
 			TestMove2(move);
@@ -197,6 +200,8 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 void AIPlayer::TestMove2(const Move& move)
 {
 	m_movesStack.push(move);
+	// TODO more fine grain control about how to undo a move
+	// TODO undo a castle
 	move.piece->Move(move.target);
 }
 void AIPlayer::UndoMove2()
@@ -276,9 +281,7 @@ int AIPlayer::GetPieceValue(Piece* piece) const
 {
 	if (piece == nullptr)
 		return 0;
-	int mod = 1;
-	if (!piece->IsSameTeam(m_team))
-		mod = -1;
+	int mod = (int)piece->IsSameTeam(m_team) * 2 - 1; // 1 for same team, -1 for opponent team
 	return mod * GetPiecePoints(piece->Type());
 }
 
