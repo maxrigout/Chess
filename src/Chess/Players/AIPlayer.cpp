@@ -197,9 +197,17 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 	return score;
 }
 
+// should probably move the TestMove2 and UndoMove2 to the Board class
 void AIPlayer::TestMove2(const Move& move)
 {
 	m_movesStack.push(move);
+	// if (move.isCastle)
+	// {
+	// 	Piece* targetRook = m_pBoard->GetCell(move.target)->GetPiece();
+	// 	if (targetRook == nullptr)
+	// 		std::cout << "something went wrong...\n";
+	// 	m_movesStack.top().otherAffectedPiece = targetRook;
+	// }
 	// TODO more fine grain control about how to undo a move
 	// TODO undo a castle
 	move.piece->Move(move.target);
@@ -219,13 +227,23 @@ void AIPlayer::UndoMove2()
 	if (lastMove.wasFirstMove)
 		movedPiece->ReseFirstMove();
 
-	// reset the captured piece
-	Piece* capturedPiece = lastMove.capturedPiece;
-	if (capturedPiece != nullptr)
+	// if the move was a castle...
+	if (lastMove.isCastle)
 	{
-		// std::cout << "resetting captured piece: " << capturedPiece->Type() << " at " << m_pBoard->GetBoardCoordinates(lastMove.target) << std::endl;
-		capturedPiece->ResetCaptured();
-		m_pBoard->GetCell(lastMove.target)->PlacePiece(capturedPiece);
+		Piece* rook = lastMove.otherAffectedPiece;
+		// reset the position of the rook since it was where the king was going
+		rook->Move(lastMove.target);
+	}
+	else
+	{
+		// reset the captured piece
+		Piece* capturedPiece = lastMove.otherAffectedPiece;
+		if (capturedPiece != nullptr)
+		{
+			// std::cout << "resetting captured piece: " << capturedPiece->Type() << " at " << m_pBoard->GetBoardCoordinates(lastMove.target) << std::endl;
+			capturedPiece->ResetCaptured();
+			m_pBoard->GetCell(lastMove.target)->PlacePiece(capturedPiece);
+		}
 	}
 }
 	

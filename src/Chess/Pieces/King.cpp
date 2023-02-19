@@ -158,7 +158,6 @@ void King::Move(const pt2di& target)
 		if (movevect == vector2d<int>(2, 0))
 		{
 			Piece* rightTower = m_pBoard->GetCell(m_boardPosition + vector2d<int>(3, 0))->GetPiece();
-			if (rightTower == nullptr)
 			rightTower->Move(rightTower->Pos() + vector2d<int>(-2, 0));
 		}
 		else if (movevect == vector2d<int>(-3, 0))

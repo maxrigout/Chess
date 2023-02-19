@@ -25,6 +25,16 @@ public:
 	void SetCellDim(const vec2di& dim);
 	const vec2di& GetCellDim() const { return m_cellDim; }
 
+	Piece* GetPieceAtCell(const pt2di& pos);
+	void PlacePieceAtCell(const pt2di& pos);
+	void MovePiece(const pt2di& origin, const pt2di& target);
+	bool DoesCellHavePiece() const;
+	bool IsCellAttacked(const pt2di& pos) const;
+	void ResetCellsAttack();
+
+	void TestMove();
+	void UndoMove();
+
 	void AttackCell(const pt2di& position, TEAM team);
 	void ResetAttack();
 

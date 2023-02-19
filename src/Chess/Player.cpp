@@ -7,6 +7,7 @@
 #include "Chess/Pieces/King.h"
 
 #include <iostream>
+#include <signal.h>
 
 Player::Player(Board* board, TEAM team, int king_row)
 	: m_pBoard{ board }, m_team{ team }
@@ -389,12 +390,25 @@ std::vector<Move> Player::GetPossibleMoves()
 		{
 			// verify the move won't put yourself in check
 			Move move = { piece, availableMove, piece->Pos(), nullptr, piece->IsFirstMove() };
+			// tag the move as a castle move
+			vec2di moveVect = move.target - piece->Pos();
+			if (move.piece->Type() == 'K' && (moveVect.x > 1 || moveVect.x < -1))
+			{
+				move.otherAffectedPiece = m_pBoard->GetCell(move.target)->GetPiece();
+				if (move.otherAffectedPiece == nullptr)
+				{
+					std::cout << "something went wrong\n";
+					// raise(SIGTRAP);
+					__builtin_debugtrap();
+				}
+				move.isCastle = true;
+			}
 			char old_cell = TestMove(move);
 			// if the move take the king out of check
 			if (!IsHypotheticalCheck())
 			{
 				if (m_pBoard->GetCell(move.target)->HasPiece())
-					move.capturedPiece = m_pBoard->GetCell(move.target)->GetPiece();
+					move.otherAffectedPiece = m_pBoard->GetCell(move.target)->GetPiece();
 				piece->AddAvailableMove(move.target);
 				possibleMoves.push_back(move);
 			}
