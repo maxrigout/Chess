@@ -1,6 +1,6 @@
 out
 deps/
-fonts/
+resources/
 *.dSYM
 **/.DS_Store
 .DS_Store

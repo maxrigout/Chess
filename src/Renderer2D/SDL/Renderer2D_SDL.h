@@ -21,8 +21,12 @@ public:
 	virtual void FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const;
 	virtual void DrawLine(const pt2di& start, const pt2di& end, const Color& color) const;
 	virtual void DrawText(const pt2di& position, const std::string& text, const Color& color) const;
-	virtual void DrawText(const pt2di& topLeft, const pt2di& bottomRight, const std::string& text, const Color& color) const;
+	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const;
+
+	virtual SpriteID LoadTexture(const char* path);
+	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite);
+	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const;
 
 	virtual const vec2di& GetWindowDim() const;
 	virtual const vec2di& GetCellDim() const;
@@ -34,10 +38,20 @@ public:
 private:
 	void SetRenderDrawColor(const Color& c) const { SDL_SetRenderDrawColor(m_renderer, c.r, c.g, c.b, c.a); }
 
+	struct Asset
+	{
+		int textureIndex;
+		pt2di topLeft;
+		vec2di size;
+	};
+
 	SDL_Renderer* m_renderer;
 	vec2di m_windowDim;
 	vec2di m_cellDim;
 	vec2di m_viewPortDim;
 
 	TTF_Font* defaultFont = nullptr;
+
+	std::vector<SDL_Texture*> m_textures;
+	std::vector<Asset> m_sprites;
 };

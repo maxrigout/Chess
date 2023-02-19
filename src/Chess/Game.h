@@ -31,6 +31,8 @@ private:
 	void InitBoard();
 	void FreeBoard();
 
+	void LoadGraphics();
+
 	void HandleInput();
 	void Update(float dt);
 	void Render();
@@ -60,4 +62,6 @@ private:
 	Player* m_pActivePlayer;
 	Player* m_pPlayer1;
 	Player* m_pPlayer2;
+
+	std::vector<Renderer2D::SpriteID> m_piecesSprites;
 };

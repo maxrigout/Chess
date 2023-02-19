@@ -1,4 +1,5 @@
 #include "Renderer2D_SDL.h"
+#include "SDL2_image/SDL_image.h"
 
 #include <iostream>
 
@@ -22,6 +23,9 @@ Renderer2D_SDL::Renderer2D_SDL(SDL_Renderer* renderer)
 	if (TTF_Init() < 0)
 		std::cout << "Error initializing SDL_ttf: " << TTF_GetError() << std::endl;
 
+	if (IMG_Init(IMG_INIT_JPG) < 0)
+		std::cout << "Error initializing SDL_image: " << IMG_GetError() << std::endl;
+
 	defaultFont = TTF_OpenFont("resources/fonts/Vanilla Caramel.otf", 64);
 	// defaultFont = TTF_OpenFont("Fonts/VirtualNote.ttf", 64);
 	if (defaultFont == nullptr)
@@ -32,7 +36,12 @@ Renderer2D_SDL::Renderer2D_SDL(SDL_Renderer* renderer)
 
 Renderer2D_SDL::~Renderer2D_SDL()
 {
+	for (auto& texture : m_textures)
+	{
+		SDL_DestroyTexture(texture);
+	}
 	TTF_CloseFont(defaultFont);
+	IMG_Quit();
 	TTF_Quit();
 	SDL_DestroyRenderer(m_renderer);
 }
@@ -136,13 +145,13 @@ void Renderer2D_SDL::DrawText(const pt2di& position, const std::string& text, co
 	SDL_DestroyTexture(message);
 }
 
-void Renderer2D_SDL::DrawText(const pt2di& topLeft, const pt2di& dims, const std::string& text, const Color& color) const
+void Renderer2D_SDL::DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const
 {
 	SetRenderDrawColor(color);
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(defaultFont, text.c_str(), toSDL_Color(color));
 	SDL_Texture* message = SDL_CreateTextureFromSurface(m_renderer, surfaceMessage);
 	// SDL_Rect dest{ topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y };
-	SDL_Rect dest{ topLeft.x, topLeft.y, dims.x, dims.y };
+	SDL_Rect dest{ topLeft.x, topLeft.y, dimensions.x, dimensions.y };
 
 	SDL_RenderCopy(m_renderer, message, NULL, &dest);
 
@@ -176,6 +185,69 @@ void Renderer2D_SDL::DrawArrow(const pt2di& start, const pt2di& end, const Color
 	SDL_RenderDrawLine(m_renderer, screenEnd.x, screenEnd.y, left.x, left.y);
 	SDL_RenderDrawLine(m_renderer, screenEnd.x, screenEnd.y, right.x, right.y);
 }
+
+
+Renderer2D::SpriteID Renderer2D_SDL::LoadTexture(const char* path)
+{
+	SDL_Texture* texture = IMG_LoadTexture(m_renderer, path);
+	m_textures.push_back(texture);
+	int textureId = m_textures.size() - 1;
+	int width, height;
+	SDL_QueryTexture(texture, NULL, NULL, &width, &height);
+	m_sprites.push_back({ textureId, { 0, 0 }, { width, height } });
+	return m_sprites.size() - 1;
+}
+
+std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprites)
+{
+	std::vector<SpriteID> result;
+	SDL_Texture* sheet = IMG_LoadTexture(m_renderer, path);
+	m_textures.push_back(sheet);
+	int textureId = m_textures.size() - 1;
+	int width, height;
+	SDL_QueryTexture(sheet, NULL, NULL, &width, &height);
+	for (const auto& sprite : sprites)
+	{
+		pt2di offset = sprite.offset;
+		vec2di size = sprite.size;
+		switch (sprite.type)
+		{
+		case SpriteOffsetType::TopLeft:
+			break;
+		case SpriteOffsetType::TopRight:
+			offset.x -= size.w;
+			break;
+		case SpriteOffsetType::BottomLeft:
+			offset.y -= size.h;
+			break;
+		case SpriteOffsetType::BottomRight:
+			offset = offset - size;
+			break;
+		}
+		m_sprites.push_back({ textureId, offset, size });
+		result.push_back(m_sprites.size() - 1);
+	}
+	return result;
+}
+
+void Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const Renderer2D::SpriteID& spriteId) const
+{
+	Asset asset = m_sprites[spriteId];
+	SDL_Texture* texture = m_textures[asset.textureIndex];
+	SDL_Rect src, dest;
+	src.x = asset.topLeft.x;
+	src.y = asset.topLeft.y;
+	src.w = asset.size.w;
+	src.h = asset.size.h;
+
+	dest.x = topLeft.x;
+	dest.y = topLeft.y;
+	dest.w = dimensions.w;
+	dest.h = dimensions.h;
+
+	SDL_RenderCopy(m_renderer, texture, &src, &dest);
+}
+
 
 const vec2di& Renderer2D_SDL::GetWindowDim() const
 {

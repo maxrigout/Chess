@@ -27,6 +27,7 @@ void Game::Init(int width, int height)
 {
 	InitSDL(width, height);
 	InitBoard();
+	LoadGraphics();
 	m_isInitialized = m_isSDLInitialized && m_isBoardInitialized;
 }
 
@@ -122,6 +123,13 @@ void Game::FreeBoard()
 	delete m_pPlayer2;
 
 	m_isBoardInitialized = false;
+}
+
+void Game::LoadGraphics()
+{
+	std::vector<SpriteDescriptor> sprites;
+	sprites.push_back({ { 201, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight });
+	m_piecesSprites = m_pRenderer->LoadSpriteSheet("resources/graphics/pieces2.png", sprites);
 }
 
 void Game::Run()
@@ -243,6 +251,8 @@ void Game::Render()
 
 	m_pPlayer1->DrawLastMove(m_pRenderer);
 	m_pPlayer2->DrawLastMove(m_pRenderer);
+
+	m_pRenderer->DrawSprite({0, 0}, m_pRenderer->GetCellDim(), m_piecesSprites[0]);
 
 	m_pRenderer->End();
 }

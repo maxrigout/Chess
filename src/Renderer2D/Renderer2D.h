@@ -1,9 +1,10 @@
 #pragma once
 
-#include <string>
-
 #include "Math/point2d.h"
 #include "Math/vector2d.h"
+
+#include <string>
+#include <vector>
 
 struct Color
 {
@@ -40,9 +41,26 @@ static const Color VERY_DARK_YELLOW{63, 63, 0, 255};
 static const Color VERY_DARK_CYAN{0, 63, 63, 255};
 static const Color VERY_DARK_MAGENTA{63, 0, 63, 255};
 
+enum class SpriteOffsetType
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight
+};
+
+struct SpriteDescriptor
+{
+	pt2di offset{-1, -1};
+	vec2di size{-1, -1};
+	SpriteOffsetType type;
+};
+
 class Renderer2D
 {
 public:
+	using SpriteID = size_t;
+
 	virtual ~Renderer2D() = default;
 
 	virtual void Begin() = 0;
@@ -55,8 +73,12 @@ public:
 	virtual void FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const = 0;
 	virtual void DrawLine(const pt2di& start, const pt2di& end, const Color& color) const = 0;
 	virtual void DrawText(const pt2di& position, const std::string& text, const Color& color) const = 0;
-	virtual void DrawText(const pt2di& topLeft, const pt2di& bottomRight, const std::string& text, const Color& color) const = 0;
+	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const = 0;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const = 0;
+	
+	virtual SpriteID LoadTexture(const char* path) = 0;
+	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite) = 0;
+	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const = 0;
 
 	virtual const vec2di& GetWindowDim() const = 0;
 	virtual const vec2di& GetCellDim() const = 0;
