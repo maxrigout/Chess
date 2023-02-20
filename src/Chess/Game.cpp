@@ -129,8 +129,20 @@ void Game::FreeBoard()
 void Game::LoadGraphics()
 {
 	std::vector<SpriteDescriptor> sprites;
-	sprites.push_back({ { 201, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight });
-	m_piecesSprites = m_pRenderer->LoadSpriteSheet("resources/graphics/pieces2.png", sprites);
+	sprites.push_back({ { 201, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P2" });
+	sprites.push_back({ { 415, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H2" });
+	sprites.push_back({ { 628, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B2" });
+	sprites.push_back({ { 842, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R2" });
+	sprites.push_back({ { 1056, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q2" });
+	sprites.push_back({ { 1270, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K2" });
+
+	sprites.push_back({ { 201, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P1" });
+	sprites.push_back({ { 415, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H1" });
+	sprites.push_back({ { 628, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B1" });
+	sprites.push_back({ { 842, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R1" });
+	sprites.push_back({ { 1056, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q1" });
+	sprites.push_back({ { 1270, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K1" });
+	m_piecesSprites = m_pRenderer->LoadSpriteSheet("resources/graphics/pieces3.png", sprites);
 }
 
 void Game::Run()
@@ -141,6 +153,7 @@ void Game::Run()
 	m_isPlaying = true;
 	while(m_isPlaying)
 	{
+		// TODO frame limit cap
 		HandleInput();
 		Update(0.0166);
 		Render();

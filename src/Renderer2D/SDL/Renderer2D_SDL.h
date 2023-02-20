@@ -5,6 +5,8 @@
 
 #include "Renderer2D/Renderer2D.h"
 
+#include <unordered_map>
+
 class Renderer2D_SDL : public Renderer2D
 {
 public:
@@ -27,6 +29,7 @@ public:
 	virtual SpriteID LoadTexture(const char* path);
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite);
 	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const;
+	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const;
 
 	virtual const vec2di& GetWindowDim() const;
 	virtual const vec2di& GetCellDim() const;
@@ -38,7 +41,7 @@ public:
 private:
 	void SetRenderDrawColor(const Color& c) const { SDL_SetRenderDrawColor(m_renderer, c.r, c.g, c.b, c.a); }
 
-	struct Asset
+	struct Sprite
 	{
 		int textureIndex;
 		pt2di topLeft;
@@ -53,5 +56,6 @@ private:
 	TTF_Font* defaultFont = nullptr;
 
 	std::vector<SDL_Texture*> m_textures;
-	std::vector<Asset> m_sprites;
+	std::unordered_map<std::string, SpriteID> m_tagsMap;
+	std::vector<Sprite> m_sprites;
 };

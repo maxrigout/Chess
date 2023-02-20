@@ -9,6 +9,18 @@ int GenerateUniquePieceId()
 	return id++;
 }
 
+char TeamToChar(TEAM team)
+{
+	switch (team)
+	{
+	case TEAM::ONE: return '1';
+	case TEAM::TWO: return '2';
+	case TEAM::NONE: break;
+	}
+
+	return 'U'; // U for unknown
+}
+
 Piece::Piece(Board* pBoard, char type, TEAM team, const pt2di& initialBoardPosition, const std::vector<vec2di>& moves)
 {
 	m_isFirstMove = true;
@@ -41,9 +53,14 @@ void Piece::UpdateMovement(float dt)
 void Piece::DrawYourself(const Renderer2D* renderer) const
 {
 	vec2di cell = renderer->GetCellDim();
-	pt2di center = m_screenPosition + vec2df(cell) / 2;
-	renderer->FillCircle(center, cell.w / 3, m_teamColor);
-	renderer->DrawText(m_screenPosition, {m_pieceType, '\0'}, WHITE);
+	// pt2di center = m_screenPosition + vec2df(cell) / 2;
+	// renderer->FillCircle(center, cell.w / 3, m_teamColor);
+	// renderer->DrawText(m_screenPosition, {m_pieceType, '\0'}, WHITE);
+	char team = TeamToChar(m_team);
+	std::string tag = "";
+	tag += m_pieceType;
+	tag += team;
+	renderer->DrawSprite(m_screenPosition, cell, tag);
 }
 
 void Piece::DrawMoves(const Renderer2D* renderer) const

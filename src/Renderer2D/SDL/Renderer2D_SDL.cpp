@@ -225,6 +225,7 @@ std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* pa
 			break;
 		}
 		m_sprites.push_back({ textureId, offset, size });
+		m_tagsMap.emplace(sprite.tag, m_sprites.size() - 1);
 		result.push_back(m_sprites.size() - 1);
 	}
 	return result;
@@ -232,13 +233,13 @@ std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* pa
 
 void Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const Renderer2D::SpriteID& spriteId) const
 {
-	Asset asset = m_sprites[spriteId];
-	SDL_Texture* texture = m_textures[asset.textureIndex];
+	Sprite sprite = m_sprites[spriteId];
+	SDL_Texture* texture = m_textures[sprite.textureIndex];
 	SDL_Rect src, dest;
-	src.x = asset.topLeft.x;
-	src.y = asset.topLeft.y;
-	src.w = asset.size.w;
-	src.h = asset.size.h;
+	src.x = sprite.topLeft.x;
+	src.y = sprite.topLeft.y;
+	src.w = sprite.size.w;
+	src.h = sprite.size.h;
 
 	dest.x = topLeft.x;
 	dest.y = topLeft.y;
@@ -246,6 +247,13 @@ void Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, 
 	dest.h = dimensions.h;
 
 	SDL_RenderCopy(m_renderer, texture, &src, &dest);
+}
+
+void Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
+{
+	SpriteID spriteId = m_tagsMap.at(tag);
+	// TODO error check
+	return DrawSprite(topLeft, dimensions, spriteId);
 }
 
 

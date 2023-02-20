@@ -53,7 +53,8 @@ struct SpriteDescriptor
 {
 	pt2di offset{-1, -1};
 	vec2di size{-1, -1};
-	SpriteOffsetType type;
+	SpriteOffsetType type = SpriteOffsetType::TopLeft;
+	std::string tag = "";
 };
 
 class Renderer2D
@@ -79,6 +80,7 @@ public:
 	virtual SpriteID LoadTexture(const char* path) = 0;
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite) = 0;
 	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const = 0;
+	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const = 0;
 
 	virtual const vec2di& GetWindowDim() const = 0;
 	virtual const vec2di& GetCellDim() const = 0;
