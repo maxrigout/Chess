@@ -12,15 +12,15 @@ public:
 	Cell(const Cell& other);
 	~Cell() = default;
 
-	void PlacePiece(Piece *p);
-	void RemovePiece();
-	void CaptureCell();
-	bool HasPiece() const { return (m_piece != nullptr); }
-	bool IsEmpty() const { return (m_piece == nullptr); }
-	bool IsSameTeam(TEAM t) const;
-	Piece* GetPiece() const { return m_piece; }
+	// void PlacePiece(Piece *p);
+	// void RemovePiece();
+	// void CaptureCell();
+	// bool HasPiece() const { return (m_piece != nullptr); }
+	// bool IsEmpty() const { return (m_piece == nullptr); }
+	// bool IsSameTeam(TEAM t) const;
+	// Piece* GetPiece() const { return m_piece; }
 	const pt2di& GetCoordinates() const { return m_coordinates; }
-	bool IsAttacked() const { return m_attackedBy != TEAM::NONE; }
+	// bool IsAttacked() const { return m_attackedBy != TEAM::NONE; }
 	void Attack(TEAM t) { m_attackedBy = t; }
 	void ResetAttacked() { m_attackedBy = TEAM::NONE; }
 

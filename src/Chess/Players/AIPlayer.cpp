@@ -8,8 +8,8 @@
 
 #include "DebugLogger.h"
 
-AIPlayer::AIPlayer(Board* board, TEAM team, int king_row)
-	: Player(board, team, king_row)
+AIPlayer::AIPlayer(Board* pBoard, TEAM team)
+	: Player(pBoard, team)
 {
 	srand(time(0));
 }
@@ -90,20 +90,20 @@ std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
 
 std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
 {
-	int max_score = std::numeric_limits<int>::min();
+	int maxScore = std::numeric_limits<int>::min();
 	std::vector<Move> bestMoves;
 	for (const auto& move : moves)
 	{
 		TestMove2(move);
-		int score = alphabeta(3, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
+		int moveScore = alphabeta(3, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
 		// int score = minimax(3, false);
-		if (score > max_score)
+		if (moveScore > maxScore)
 		{
 			std::cout << "found better move\n";
-			max_score = score;
+			maxScore = moveScore;
 			bestMoves.clear();
 		}
-		if (score >= max_score)
+		if (moveScore >= maxScore)
 			bestMoves.push_back(move);
 		UndoMove2();
 	}
@@ -212,6 +212,7 @@ void AIPlayer::TestMove2(const Move& move)
 	// TODO undo a castle
 	move.piece->Move(move.target);
 }
+
 void AIPlayer::UndoMove2()
 {
 	Move lastMove = m_movesStack.top();
@@ -242,11 +243,10 @@ void AIPlayer::UndoMove2()
 		{
 			// std::cout << "resetting captured piece: " << capturedPiece->Type() << " at " << m_pBoard->GetBoardCoordinates(lastMove.target) << std::endl;
 			capturedPiece->ResetCaptured();
-			m_pBoard->GetCell(lastMove.target)->PlacePiece(capturedPiece);
+			m_pBoard->PlacePiece(capturedPiece);
 		}
 	}
 }
-	
 
 int AIPlayer::EvaluateBoard() const
 {
@@ -268,7 +268,7 @@ int AIPlayer::EvaluateBoard2() const
 	{
 		for (int j = 0; j < m_pBoard->GetHeight(); j++)
 		{
-			out += GetPieceValue(m_pBoard->GetCell({ i, j })->GetPiece());
+			out += GetPieceValue(m_pBoard->GetPieceAtCell({ i, j }));
 		}
 	}
 	return out;

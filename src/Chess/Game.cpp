@@ -75,6 +75,7 @@ void Game::InitBoard()
 		return;
 
 	m_pBoard = new Board(8, 8);
+	m_pBoard->SetScreenDim(m_pRenderer->GetWindowDim());
 
 	int width, height;
 	SDL_GetWindowSize(m_pWindow, &width, &height);
@@ -102,10 +103,10 @@ void Game::InitBoard()
 
 	// Player set up
 	// the pieces set up should be done in the constructor
-	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE, 7);
-	m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO, 0);
+	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE);
+	m_pPlayer2 = new HumanPlayer(m_pBoard, TEAM::TWO);
 
-	((AIPlayer*)m_pPlayer2)->SetOpponentPlayer(m_pPlayer1);
+	//((AIPlayer*)m_pPlayer2)->SetOpponentPlayer(m_pPlayer1);
 
 	m_pActivePlayer = m_pPlayer1;
 	m_pPlayer2->AttackCells();
@@ -141,7 +142,7 @@ void Game::Run()
 	while(m_isPlaying)
 	{
 		HandleInput();
-		Update(0.5);
+		Update(0.0166);
 		Render();
 	}
 }

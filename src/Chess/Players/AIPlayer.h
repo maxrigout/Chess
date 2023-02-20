@@ -11,7 +11,7 @@
 class AIPlayer : public Player
 {
 public:
-	AIPlayer(Board* board, TEAM t, int king_row);
+	AIPlayer(Board* pBoard, TEAM team);
 	virtual ~AIPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;

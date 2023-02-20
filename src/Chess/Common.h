@@ -41,3 +41,20 @@ struct Move
 	bool wasFirstMove = false;
 	bool isCastle = false;
 };
+
+enum class EventType
+{
+	Move,
+	GetCaptured,
+	Castle
+};
+
+struct MoveEvent
+{
+	Piece* piece;
+	pt2di target;
+	pt2di origin;
+	EventType eventType;
+	bool wasFirstMove = false;
+	bool hasSideEffect = false;
+};

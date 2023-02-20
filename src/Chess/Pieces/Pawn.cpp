@@ -40,26 +40,18 @@ bool Pawn::IsMoveValid(const pt2di& target, MoveInfo& info) const
 	// checking for 1 cell in front
 	if (move_vect == move_front)
 	{
-		Cell* target_cell = m_pBoard->GetCell(m_boardPosition + move_vect);
-		return !target_cell->HasPiece();
+		return m_pBoard->GetPieceAtCell(m_boardPosition + move_vect) == nullptr;
 	}
 	// if we're moving 2 spaces forward, we need to check for both cells in front
 	if (m_isFirstMove && move_vect == move_front2)
 	{
-		Cell* intermediate_cell = m_pBoard->GetCell(m_boardPosition + move_front);
-		Cell* target_cell = m_pBoard->GetCell(m_boardPosition + move_vect);
-		// we didn't check if the position was valid for the intermediate cell
-		// if the target cell is valid, then most likely, the intermediate cell will be valid as well
-		if (intermediate_cell == nullptr)
-			return false;
-		// if either cell is occupied, then not valid
-		return !target_cell->HasPiece() && !intermediate_cell->HasPiece();
+		return m_pBoard->GetPieceAtCell(m_boardPosition + move_front) == nullptr && m_pBoard->GetPieceAtCell(m_boardPosition + move_vect) == nullptr;
 	}
 	// if we're capturing a piece
 	if (move_vect == capture_left || move_vect == capture_right)
 	{
-		Cell* target_cell = m_pBoard->GetCell(m_boardPosition + move_vect);
-		return target_cell->HasPiece() && !target_cell->IsSameTeam(m_team);
+		Piece* targetPiece = m_pBoard->GetPieceAtCell(m_boardPosition + move_vect);
+		return targetPiece != nullptr && !targetPiece->IsSameTeam(m_team);
 	}
 
 	// TODO there's one more move the pawn can do... need to look at the rules

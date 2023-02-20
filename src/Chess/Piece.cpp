@@ -40,13 +40,10 @@ void Piece::UpdateMovement(float dt)
 
 void Piece::DrawYourself(const Renderer2D* renderer) const
 {
-	if (!m_isCaptured)
-	{
-		vec2di cell = renderer->GetCellDim();
-		pt2di center = m_screenPosition + vec2df(cell) / 2;
-		renderer->FillCircle(center, cell.w / 3, m_teamColor);
-		renderer->DrawText(m_screenPosition, {m_pieceType, '\0'}, WHITE);
-	}
+	vec2di cell = renderer->GetCellDim();
+	pt2di center = m_screenPosition + vec2df(cell) / 2;
+	renderer->FillCircle(center, cell.w / 3, m_teamColor);
+	renderer->DrawText(m_screenPosition, {m_pieceType, '\0'}, WHITE);
 }
 
 void Piece::DrawMoves(const Renderer2D* renderer) const
@@ -62,23 +59,18 @@ void Piece::DrawMoves(const Renderer2D* renderer) const
 
 void Piece::Move(const pt2di& target)
 {
-	Cell* oldcell = m_pBoard->GetCell(m_boardPosition);
-	Cell* newcell = m_pBoard->GetCell(target);
-	if (oldcell == nullptr || newcell == nullptr)
-		return;
-
+	m_pBoard->CaptureLocation(target);
+	m_pBoard->MovePiece(this, target);
 	m_boardPosition = target;
-	oldcell->RemovePiece();
-	newcell->CaptureCell();
-	newcell->PlacePiece(this);
-	m_targetScreenPosition = m_pBoard->BoardToWindowCoordinates(target);
+	m_targetScreenPosition = m_pBoard->BoardToWindowCoordinates(m_boardPosition);
 	// std::cout << "Moved " << m_pieceType << " from " << m_pBoard->GetBoardCoordinates(oldcell->GetCoordinates()) << " to " << m_pBoard->GetBoardCoordinates(newcell->GetCoordinates()) << std::endl;
 	m_isFirstMove = false;
 }
 
-void Piece::Capture()
+void Piece::GetCaptured(const pt2di& benchPosition)
 {
 	m_isCaptured = true;
+	m_targetScreenPosition = benchPosition;
 }
 
 void Piece::ResetCaptured()

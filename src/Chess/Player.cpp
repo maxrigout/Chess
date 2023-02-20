@@ -9,22 +9,21 @@
 #include <iostream>
 #include <signal.h>
 
-Player::Player(Board* board, TEAM team, int king_row)
+Player::Player(Board* board, TEAM team)
 	: m_pBoard{ board }, m_team{ team }
 {
 	m_pBoardCopy = std::make_unique<char[]>(m_pBoard->GetWidth() * m_pBoard->GetHeight());
 
-	int pawn_row = 0;
-	PAWN_DIRECTION pawn_direction = PAWN_DIRECTION::DOWN;
-	if (king_row == 7)
+	int pawn_row = 6;
+	int king_row = 7;
+	PAWN_DIRECTION pawn_direction = PAWN_DIRECTION::UP;
+	if (team == TEAM::TWO)
 	{
-		pawn_row = 6;
-		pawn_direction = PAWN_DIRECTION::UP;
+		pawn_row = 1;
+		king_row = 0;
+		pawn_direction = PAWN_DIRECTION::DOWN;
 	}
-	else
-	{
-		pawn_row = king_row + 1;
-	}
+
 	Piece *r1, *r2, *b1, *b2, *k1, *k2, *q, *p;
 	r1 = new	Rook	(m_pBoard, team, { 0, king_row });
 	k1 = new	Knight	(m_pBoard, team, { 1, king_row });
@@ -45,7 +44,7 @@ Player::Player(Board* board, TEAM team, int king_row)
 
 	for (const auto& piece : m_pieces)
 	{
-		board->GetCell(piece->Pos())->PlacePiece(piece);
+		board->PlacePiece(piece);
 	}
 }
 
@@ -154,18 +153,18 @@ void Player::AttackCells()
 	}
 }
 
-Piece* Player::GetPieceAtPosition(const pt2di& position)
-{
-	Cell* cell = m_pBoard->GetCell(position);
-	if (cell == nullptr)
-		return nullptr;
-	Piece* piece = cell->GetPiece();
-	if (piece == nullptr)
-		return nullptr;
-	if (!piece->IsSameTeam(m_team))
-		return nullptr;
-	return piece;
-}
+// Piece* Player::GetPieceAtPosition(const pt2di& position)
+// {
+// 	Cell* cell = m_pBoard->GetCell(position);
+// 	if (cell == nullptr)
+// 		return nullptr;
+// 	Piece* piece = cell->GetPiece();
+// 	if (piece == nullptr)
+// 		return nullptr;
+// 	if (!piece->IsSameTeam(m_team))
+// 		return nullptr;
+// 	return piece;
+// }
 
 void Player::UndoMove(const Move& move, char old_cell)
 {
@@ -187,7 +186,7 @@ char Player::TestMove(const Move& move)
 bool Player::IsCheck() const
 {
 	pt2di kingPosition = m_king->Pos();
-	return m_pBoard->GetCell(kingPosition)->IsAttacked();
+	return m_pBoard->IsCellAttacked(kingPosition);
 }
 
 bool Player::IsHypotheticalCheck() const
@@ -355,7 +354,7 @@ void Player::CopyBoard()
 	{
 		for (int j = 0; j < m_pBoard->GetHeight(); ++j)
 		{
-			Piece* p = m_pBoard->GetCell({ i, j })->GetPiece();
+			Piece* p = m_pBoard->GetPieceAtCell({ i, j });
 			if (p != nullptr)
 			{
 				if (!p->IsCaptured())
@@ -391,24 +390,24 @@ std::vector<Move> Player::GetPossibleMoves()
 			// verify the move won't put yourself in check
 			Move move = { piece, availableMove, piece->Pos(), nullptr, piece->IsFirstMove() };
 			// tag the move as a castle move
-			vec2di moveVect = move.target - piece->Pos();
-			if (move.piece->Type() == 'K' && (moveVect.x > 1 || moveVect.x < -1))
-			{
-				move.otherAffectedPiece = m_pBoard->GetCell(move.target)->GetPiece();
-				if (move.otherAffectedPiece == nullptr)
-				{
-					std::cout << "something went wrong\n";
-					// raise(SIGTRAP);
-					__builtin_debugtrap();
-				}
-				move.isCastle = true;
-			}
+			// vec2di moveVect = move.target - piece->Pos();
+			// if (move.piece->Type() == 'K' && (moveVect.x > 1 || moveVect.x < -1))
+			// {
+			// 	move.otherAffectedPiece = m_pBoard->GetPieceAtCell(move.target);
+			// 	if (move.otherAffectedPiece == nullptr)
+			// 	{
+			// 		std::cout << "something went wrong\n";
+			// 		// raise(SIGTRAP);
+			// 		__builtin_debugtrap();
+			// 	}
+			// 	move.isCastle = true;
+			// }
 			char old_cell = TestMove(move);
 			// if the move take the king out of check
 			if (!IsHypotheticalCheck())
 			{
-				if (m_pBoard->GetCell(move.target)->HasPiece())
-					move.otherAffectedPiece = m_pBoard->GetCell(move.target)->GetPiece();
+				if (m_pBoard->DoesCellHavePiece(move.target))
+					move.otherAffectedPiece = m_pBoard->GetPieceAtCell(move.target);
 				piece->AddAvailableMove(move.target);
 				possibleMoves.push_back(move);
 			}
@@ -421,10 +420,7 @@ std::vector<Move> Player::GetPossibleMoves()
 
 void Player::SelectPiece(const pt2di& position)
 {
-	Cell* cell = m_pBoard->GetCell(position);
-	if (cell == nullptr)
-		return;
-	Piece* piece = cell->GetPiece();
+	Piece* piece = m_pBoard->GetPieceAtCell(position);
 	if (piece == nullptr)
 	{
 		m_selectedPiece = nullptr;

@@ -4,8 +4,8 @@
 
 #include <iostream>
 
-HumanPlayer::HumanPlayer(Board* board, TEAM team, int king_row)
-	: Player(board, team, king_row)
+HumanPlayer::HumanPlayer(Board* pBoard, TEAM team)
+	: Player(pBoard, team)
 {
 }
 

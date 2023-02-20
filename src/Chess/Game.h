@@ -44,7 +44,7 @@ private:
 
 	SDL_Window* m_pWindow;
 	pt2di m_mousePos;
-	unsigned int m_mouseButtonState;
+	unsigned int m_mouseButtonState = 0;
 
 	Renderer2D* m_pRenderer = nullptr;
 

@@ -59,14 +59,13 @@ bool FastPiece::CanAttack(const pt2di& target) const
 		{
 			path[i - 1] = m_boardPosition + (stepdir * i);
 		}
-		for (auto tile : path)
+		for (const auto& tile : path)
 		{
-			Cell* target_cell = m_pBoard->GetCell(tile);
-			if (target_cell == nullptr)
-			{
+			if (!m_pBoard->IsPositionValid(tile))
 				return false;
-			}
-			else if (target_cell->HasPiece() && !target_cell->IsSameTeam(m_team) && target_cell->GetPiece()->Type() != 'K')
+			
+			Piece* piece = m_pBoard->GetPieceAtCell(tile);
+			if (piece != nullptr && !piece->IsSameTeam(m_team) && piece->Type() != 'K')
 			{
 				blocked = true;
 			}
@@ -93,7 +92,7 @@ void FastPiece::AttackCells() const
 			if (!CanAttack(target_cell))
 				break;
 			m_pBoard->AttackCell(target_cell, m_team);
-			if (m_pBoard->GetCell(target_cell)->GetPiece() != nullptr)
+			if (m_pBoard->GetPieceAtCell(target_cell) != nullptr)
 				break;
 		}
 	}
@@ -116,7 +115,7 @@ void FastPiece::CalculateAvailableMoves()
 				break;
 			m_availableMoves.push_back(m_boardPosition + move * i);
 			// if we hit an enemy piece (ie. we can get there), we can't continue
-			if (m_pBoard->GetCell(targetCoords)->GetPiece() != nullptr)
+			if (m_pBoard->GetPieceAtCell(targetCoords) != nullptr)
 				break;
 		}
 	}
@@ -126,91 +125,91 @@ void FastPiece::CalculateAvailableMoves()
 
 bool FastPiece::IsCellReachable(const pt2di& coords) const
 {
-	Cell* targetCell = m_pBoard->GetCell(coords);
-	if (targetCell == nullptr)
+	if (!m_pBoard->IsPositionValid(coords))
 		return false;
 	
-	if (targetCell->HasPiece())
-		return !targetCell->GetPiece()->IsSameTeam(m_team);
+	Piece* piece = m_pBoard->GetPieceAtCell(coords);
+	if (piece != nullptr)
+		return !piece->IsSameTeam(m_team);
 	return true;
 }
 
-bool FastPiece::IsMoveValid2(const pt2di& target, MoveInfo& info) const
-{
-	/* * STEP 1: CHECK TO SEE IF FIRST MOVE (FOR KING AND PAWN)
-	   * STEP 2: CHECK TO SEE IF THERE IS A PIECE AT THAT LOCATION
-	   * STEP 2.1: CHECK TO SEE IF IT'S AN ENEMY PIECE (YES CONTINUE, NO RETURN FALSE)
-	   * STEP 3: CHECK TO SEE IF YOU CAN GET TO THE TARGET POSITION
-	*/
+// bool FastPiece::IsMoveValid2(const pt2di& target, MoveInfo& info) const
+// {
+// 	/* * STEP 1: CHECK TO SEE IF FIRST MOVE (FOR KING AND PAWN)
+// 	   * STEP 2: CHECK TO SEE IF THERE IS A PIECE AT THAT LOCATION
+// 	   * STEP 2.1: CHECK TO SEE IF IT'S AN ENEMY PIECE (YES CONTINUE, NO RETURN FALSE)
+// 	   * STEP 3: CHECK TO SEE IF YOU CAN GET TO THE TARGET POSITION
+// 	*/
 
-	if (target == m_boardPosition)
-		return false;
+// 	if (target == m_boardPosition)
+// 		return false;
 
-	// if we're checking for an out of bounds cell
-	if (!m_pBoard->IsPositionValid(target)) 
-		return false;
+// 	// if we're checking for an out of bounds cell
+// 	if (!m_pBoard->IsPositionValid(target)) 
+// 		return false;
 
-	vec2di stepdir;
-	vec2di movevect(target - m_boardPosition);
-	bool found_dir = false;
-	int nSteps = 0;
+// 	vec2di stepdir;
+// 	vec2di movevect(target - m_boardPosition);
+// 	bool found_dir = false;
+// 	int nSteps = 0;
 
-	// if we're checking against the current piece position
-	if (movevect.x == 0 && movevect.y == 0)
-		return false;
+// 	// if we're checking against the current piece position
+// 	if (movevect.x == 0 && movevect.y == 0)
+// 		return false;
 
-	for (const auto& m : m_moves)
-	{
-		if (movevect.IsPositiveMultiple(m))
-		{
-			if (m.x != 0)
-			{
-				nSteps = movevect.x / m.x;
-			}
-			else
-			{
-				nSteps = movevect.y / m.y;
-			}
-			stepdir = m;
-			found_dir = true;
-			break;
-		}
-	}
+// 	for (const auto& m : m_moves)
+// 	{
+// 		if (movevect.IsPositiveMultiple(m))
+// 		{
+// 			if (m.x != 0)
+// 			{
+// 				nSteps = movevect.x / m.x;
+// 			}
+// 			else
+// 			{
+// 				nSteps = movevect.y / m.y;
+// 			}
+// 			stepdir = m;
+// 			found_dir = true;
+// 			break;
+// 		}
+// 	}
 
-	// check each cells between current pos and target pos
-	if (found_dir)
-	{
-		std::vector<pt2di> path;
-		bool blocked = false;
+// 	// check each cells between current pos and target pos
+// 	if (found_dir)
+// 	{
+// 		std::vector<pt2di> path;
+// 		bool blocked = false;
 
-		path.resize(nSteps);
+// 		path.resize(nSteps);
 
-		for (int i = 1; i < nSteps + 1; ++i)
-		{
-			path[i - 1] = m_boardPosition + (stepdir * i);
-		}
-		for (auto tile : path)
-		{
-			Cell* target_cell = m_pBoard->GetCell(tile);
-			if (target_cell == nullptr)
-			{
-				return false;
-			}
-			else if (target_cell->HasPiece() && target_cell->IsSameTeam(m_team))
-			{
-				return false;
-			}
-			else if (target_cell->HasPiece() && !target_cell->IsSameTeam(m_team))
-			{
-				blocked = true;
-			}
-			else if (blocked)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+// 		for (int i = 1; i < nSteps + 1; ++i)
+// 		{
+// 			path[i - 1] = m_boardPosition + (stepdir * i);
+// 		}
+// 		for (auto tile : path)
+// 		{
+// 			Cell* target_cell = m_pBoard->GetCell(tile);
+// 			if (target_cell == nullptr)
+// 			{
+// 				return false;
+// 			}
+// 			else if (target_cell->HasPiece() && target_cell->IsSameTeam(m_team))
+// 			{
+// 				return false;
+// 			}
+// 			else if (target_cell->HasPiece() && !target_cell->IsSameTeam(m_team))
+// 			{
+// 				blocked = true;
+// 			}
+// 			else if (blocked)
+// 			{
+// 				return false;
+// 			}
+// 		}
+// 		return true;
+// 	}
 
-	return false;
-}
+// 	return false;
+// }

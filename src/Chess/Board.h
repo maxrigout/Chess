@@ -7,10 +7,12 @@
 #define EVEN_CELL_COLOR BLACK
 #define ODD_CELL_COLOR WHITE
 
+#include "Common.h"
 #include "Cell.h"
 #include "Renderer2D/Renderer2D.h"
 
 #include <string>
+#include <stack>
 
 class Board
 {
@@ -21,19 +23,21 @@ public:
 
 	int GetWidth() const { return m_width; }
 	int GetHeight() const { return m_height; }
-	Cell* GetCell(const pt2di& pos);
 	void SetCellDim(const vec2di& dim);
 	const vec2di& GetCellDim() const { return m_cellDim; }
 
-	Piece* GetPieceAtCell(const pt2di& pos);
-	void PlacePieceAtCell(const pt2di& pos);
-	void MovePiece(const pt2di& origin, const pt2di& target);
-	bool DoesCellHavePiece() const;
+	Piece* GetPieceAtCell(const pt2di& pos) const;
+	void PlacePiece(Piece* piece);
+	void MovePiece(Piece* piece, const pt2di& target);
+	void CaptureLocation(const pt2di& target);
+	bool DoesCellHavePiece(const pt2di& pos) const;
 	bool IsCellAttacked(const pt2di& pos) const;
 	void ResetCellsAttack();
 
 	void TestMove();
 	void UndoMove();
+
+	pt2di GetNextBenchLocation();
 
 	void AttackCell(const pt2di& position, TEAM team);
 	void ResetAttack();
@@ -53,10 +57,22 @@ public:
 	
 	std::string GetBoardCoordinates(const pt2di& position) const;
 
+	std::string ToString() const;
+
+	void SetScreenDim(const vec2di& dims) { m_screenDim = dims; }
+
 private:
+	Cell* GetCell(const pt2di& pos);
+	const Cell* GetCell(const pt2di& pos) const;
+
 	Cell* m_cells;
 	int m_width;
 	int m_height;
 
 	vec2di m_cellDim;
+	vec2di m_screenDim;
+
+	std::stack<MoveEvent> m_moveStack;
+
+	pt2di m_benchCursor;
 };

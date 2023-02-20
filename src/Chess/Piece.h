@@ -27,7 +27,7 @@ public:
 	bool IsSameTeam(TEAM t) const { return (m_team == t); }
 	bool HasMoved() const { return !m_isFirstMove; }
 	bool IsCaptured() const { return m_isCaptured; }
-	void Capture();
+	void GetCaptured(const pt2di& benchPosition);
 	void ResetCaptured();
 	const pt2di& Pos() const { return m_boardPosition; }
 	char Type() const { return m_pieceType; }
@@ -56,5 +56,5 @@ protected:
 
 	pt2df m_screenPosition;
 	pt2df m_targetScreenPosition;
-	float m_speed = 1.0f;
+	float m_speed = 15.0f;
 };

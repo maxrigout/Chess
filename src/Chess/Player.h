@@ -20,7 +20,7 @@ struct PlayingContext
 class Player
 {
 public:
-	Player(Board* board, TEAM team, int king_row);
+	Player(Board* board, TEAM team);
 	virtual ~Player();
 	virtual void Play(const PlayingContext& context) = 0;
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
@@ -29,7 +29,7 @@ public:
 	void BeginTurn() { m_hasTurnEnded = false; CalculateMoves(); }
 	std::string GetCopyAsString() const;
 	void CalculateMoves();
-	Piece* GetPieceAtPosition(const pt2di& position);
+	// Piece* GetPieceAtPosition(const pt2di& position);
 	void DrawPieces(const Renderer2D* renderer) const;
 	void DrawSelectedPieceMoves(const Renderer2D* renderer) const;
 	void AttackCells();

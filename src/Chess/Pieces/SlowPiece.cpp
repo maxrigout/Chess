@@ -25,10 +25,11 @@ bool SlowPiece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 	{
 		if (movevect == m)
 		{
-			Cell* target_cell = m_pBoard->GetCell(m_boardPosition + m);
-			if (target_cell == nullptr)
+			pt2di position = m_boardPosition + m;
+			if (!m_pBoard->IsPositionValid(position))
 				return false;
-			if (target_cell->HasPiece() && target_cell->IsSameTeam(m_team))
+			Piece* piece = m_pBoard->GetPieceAtCell(position);
+			if (piece != nullptr && piece->IsSameTeam(m_team))
 				return false;
 
 			return true;
@@ -55,8 +56,7 @@ bool SlowPiece::CanAttack(const pt2di& target) const
 	{
 		if (movevect == m)
 		{
-			Cell* target_cell = m_pBoard->GetCell(m_boardPosition + m);
-			return target_cell != nullptr;
+			return m_pBoard->IsPositionValid(m_boardPosition + m);
 		}
 	}
 

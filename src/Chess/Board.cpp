@@ -1,6 +1,32 @@
 #include "Board.h"
+#include "Piece.h"
 
 #include <iostream>
+
+bool isUpperCase(char c)
+{
+	return c >= 'A' && c <= 'Z';
+}
+
+bool isLowerCase(char c)
+{
+	return c >= 'a' && c <= 'z';
+}
+
+char toUpperCase(char c)
+{
+	if (isUpperCase(c))
+		return c;
+	return (char)((int)'A' + (int)c - (int)'a');
+}
+
+char toLowerCase(char c)
+{
+	if (isLowerCase(c))
+		return c;
+	return (char)((int)'a' + (int)c - (int)'A');
+}
+
 Board::Board(int width, int height)
 {
 	m_width = width;
@@ -13,6 +39,7 @@ Board::Board(int width, int height)
 			m_cells[y * m_width + x].m_coordinates = { x, y };
 		}
 	}
+	m_benchCursor = { m_width - 1, 0 };
 }
 
 Board::Board(const Board& other)
@@ -35,6 +62,15 @@ Board::~Board()
 }
 
 Cell* Board::GetCell(const pt2di& pos)
+{
+	if (pos.x < 0 || pos.x >= m_width)
+		return nullptr;
+	if (pos.y < 0 || pos.y >= m_height)
+		return nullptr;
+	return &m_cells[pos.y * m_width + pos.x];
+}
+
+const Cell* Board::GetCell(const pt2di& pos) const
 {
 	if (pos.x < 0 || pos.x >= m_width)
 		return nullptr;
@@ -216,4 +252,133 @@ std::string Board::GetBoardCoordinates(const pt2di& position) const
 	char column = 'a' + position.x;
 	std::string boardCoords = column + std::to_string(m_height - position.y);
 	return boardCoords;
+}
+
+std::string Board::ToString() const
+{
+	std::string out("+");
+	for (int i = 0; i < m_width; i++)
+	{
+		out += '-';
+	}
+	out += "+\n";
+	for (int j = 0; j < m_height; j++)
+	{
+		out += "|";
+		for (int i = 0; i < m_width; i++)
+		{
+			const Cell* cell = GetCell({ i, j });
+			const Piece* piece = cell->m_piece;
+			if (piece == nullptr)
+				out += COPY_EMPTY_CELL;
+			else
+			{
+				if (piece->Team() == TEAM::ONE)
+					out += toUpperCase(piece->Type());
+				else
+					out += toLowerCase(piece->Type());
+			}
+		}
+		out += "|\n";
+	}
+	out += '+';
+	for (int i = 0; i < m_width; i++)
+	{
+		out += '-';
+	}
+	out += "+\n";
+	return out;
+}
+
+Piece* Board::GetPieceAtCell(const pt2di& pos) const
+{
+	const Cell* cell = GetCell(pos);
+	if (cell == nullptr)
+		return nullptr;
+	return cell->m_piece;
+}
+
+void Board::PlacePiece(Piece* piece)
+{
+	Cell* cell = GetCell(piece->Pos());
+	if (cell == nullptr)
+		return;
+	cell->m_piece = piece;
+}
+
+void Board::MovePiece(Piece* piece, const pt2di& destination)
+{
+	// we have to move the piece
+	// add the move to the move stack
+	Cell* currentCell = GetCell(piece->Pos());
+	Cell* destinationCell = GetCell(destination);
+	if (currentCell == nullptr || destinationCell == nullptr)
+		return;
+
+	destinationCell->m_piece = piece;
+	currentCell->m_piece = nullptr;
+	MoveEvent move{ piece, destination, piece->Pos(), EventType::Move, piece->IsFirstMove() };
+	m_moveStack.push(move);
+}
+
+void Board::CaptureLocation(const pt2di& location)
+{
+	// we have to move the piece
+	// add the move to the move stack
+	Cell* cell = GetCell(location);
+	if (cell == nullptr)
+		return;
+
+	Piece* capturedPiece = cell->m_piece;
+	if (capturedPiece == nullptr)
+		return;
+	capturedPiece->GetCaptured(GetNextBenchLocation());
+	MoveEvent event{ capturedPiece, location, capturedPiece->Pos(), EventType::GetCaptured };
+	m_moveStack.push(event);
+	cell->m_piece = nullptr;
+}
+
+bool Board::DoesCellHavePiece(const pt2di& pos) const
+{
+	const Cell* cell = GetCell(pos);
+	if (cell == nullptr)
+		return false;
+	return cell->m_piece != nullptr;
+}
+
+bool Board::IsCellAttacked(const pt2di& pos) const
+{
+	const Cell* cell = GetCell(pos);
+	if (cell == nullptr)
+		return false;
+	return cell->m_attackedBy != TEAM::NONE;
+}
+
+void Board::ResetCellsAttack()
+{
+	for (int i = 0; i < m_width * m_height; ++i)
+	{
+		m_cells[i].m_attackedBy = TEAM::NONE;
+	}
+}
+
+void Board::TestMove()
+{
+
+}
+
+void Board::UndoMove()
+{
+
+}
+
+pt2di Board::GetNextBenchLocation()
+{
+	m_benchCursor.x++;
+	if ((m_benchCursor.x + 1) * m_cellDim.w > m_screenDim.w)
+	{
+		m_benchCursor.y++;
+		m_benchCursor.x = m_width;
+	}
+	return { m_benchCursor.x * m_cellDim.w, m_benchCursor.y * m_cellDim.h };
 }
