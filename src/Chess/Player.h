@@ -6,7 +6,7 @@
 #include "Chess/Piece.h"
 #include "Chess/Pieces/King.h"
 
-#include "DebugLogger.h"
+#include "Logger.h"
 
 #include <vector>
 #include <memory>

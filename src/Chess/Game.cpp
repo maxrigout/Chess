@@ -10,9 +10,6 @@
 
 #include "Renderer2D/SDL/Renderer2D_SDL.h"
 
-#include <iostream>
-
-
 Game::Game()
 {
 	
@@ -193,11 +190,11 @@ void Game::HandleInput()
 				break;
 
 			case SDL_MOUSEWHEEL:
-				std::cout << "SDL_MOUSEWHEEL: " << event.wheel.y << "\n";
+				// std::cout << "SDL_MOUSEWHEEL: " << event.wheel.y << "\n";
 				break;
 
 			case SDL_KEYDOWN:
-				std::cout << "SDL_KEYDOWN: " << event.key.keysym.scancode << "\n";
+				// std::cout << "SDL_KEYDOWN: " << event.key.keysym.scancode << "\n";
 				if (event.key.keysym.sym == SDLK_z && !zDown)
 				{
 					zDown = true;
@@ -207,7 +204,7 @@ void Game::HandleInput()
 				break;
 
 			case SDL_KEYUP:
-				std::cout << "SDL_KEYUP: " << event.key.keysym.scancode << "\n";
+				// std::cout << "SDL_KEYUP: " << event.key.keysym.scancode << "\n";
 				if (event.key.keysym.sym == SDLK_z)
 					zDown = false;
 				break;
@@ -290,7 +287,7 @@ void Game::SelectCell(const pt2di& cellBoardPosition)
 
 void Game::SwitchPlayers()
 {
-	std::cout << "switching players\n";
+	LOG_INFO("switching players");
 	static int player = 0;
 	// reset the guarded cells
 	m_pBoard->ResetAttack();
@@ -309,9 +306,9 @@ void Game::SwitchPlayers()
 	m_activeTeam = m_pActivePlayer->GetTeam();
 	if (m_pActivePlayer->IsCheckMate())
 	{
-		std::cout << "checkmate\n";
+		LOG_INFO("checkmate\n");
 		m_isGameOver = true;
 		return;
 	}
-	std::cout << "player " << player << "'s turn\n";
+	LOG_INFO("player " + std::to_string(player) + "'s turn");
 }

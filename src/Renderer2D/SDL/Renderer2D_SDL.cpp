@@ -1,7 +1,7 @@
 #include "Renderer2D_SDL.h"
 #include "SDL2_image/SDL_image.h"
 
-#include <iostream>
+#include "Logger.h"
 
 SDL_Color toSDL_Color(const Color& color)
 {
@@ -21,16 +21,16 @@ Renderer2D_SDL::Renderer2D_SDL(SDL_Renderer* renderer)
 	SDL_GetWindowSize(SDL_RenderGetWindow(m_renderer), &m_windowDim.w, &m_windowDim.h);
 	m_viewPortDim = { viewPortRect.w, viewPortRect.h };
 	if (TTF_Init() < 0)
-		std::cout << "Error initializing SDL_ttf: " << TTF_GetError() << std::endl;
+		LOG_ERROR(std::string("Error initializing SDL_ttf: ") + TTF_GetError());
 
 	if (IMG_Init(IMG_INIT_JPG) < 0)
-		std::cout << "Error initializing SDL_image: " << IMG_GetError() << std::endl;
+		LOG_ERROR(std::string("Error initializing SDL_image: ") + IMG_GetError());
 
 	defaultFont = TTF_OpenFont("resources/fonts/Vanilla Caramel.otf", 64);
 	// defaultFont = TTF_OpenFont("Fonts/VirtualNote.ttf", 64);
 	if (defaultFont == nullptr)
 	{
-		std::cout << "cannot open font\n";
+		LOG_ERROR("cannot open font");
 	}
 }
 
@@ -231,9 +231,9 @@ std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* pa
 	return result;
 }
 
-void Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const Renderer2D::SpriteID& spriteId) const
+bool Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const Renderer2D::SpriteID& spriteId) const
 {
-	Sprite sprite = m_sprites[spriteId];
+	const Sprite& sprite = m_sprites[spriteId];
 	SDL_Texture* texture = m_textures[sprite.textureIndex];
 	SDL_Rect src, dest;
 	src.x = sprite.topLeft.x;
@@ -246,14 +246,21 @@ void Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, 
 	dest.w = dimensions.w;
 	dest.h = dimensions.h;
 
-	SDL_RenderCopy(m_renderer, texture, &src, &dest);
+	return SDL_RenderCopy(m_renderer, texture, &src, &dest) == 0;
 }
 
-void Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
+bool Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
 {
-	SpriteID spriteId = m_tagsMap.at(tag);
-	// TODO error check
-	return DrawSprite(topLeft, dimensions, spriteId);
+	try
+	{
+		const SpriteID& spriteId = m_tagsMap.at(tag);
+		return DrawSprite(topLeft, dimensions, spriteId);
+	}
+	catch (const std::exception& e)
+	{
+		LOG_ERROR("an error has occured with tag: " + tag + " - " + e.what());
+	}
+	return false;
 }
 
 

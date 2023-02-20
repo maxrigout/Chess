@@ -6,7 +6,7 @@
 #include "Chess/Pieces/Queen.h"
 #include "Chess/Pieces/King.h"
 
-#include "DebugLogger.h"
+#include "Logger.h"
 
 AIPlayer::AIPlayer(Board* pBoard, TEAM team)
 	: Player(pBoard, team)
@@ -35,7 +35,7 @@ void AIPlayer::PlayThread()
 {
 	m_isPlaying = true;
 	CopyBoard();
-	std::cout << GetCopyAsString();
+	LOG_INFO(GetCopyAsString());
 	std::vector<Move> possibleMoves = GetPossibleMoves();
 
 	// RandomPlay
@@ -74,7 +74,7 @@ std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
 		{
 			bestMoves.clear();
 			bestMoves.push_back(move);
-			std::cout << "found better move\n";
+			LOG_INFO("found better move\n");
 			max_score = score;
 		}
 		else if (score == max_score)
@@ -99,7 +99,7 @@ std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
 		// int score = minimax(3, false);
 		if (moveScore > maxScore)
 		{
-			std::cout << "found better move\n";
+			LOG_INFO("found better move\n");
 			maxScore = moveScore;
 			bestMoves.clear();
 		}
@@ -180,7 +180,7 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 		m_opponentPlayer->CalculateMoves();
 		if (m_opponentPlayer->IsCheckMate())
 		{
-			std::cout << "checkmate\n";
+			LOG_INFO("checkmate\n");
 			return 10000;
 		}
 		std::vector<Move> moves = m_opponentPlayer->GetPossibleMoves();
@@ -205,7 +205,7 @@ void AIPlayer::TestMove2(const Move& move)
 	// {
 	// 	Piece* targetRook = m_pBoard->GetCell(move.target)->GetPiece();
 	// 	if (targetRook == nullptr)
-	// 		std::cout << "something went wrong...\n";
+	// 		LOG_INFO("something went wrong...\n");
 	// 	m_movesStack.top().otherAffectedPiece = targetRook;
 	// }
 	// TODO more fine grain control about how to undo a move

@@ -53,14 +53,16 @@ void Piece::UpdateMovement(float dt)
 void Piece::DrawYourself(const Renderer2D* renderer) const
 {
 	vec2di cell = renderer->GetCellDim();
-	// pt2di center = m_screenPosition + vec2df(cell) / 2;
-	// renderer->FillCircle(center, cell.w / 3, m_teamColor);
-	// renderer->DrawText(m_screenPosition, {m_pieceType, '\0'}, WHITE);
 	char team = TeamToChar(m_team);
 	std::string tag = "";
 	tag += m_pieceType;
 	tag += team;
-	renderer->DrawSprite(m_screenPosition, cell, tag);
+	if (!renderer->DrawSprite(m_screenPosition, cell, tag))
+	{
+		pt2di center = m_screenPosition + vec2df(cell) / 2;
+		renderer->FillCircle(center, cell.w / 3, m_teamColor);
+		renderer->DrawText(m_screenPosition, { m_pieceType, '\0' }, WHITE);
+	}
 }
 
 void Piece::DrawMoves(const Renderer2D* renderer) const

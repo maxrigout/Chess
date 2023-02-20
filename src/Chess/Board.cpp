@@ -396,14 +396,9 @@ void Board::UndoMove()
 	destinationCell->m_piece = piece;
 
 	lastEvent.piece->UndoMove(lastEvent.origin, lastEvent.wasFirstMove);
-	switch (lastEvent.eventType)
-	{
-	case EventType::Castle:
+
+	if (lastEvent.eventType == EventType::Castle)
 		UndoMove();
-		break;
-	case EventType::GetCaptured:
-		break;
-	}
 
 	// hack because the GetCaptured event happens before the Move event
 	if (m_moveStack.top().eventType == EventType::GetCaptured)

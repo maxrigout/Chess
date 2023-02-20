@@ -1,5 +1,5 @@
 #include "Chess/Game.h"
-#include "DebugLogger.h"
+#include "Logger.h"
 
 int main(int argc, char** argv)
 {

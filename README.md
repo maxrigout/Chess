@@ -6,12 +6,13 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 | ---- | --- |
 | SDL2 | [https://github.com/libsdl-org/SDL](https://github.com/libsdl-org/SDL) |
 | SDL2_ttf | [https://github.com/libsdl-org/SDL_ttf](https://github.com/libsdl-org/SDL_ttf) |
-| ~~SDL2_image~~ | ~~[https://github.com/libsdl-org/SDL_image](https://github.com/libsdl-org/SDL_image)~~ |
+| SDL2_image | [https://github.com/libsdl-org/SDL_image](https://github.com/libsdl-org/SDL_image) |
 
 * Once the dependencies are installed create the following directories at the root of the project:
     * deps/include
        * SDL2
        * SDL2_ttf
+       * SDL2_image
     * deps/libraries
     * fonts
 * You should have the following structure:
@@ -27,6 +28,9 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
       |
       |-- SDL2
       |-- Contains the SDL2 headers
+      |
+      |-- SDL2_image
+      |-- Contains the SDL2_image header
       |
       |-- SDL2_ttf
       |-- Contains the SDL2_tff header
@@ -51,17 +55,18 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 
 ## How To Build
 ### Mac OS (with VS Code)
-* Copy the SDL2 and SDL2_ttf headers inside "deps/include/SDL2" and "deps/include/SDL2_ttf" respectively.
-    * Alternatively, you can change line 14 in the .vscode/tasks.json file to point to your own SDL2/SDL2_ttf installation.
+* Copy the `SDL2`, `SDL2_ttf` and `SDL2_image` headers inside `deps/include/SDL2`, `deps/include/SDL2_ttf` and `deps/include/SDL2_image` respectively.
+    * Alternatively, you can change line 14 in the .vscode/tasks.json file to point to your own SDL2/SDL2_ttf/SDL2_image installation.
 * Open the project in VS Code.
 * Go to Terminal > Run Build Task to build the project.
 
 ### Windows (with Visual Studio 2022)
-* Copy the SDL2 and SDL2_ttf headers inside "deps/include/SDL2" and "deps/include/SDL2_ttf" respectively.
+* Copy the SDL2, SDL2_ttf and SDL2_image headers inside `deps/include/SDL2`, `deps/include/SDL2_ttf` and `deps/include/SDL2_image` respectively.
 * Add the following .lib files to the deps/libraries folder:
     * SDL2.lib
     * SDL2main.lib
     * SDL2_ttf.lib
+    * SDL2_image.lib (tbd)
 * Open the .sln file.
 * Build the project.
     * If the program crashes during execution due to missing dlls, then you'll need to copy the dlls to the root of the project.

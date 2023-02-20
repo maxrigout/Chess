@@ -1,0 +1,26 @@
+#pragma once
+
+#include <string>
+// #include <set>
+
+class Logger
+{
+public:
+	// static void Info(const char* file, const char* function, int lineNumber, const char* msg);
+	// static void Debug(const char* file, const char* function, int lineNumber, const char* msg);
+	// static void Error(const char* file, const char* function, int lineNumber, const char* msg);
+	// static void Fatal(const char* file, const char* function, int lineNumber, const char* msg);
+	static void Info(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void Debug(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void Error(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void Fatal(const char* file, const char* function, int lineNumber, const std::string& msg);
+
+private:
+	static void Log(const char* debugLevel, const char* file, const char* function, int lineNumber, const char* msg);
+	static std::string GetTime();
+};
+
+#define LOG_INFO(msg) Logger::Info(__FILE__, __func__, __LINE__, msg)
+#define LOG_DEBUG(msg) Logger::Debug(__FILE__, __func__, __LINE__, msg)
+#define LOG_ERROR(msg) Logger::Error(__FILE__, __func__, __LINE__, msg)
+#define LOG_FATAL(msg) Logger::Fatal(__FILE__, __func__, __LINE__, msg)

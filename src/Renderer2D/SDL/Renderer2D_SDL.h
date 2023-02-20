@@ -28,8 +28,8 @@ public:
 
 	virtual SpriteID LoadTexture(const char* path);
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite);
-	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const;
-	virtual void DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const;
+	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const;
+	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const;
 
 	virtual const vec2di& GetWindowDim() const;
 	virtual const vec2di& GetCellDim() const;
