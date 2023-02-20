@@ -20,6 +20,7 @@ public:
 	virtual void Move(const pt2di& target);
 	virtual void AttackCells() const = 0;
 	virtual bool CanAttack(const pt2di& target) const = 0;
+	void UndoMove(const pt2di& origin, bool wasFirstMove);
 	void UpdateMovement(float dt);
 	void DrawMoves(const Renderer2D* renderer) const;
 	void DrawYourself(const Renderer2D* renderer) const;

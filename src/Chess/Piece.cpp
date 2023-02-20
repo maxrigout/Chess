@@ -84,6 +84,14 @@ void Piece::Move(const pt2di& target)
 	m_isFirstMove = false;
 }
 
+void Piece::UndoMove(const pt2di& origin, bool wasFirstMove)
+{
+	m_boardPosition = origin;
+	m_targetScreenPosition = m_pBoard->BoardToWindowCoordinates(m_boardPosition);
+	m_isFirstMove = wasFirstMove;
+	m_isCaptured = false;
+}
+
 void Piece::GetCaptured(const pt2di& benchPosition)
 {
 	m_isCaptured = true;

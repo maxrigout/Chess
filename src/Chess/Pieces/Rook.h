@@ -8,4 +8,6 @@ public:
 		: FastPiece(pBoard, 'R', team, initialBoardPosition, { { 0, 1 } , {1, 0}, {0, -1 }, {-1, 0} })
 	{}
 	virtual ~Rook() = default;
+
+	void Castle(const vec2di& direction);
 };

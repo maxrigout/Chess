@@ -168,6 +168,7 @@ void Game::Cleanup()
 
 void Game::HandleInput()
 {
+	static bool zDown = false;
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
@@ -197,10 +198,18 @@ void Game::HandleInput()
 
 			case SDL_KEYDOWN:
 				std::cout << "SDL_KEYDOWN: " << event.key.keysym.scancode << "\n";
+				if (event.key.keysym.sym == SDLK_z && !zDown)
+				{
+					zDown = true;
+					m_pBoard->UndoMove();
+					SwitchPlayers();
+				}
 				break;
 
 			case SDL_KEYUP:
 				std::cout << "SDL_KEYUP: " << event.key.keysym.scancode << "\n";
+				if (event.key.keysym.sym == SDLK_z)
+					zDown = false;
 				break;
 		}
 	}

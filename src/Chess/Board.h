@@ -14,6 +14,8 @@
 #include <string>
 #include <stack>
 
+class King;
+
 class Board
 {
 public:
@@ -29,6 +31,7 @@ public:
 	Piece* GetPieceAtCell(const pt2di& pos) const;
 	void PlacePiece(Piece* piece);
 	void MovePiece(Piece* piece, const pt2di& target);
+	void Castle(Piece* rook, const pt2di& target);
 	void CaptureLocation(const pt2di& target);
 	bool DoesCellHavePiece(const pt2di& pos) const;
 	bool IsCellAttacked(const pt2di& pos) const;
@@ -38,6 +41,7 @@ public:
 	void UndoMove();
 
 	pt2di GetNextBenchLocation();
+	pt2di GetPreviousBenchLocation();
 
 	void AttackCell(const pt2di& position, TEAM team);
 	void ResetAttack();

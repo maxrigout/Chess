@@ -321,6 +321,20 @@ void Board::MovePiece(Piece* piece, const pt2di& destination)
 	m_moveStack.push(move);
 }
 
+void Board::Castle(Piece* rook, const pt2di& target)
+{
+	Cell* currentRookCell = GetCell(rook->Pos());
+	Cell* destinationRookCell = GetCell(target);
+	// potentially unecessary
+	if (currentRookCell == nullptr || destinationRookCell == nullptr)
+		return;
+
+	destinationRookCell->m_piece = rook;
+	currentRookCell->m_piece = nullptr;
+	MoveEvent rookMove{ rook, target, rook->Pos(), EventType::Castle, rook->IsFirstMove() };
+	m_moveStack.push(rookMove);
+}
+
 void Board::CaptureLocation(const pt2di& location)
 {
 	// we have to move the piece
@@ -369,16 +383,56 @@ void Board::TestMove()
 
 void Board::UndoMove()
 {
+	MoveEvent lastEvent = m_moveStack.top();
+	Piece* piece = lastEvent.piece;
+	m_moveStack.pop();
 
+	Cell* currentCell = GetCell(piece->Pos());
+	Cell* destinationCell = GetCell(lastEvent.origin);
+
+	currentCell->m_piece = nullptr;
+	destinationCell->m_piece = piece;
+
+	lastEvent.piece->UndoMove(lastEvent.origin, lastEvent.wasFirstMove);
+	switch (lastEvent.eventType)
+	{
+	case EventType::Castle:
+		UndoMove();
+		break;
+	case EventType::GetCaptured:
+		break;
+	}
+
+	// hack because the GetCaptured event happens before the Move event
+	if (m_moveStack.top().eventType == EventType::GetCaptured)
+	{
+		// if a piece was captured, the bench location would have been updated
+		GetPreviousBenchLocation();
+		UndoMove();
+	}
 }
 
 pt2di Board::GetNextBenchLocation()
 {
 	m_benchCursor.x++;
+	// 
 	if ((m_benchCursor.x + 1) * m_cellDim.w > m_screenDim.w)
 	{
 		m_benchCursor.y++;
 		m_benchCursor.x = m_width;
+	}
+	return { m_benchCursor.x * m_cellDim.w, m_benchCursor.y * m_cellDim.h };
+}
+
+pt2di Board::GetPreviousBenchLocation()
+{
+	m_benchCursor.x--;
+	if (m_benchCursor.x < m_width)
+	{
+		m_benchCursor.y--;
+		// int extraRoom = m_screenDim.w - (m_cellDim.w * m_width); // in px
+		int numberExtraCells = m_screenDim.w / m_width - m_cellDim.w;
+		m_benchCursor.x = m_width + numberExtraCells - 1;
 	}
 	return { m_benchCursor.x * m_cellDim.w, m_benchCursor.y * m_cellDim.h };
 }
