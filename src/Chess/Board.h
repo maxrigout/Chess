@@ -27,18 +27,19 @@ public:
 	int GetHeight() const { return m_height; }
 	void SetCellDim(const vec2di& dim);
 	const vec2di& GetCellDim() const { return m_cellDim; }
+	void SetMargin(const vec2di& margin) { m_margin = margin; }
 
 	Piece* GetPieceAtCell(const pt2di& pos) const;
 	void PlacePiece(Piece* piece);
-	void MovePiece(Piece* piece, const pt2di& target);
+	void MovePiece(Piece* piece, const pt2di& target, bool hasSideEffect); // set hasSideEffect if this event caused another
 	void Castle(Piece* rook, const pt2di& target);
-	void CaptureLocation(const pt2di& target);
+	bool CaptureLocation(const pt2di& target); // returns true if a piece was captured
 	bool DoesCellHavePiece(const pt2di& pos) const;
-	bool IsCellAttacked(const pt2di& pos) const;
+	bool IsCellAttacked(const pt2di& pos, TEAM team) const;
 	void ResetCellsAttack();
 
 	void TestMove();
-	void UndoMove();
+	void UndoMove(int i = 0);
 
 	pt2di GetNextBenchLocation();
 	pt2di GetPreviousBenchLocation();
@@ -68,6 +69,8 @@ public:
 private:
 	Cell* GetCell(const pt2di& pos);
 	const Cell* GetCell(const pt2di& pos) const;
+	void DrawCellsBasic(const Renderer2D* renderer) const;
+	void DrawCellsTextured(const Renderer2D* renderer) const;
 
 	Cell* m_cells;
 	int m_width;
@@ -75,6 +78,7 @@ private:
 
 	vec2di m_cellDim;
 	vec2di m_screenDim;
+	vec2di m_margin{ 0, 0 };
 
 	std::stack<MoveEvent> m_moveStack;
 

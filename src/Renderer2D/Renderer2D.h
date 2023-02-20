@@ -77,11 +77,12 @@ public:
 	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const = 0;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const = 0;
 	
-	virtual SpriteID LoadTexture(const char* path) = 0;
+	virtual SpriteID LoadTexture(const char* path, const std::string& tag) = 0;
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite) = 0;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const = 0;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const = 0;
-
+	
+	virtual vec2di GetSpriteSize(const std::string& spriteTag) const = 0;
 	virtual const vec2di& GetWindowDim() const = 0;
 	virtual const vec2di& GetCellDim() const = 0;
 	virtual const vec2di& GetViewPortDim() const = 0;

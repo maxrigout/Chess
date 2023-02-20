@@ -78,8 +78,8 @@ void Piece::DrawMoves(const Renderer2D* renderer) const
 
 void Piece::Move(const pt2di& target)
 {
-	m_pBoard->CaptureLocation(target);
-	m_pBoard->MovePiece(this, target);
+	bool didCapture = m_pBoard->CaptureLocation(target);
+	m_pBoard->MovePiece(this, target, didCapture);
 	m_boardPosition = target;
 	m_targetScreenPosition = m_pBoard->BoardToWindowCoordinates(m_boardPosition);
 	// std::cout << "Moved " << m_pieceType << " from " << m_pBoard->GetBoardCoordinates(oldcell->GetCoordinates()) << " to " << m_pBoard->GetBoardCoordinates(newcell->GetCoordinates()) << std::endl;

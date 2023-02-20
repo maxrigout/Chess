@@ -1,6 +1,8 @@
 #include "Board.h"
 #include "Piece.h"
 
+#include "Logger.h"
+
 #include <iostream>
 
 bool isUpperCase(char c)
@@ -86,12 +88,12 @@ void Board::SetCellDim(const vec2di& dim)
 
 pt2di Board::WindowToBoardCoordinates(const pt2di& windowCoordinates, const vec2di& cellDims) const
 {
-	return pt2di{windowCoordinates.x / cellDims.w, windowCoordinates.y / cellDims.h};
+	return pt2di{ (windowCoordinates.x - m_margin.w) / cellDims.w, (windowCoordinates.y - m_margin.h) / cellDims.h };
 }
 
 pt2di Board::BoardToWindowCoordinates(const pt2di& boardCoordinates, const vec2di& cellDims) const
 {
-	return pt2di{boardCoordinates.x * cellDims.w, boardCoordinates.y * cellDims.h};
+	return (pt2di{ boardCoordinates.x * cellDims.w, boardCoordinates.y * cellDims.h } + m_margin);
 }
 
 pt2di Board::WindowToBoardCoordinates(const pt2di& windowCoordinates) const
@@ -129,6 +131,19 @@ void Board::ResetAttack()
 }
 
 void Board::DrawCells(const Renderer2D* renderer) const
+{
+	DrawCellsTextured(renderer);
+	//DrawCellsBasic(renderer);
+}
+
+void Board::DrawCellsTextured(const Renderer2D* renderer) const
+{
+	const vec2di& windowDim = renderer->GetWindowDim();
+	int sz = std::min(windowDim.x, windowDim.y);
+	renderer->DrawSprite({ 0, 0 }, { sz, sz }, "board");
+}
+
+void Board::DrawCellsBasic(const Renderer2D* renderer) const
 {
 	vec2di screen = renderer->GetWindowDim();
 	vec2di cell = renderer->GetCellDim();
@@ -169,16 +184,16 @@ void Board::DrawCells(const Renderer2D* renderer) const
 
 void Board::DrawCellLabels(const Renderer2D* renderer, const Color& color) const
 {
-	renderer->DrawText({ 0 , 0 }, { 15, 15 }, GetBoardCoordinates({ 0, 0 }), color);
+	renderer->DrawText(pt2di{ 0, 0 } + m_margin, { 15, 15 }, GetBoardCoordinates({ 0, 0 }), color);
 	for (int i = 1; i < m_width; ++i)
 	{
 		// draw the letter
-		renderer->DrawText({ renderer->GetCellDim().x * i , 0 }, { 8, 15 }, { (char)('a' + i), '\0' }, color);
+		renderer->DrawText(pt2di{ renderer->GetCellDim().x * i , 0 } + m_margin, { 8, 15 }, { (char)('a' + i), '\0' }, color);
 	}
 	for (int j = 1; j < m_height; ++j)
 	{
 		// draw the number
-		renderer->DrawText({ 0 , j * renderer->GetCellDim().y }, { 8, 15 }, std::to_string(m_height - j), color);
+		renderer->DrawText(pt2di{ 0 , j * renderer->GetCellDim().y } + m_margin, { 8, 15 }, std::to_string(m_height - j), color);
 	}
 }
 
@@ -217,10 +232,10 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, i
 	pt2di bottomTopLeft{ cellTopLeft.x, cellTopLeft.y + cell.h - height };
 	vec2di bottomDim{ cell.w, height };
 
-	renderer->FillRect(topTopLeft, topDim, color); // top rect
-	renderer->FillRect(leftTopLeft, leftDim, color); // left rect
-	renderer->FillRect(rightTopLeft, rightDim, color); // right rect
-	renderer->FillRect(bottomTopLeft, bottomDim, color); // bottom rect
+	renderer->FillRect(topTopLeft + m_margin, topDim, color); // top rect
+	renderer->FillRect(leftTopLeft + m_margin, leftDim, color); // left rect
+	renderer->FillRect(rightTopLeft + m_margin, rightDim, color); // right rect
+	renderer->FillRect(bottomTopLeft + m_margin, bottomDim, color); // bottom rect
 
 	// option 2
 	// draw smaller and smaller rect
@@ -239,7 +254,7 @@ void Board::HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, cons
 
 	vec2di cell = renderer->GetCellDim();
 
-	renderer->FillRect(	{ cellPos.x * cell.w + padding.x, cellPos.y * cell.h + padding.y },
+	renderer->FillRect(	{ cellPos.x * cell.w + padding.x + m_margin.w, cellPos.y * cell.h + padding.y + m_margin.h },
 						{ cell.w - 2 * padding.x, cell.h - 2 * padding.y },
 						color);
 }
@@ -306,7 +321,7 @@ void Board::PlacePiece(Piece* piece)
 	cell->m_piece = piece;
 }
 
-void Board::MovePiece(Piece* piece, const pt2di& destination)
+void Board::MovePiece(Piece* piece, const pt2di& destination, bool hasSideEffect)
 {
 	// we have to move the piece
 	// add the move to the move stack
@@ -317,7 +332,7 @@ void Board::MovePiece(Piece* piece, const pt2di& destination)
 
 	destinationCell->m_piece = piece;
 	currentCell->m_piece = nullptr;
-	MoveEvent move{ piece, destination, piece->Pos(), EventType::Move, piece->IsFirstMove() };
+	MoveEvent move{ piece, destination, piece->Pos(), EventType::Move, piece->IsFirstMove(), hasSideEffect };
 	m_moveStack.push(move);
 }
 
@@ -331,25 +346,27 @@ void Board::Castle(Piece* rook, const pt2di& target)
 
 	destinationRookCell->m_piece = rook;
 	currentRookCell->m_piece = nullptr;
-	MoveEvent rookMove{ rook, target, rook->Pos(), EventType::Castle, rook->IsFirstMove() };
+	MoveEvent rookMove{ rook, target, rook->Pos(), EventType::Castle, rook->IsFirstMove(), true };
 	m_moveStack.push(rookMove);
 }
 
-void Board::CaptureLocation(const pt2di& location)
+bool Board::CaptureLocation(const pt2di& location)
 {
 	// we have to move the piece
 	// add the move to the move stack
 	Cell* cell = GetCell(location);
 	if (cell == nullptr)
-		return;
+		return false;
 
 	Piece* capturedPiece = cell->m_piece;
 	if (capturedPiece == nullptr)
-		return;
+		return false;
+
 	capturedPiece->GetCaptured(GetNextBenchLocation());
 	MoveEvent event{ capturedPiece, location, capturedPiece->Pos(), EventType::GetCaptured };
 	m_moveStack.push(event);
 	cell->m_piece = nullptr;
+	return true;
 }
 
 bool Board::DoesCellHavePiece(const pt2di& pos) const
@@ -360,12 +377,12 @@ bool Board::DoesCellHavePiece(const pt2di& pos) const
 	return cell->m_piece != nullptr;
 }
 
-bool Board::IsCellAttacked(const pt2di& pos) const
+bool Board::IsCellAttacked(const pt2di& pos, TEAM team) const
 {
 	const Cell* cell = GetCell(pos);
 	if (cell == nullptr)
 		return false;
-	return cell->m_attackedBy != TEAM::NONE;
+	return cell->m_attackedBy != TEAM::NONE && cell->m_attackedBy != team;
 }
 
 void Board::ResetCellsAttack()
@@ -381,8 +398,10 @@ void Board::TestMove()
 
 }
 
-void Board::UndoMove()
+void Board::UndoMove(int i)
 {
+	if (i)
+		LOG_DEBUG("undo move " + std::to_string(i));
 	if (m_moveStack.empty())
 		return;
 	MoveEvent lastEvent = m_moveStack.top();
@@ -396,17 +415,27 @@ void Board::UndoMove()
 	destinationCell->m_piece = piece;
 
 	lastEvent.piece->UndoMove(lastEvent.origin, lastEvent.wasFirstMove);
-
-	if (lastEvent.eventType == EventType::Castle)
-		UndoMove();
-
-	// hack because the GetCaptured event happens before the Move event
-	if (m_moveStack.top().eventType == EventType::GetCaptured)
+	if (lastEvent.eventType == EventType::GetCaptured)
 	{
 		// if a piece was captured, the bench location would have been updated
 		GetPreviousBenchLocation();
-		UndoMove();
 	}
+
+	if (lastEvent.hasSideEffect)
+		UndoMove(i++);
+
+	// if (lastEvent.eventType == EventType::Castle)
+	// 	UndoMove();
+
+	// // hack because the GetCaptured event happens before the Move event
+	// if (m_moveStack.empty())
+	// 	return;
+	// if (m_moveStack.top().eventType == EventType::GetCaptured)
+	// {
+	// 	// if a piece was captured, the bench location would have been updated
+	// 	GetPreviousBenchLocation();
+	// 	UndoMove();
+	// }
 }
 
 pt2di Board::GetNextBenchLocation()
@@ -418,7 +447,7 @@ pt2di Board::GetNextBenchLocation()
 		m_benchCursor.y++;
 		m_benchCursor.x = m_width;
 	}
-	return { m_benchCursor.x * m_cellDim.w, m_benchCursor.y * m_cellDim.h };
+	return { m_benchCursor.x * m_cellDim.w + 2 * m_margin.w, m_benchCursor.y * m_cellDim.h };
 }
 
 pt2di Board::GetPreviousBenchLocation()
@@ -431,5 +460,5 @@ pt2di Board::GetPreviousBenchLocation()
 		int numberExtraCells = m_screenDim.w / m_width - m_cellDim.w;
 		m_benchCursor.x = m_width + numberExtraCells - 1;
 	}
-	return { m_benchCursor.x * m_cellDim.w, m_benchCursor.y * m_cellDim.h };
+	return pt2di{ m_benchCursor.x * m_cellDim.w + 2 * m_margin.w, m_benchCursor.y * m_cellDim.h };
 }

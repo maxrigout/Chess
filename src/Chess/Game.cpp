@@ -73,7 +73,9 @@ void Game::InitBoard()
 
 	m_pBoard = new Board(8, 8);
 	m_pBoard->SetScreenDim(m_pRenderer->GetWindowDim());
-
+	vec2di baseMargin = { 95, 95 };
+	vec2di baseCellSize = { 137, 137 };
+	vec2di baseBoardTextureSize = { 1280, 1280 };
 	int width, height;
 	SDL_GetWindowSize(m_pWindow, &width, &height);
 
@@ -82,28 +84,39 @@ void Game::InitBoard()
 
 	bool square_cells = true; // if we want the cells to be square
 
-	int cellRenderWidthPx, cellRenderHeightPx;
+	vec2di cellRenderPx;
 	if (square_cells)
 	{
 		int val = (width / boardWidth > height / boardHeight) ? height / boardHeight : width / boardWidth;
-		cellRenderWidthPx = val;
-		cellRenderHeightPx = val;
+		cellRenderPx = { val, val };
+
+		int winSz = std::min(width, height);
+		int texSz = std::min(baseBoardTextureSize.w, baseBoardTextureSize.h);
+		float scale = (float)winSz / (float)texSz;
+		baseCellSize.w = (int)((float)baseCellSize.w * scale);
+		baseCellSize.h = (int)((float)baseCellSize.h * scale);
+
+		baseMargin.w = (int)((float)baseMargin.w * scale);
+		baseMargin.h = (int)((float)baseMargin.h * scale);
+		cellRenderPx = baseCellSize;
 	}
 	else
 	{
-		cellRenderWidthPx = width / boardWidth;
-		cellRenderHeightPx = height / boardHeight;
+		cellRenderPx = { width / boardWidth, height / boardHeight };
 	}
 
-	m_pRenderer->SetCellDim({ cellRenderWidthPx, cellRenderHeightPx });
+	m_pBoard->SetMargin(baseMargin);
+
+	m_pRenderer->SetCellDim(cellRenderPx);
 	m_pBoard->SetCellDim(m_pRenderer->GetCellDim());
 
 	// Player set up
 	// the pieces set up should be done in the constructor
 	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE);
 	m_pPlayer2 = new HumanPlayer(m_pBoard, TEAM::TWO);
+	// m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO);
 
-	//((AIPlayer*)m_pPlayer2)->SetOpponentPlayer(m_pPlayer1);
+	// ((AIPlayer*)m_pPlayer2)->SetOpponentPlayer(m_pPlayer1);
 
 	m_pActivePlayer = m_pPlayer1;
 	m_pPlayer2->AttackCells();
@@ -140,6 +153,8 @@ void Game::LoadGraphics()
 	sprites.push_back({ { 1056, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q1" });
 	sprites.push_back({ { 1270, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K1" });
 	m_piecesSprites = m_pRenderer->LoadSpriteSheet("resources/graphics/pieces3.png", sprites);
+
+	m_pRenderer->LoadTexture("resources/graphics/board2.png", "board");
 }
 
 void Game::Run()
@@ -264,15 +279,13 @@ void Game::Render()
 	// draw the selected piece's moves
 	m_pActivePlayer->DrawSelectedPieceMoves(m_pRenderer);
 
-	m_pBoard->DrawCellLabels(m_pRenderer, DARK_GREY);
+	// m_pBoard->DrawCellLabels(m_pRenderer, DARK_GREY);
 
 	m_pPlayer1->DrawPieces(m_pRenderer);
 	m_pPlayer2->DrawPieces(m_pRenderer);
 
 	m_pPlayer1->DrawLastMove(m_pRenderer);
 	m_pPlayer2->DrawLastMove(m_pRenderer);
-
-	m_pRenderer->DrawSprite({0, 0}, m_pRenderer->GetCellDim(), m_piecesSprites[0]);
 
 	m_pRenderer->End();
 }
@@ -306,9 +319,9 @@ void Game::SwitchPlayers()
 	m_activeTeam = m_pActivePlayer->GetTeam();
 	if (m_pActivePlayer->IsCheckMate())
 	{
-		LOG_INFO("checkmate\n");
+		LOG_INFO("game: checkmate\n");
 		m_isGameOver = true;
 		return;
 	}
-	LOG_INFO("player " + std::to_string(player) + "'s turn");
+	LOG_INFO("player " + std::to_string(player + 1) + "'s turn");
 }

@@ -79,7 +79,7 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 - [x] Renderer refactor
 - [x] Text (label for the pieces)
 - [x] AI (AlphaBeta)
-- [ ] Better graphics (wip)
+- [x] Better graphics
 - [x] Better AI
 - [ ] Window and input system
 - [ ] Setup script

@@ -26,9 +26,9 @@ public:
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
 	void UpdatePieces(float dt);
 	bool HasEndedTurn() const { return m_hasTurnEnded; }
-	void BeginTurn() { m_hasTurnEnded = false; CalculateMoves(); }
+	void BeginTurn() { m_hasTurnEnded = false; CalculateLegalMoves(); }
 	std::string GetCopyAsString() const;
-	void CalculateMoves();
+	void CalculateLegalMoves();
 	// Piece* GetPieceAtPosition(const pt2di& position);
 	void DrawPieces(const Renderer2D* renderer) const;
 	void DrawSelectedPieceMoves(const Renderer2D* renderer) const;

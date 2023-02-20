@@ -2,7 +2,7 @@
 
 #include "Rook.h"
 
-#include <iostream>
+#include "Logger.h"
 
 King::King(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
 	: SlowPiece(pBoard, 'K', team, initialBoardPosition, { {1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {1, 0}, {-1, 0}, {0, -1}, {0, 1} })
@@ -75,7 +75,7 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 				return false;
 			}
 			Piece* piece = m_pBoard->GetPieceAtCell(target);
-			if (piece == nullptr && !m_pBoard->IsCellAttacked(target))
+			if (piece == nullptr && !m_pBoard->IsCellAttacked(target, m_team))
 			{
 				info.reason = MoveInfo::NONE;
 				return true;
@@ -85,7 +85,7 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 				info.reason = MoveInfo::ALREADY_OCCUPIED | MoveInfo::SAME_TEAM;
 				return false;
 			}
-			if (m_pBoard->IsCellAttacked(target))
+			if (m_pBoard->IsCellAttacked(target, m_team))
 			{
 				info.reason = MoveInfo::CELL_GUARDED;
 				return false;
@@ -107,9 +107,15 @@ void King::Move(const pt2di& target)
 		if (movevect == vec2di(2, 0))
 		{
 			Piece* rightRook = m_pBoard->GetPieceAtCell(m_boardPosition + vec2di(3, 0));
+			// if we're testing this move... the rook should be present (ie not nullptr)
+			if (rightRook == nullptr)
+			{
+				LOG_INFO("right rook is nullptr?...");
+				return;
+			}
 			if (rightRook->Type() != 'R')
 			{
-				std::cout << "cannot castle at this time... Piece is not a rook!";
+				LOG_INFO("cannot castle at this time... Piece is not a rook!");
 				return;
 			}
 			Piece::Move(target);
@@ -120,9 +126,14 @@ void King::Move(const pt2di& target)
 		else if (movevect == vec2di(-3, 0))
 		{
 			Piece* leftRook = m_pBoard->GetPieceAtCell(m_boardPosition + vec2di(-4, 0));
+			if (leftRook == nullptr)
+			{
+				LOG_INFO("left rook is nullptr?...");
+				return;
+			}
 			if (leftRook->Type() != 'R')
 			{
-				std::cout << "cannot castle at this time... Piece is not a rook!";
+				LOG_INFO("cannot castle at this time... Piece is not a rook!");
 				return;
 			}
 			Piece::Move(target);
@@ -148,7 +159,7 @@ bool King::CanAttack(const pt2di& target) const
 
 bool King::Check()
 {
-	return m_pBoard->IsCellAttacked(m_boardPosition);
+	return m_pBoard->IsCellAttacked(m_boardPosition, m_team);
 }
 
 void King::CalculateAvailableMoves()

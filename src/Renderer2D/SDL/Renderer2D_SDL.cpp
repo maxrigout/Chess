@@ -38,7 +38,7 @@ Renderer2D_SDL::~Renderer2D_SDL()
 {
 	for (auto& texture : m_textures)
 	{
-		SDL_DestroyTexture(texture);
+		SDL_DestroyTexture(texture.texture);
 	}
 	TTF_CloseFont(defaultFont);
 	IMG_Quit();
@@ -187,25 +187,27 @@ void Renderer2D_SDL::DrawArrow(const pt2di& start, const pt2di& end, const Color
 }
 
 
-Renderer2D::SpriteID Renderer2D_SDL::LoadTexture(const char* path)
+Renderer2D::SpriteID Renderer2D_SDL::LoadTexture(const char* path, const std::string& tag)
 {
 	SDL_Texture* texture = IMG_LoadTexture(m_renderer, path);
-	m_textures.push_back(texture);
-	int textureId = m_textures.size() - 1;
 	int width, height;
 	SDL_QueryTexture(texture, NULL, NULL, &width, &height);
+	m_textures.push_back({ texture, { width, height } });
+	int textureId = m_textures.size() - 1;
 	m_sprites.push_back({ textureId, { 0, 0 }, { width, height } });
-	return m_sprites.size() - 1;
+	SpriteID spriteId = m_sprites.size() - 1;
+	m_tagsMap.emplace(tag, spriteId);
+	return spriteId;
 }
 
 std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprites)
 {
 	std::vector<SpriteID> result;
 	SDL_Texture* sheet = IMG_LoadTexture(m_renderer, path);
-	m_textures.push_back(sheet);
-	int textureId = m_textures.size() - 1;
 	int width, height;
 	SDL_QueryTexture(sheet, NULL, NULL, &width, &height);
+	m_textures.push_back({ sheet, { width, height } });
+	int textureId = m_textures.size() - 1;
 	for (const auto& sprite : sprites)
 	{
 		pt2di offset = sprite.offset;
@@ -234,19 +236,19 @@ std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* pa
 bool Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const Renderer2D::SpriteID& spriteId) const
 {
 	const Sprite& sprite = m_sprites[spriteId];
-	SDL_Texture* texture = m_textures[sprite.textureIndex];
+	const Texture& texture = m_textures[sprite.textureIndex];
 	SDL_Rect src, dest;
 	src.x = sprite.topLeft.x;
 	src.y = sprite.topLeft.y;
-	src.w = sprite.size.w;
-	src.h = sprite.size.h;
+	src.w = sprite.size.w > 0 ? sprite.size.w : texture.size.w;
+	src.h = sprite.size.h > 0 ? sprite.size.h : texture.size.h;
 
 	dest.x = topLeft.x;
 	dest.y = topLeft.y;
 	dest.w = dimensions.w;
 	dest.h = dimensions.h;
 
-	return SDL_RenderCopy(m_renderer, texture, &src, &dest) == 0;
+	return SDL_RenderCopy(m_renderer, texture.texture, &src, &dest) == 0;
 }
 
 bool Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
@@ -263,6 +265,20 @@ bool Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, 
 	return false;
 }
 
+
+vec2di Renderer2D_SDL::GetSpriteSize(const std::string& spriteTag) const
+{
+	try
+	{
+		const SpriteID& spriteId = m_tagsMap.at(spriteTag);
+		return m_textures[spriteId].size;
+	}
+	catch (const std::exception& e)
+	{
+		LOG_ERROR("an error has occured with tag: " + spriteTag + " - " + e.what());
+	}
+	return { -1, -1 };
+}
 
 const vec2di& Renderer2D_SDL::GetWindowDim() const
 {

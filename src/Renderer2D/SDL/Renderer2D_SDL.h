@@ -26,11 +26,12 @@ public:
 	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const;
 
-	virtual SpriteID LoadTexture(const char* path);
+	virtual SpriteID LoadTexture(const char* path, const std::string& tag);
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite);
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const;
 
+	virtual vec2di GetSpriteSize(const std::string& spriteTag) const;
 	virtual const vec2di& GetWindowDim() const;
 	virtual const vec2di& GetCellDim() const;
 	virtual const vec2di& GetViewPortDim() const;
@@ -48,6 +49,12 @@ private:
 		vec2di size;
 	};
 
+	struct Texture
+	{
+		SDL_Texture* texture;
+		vec2di size;
+	};
+
 	SDL_Renderer* m_renderer;
 	vec2di m_windowDim;
 	vec2di m_cellDim;
@@ -55,7 +62,7 @@ private:
 
 	TTF_Font* defaultFont = nullptr;
 
-	std::vector<SDL_Texture*> m_textures;
+	std::vector<Texture> m_textures;
 	std::unordered_map<std::string, SpriteID> m_tagsMap;
 	std::vector<Sprite> m_sprites;
 };

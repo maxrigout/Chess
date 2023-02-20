@@ -8,10 +8,14 @@
 
 #include "Logger.h"
 
+unsigned int searchDepth = 3;
+
 AIPlayer::AIPlayer(Board* pBoard, TEAM team)
 	: Player(pBoard, team)
 {
 	srand(time(0));
+	if (searchDepth % 2)
+		searchDepth++;
 }
 
 AIPlayer::~AIPlayer()
@@ -50,6 +54,7 @@ void AIPlayer::PlayThread()
 	m_lastMoveStart = pieceToMove->Pos();
 	pieceToMove->Move(move.target);
 	m_lastMoveEnd = pieceToMove->Pos();
+	LOG_INFO("AI Player finished playing");
 	EndTurn();
 	m_isPlaying = false;
 }
@@ -74,7 +79,7 @@ std::vector<Move> AIPlayer::GetBestMove(const std::vector<Move>& moves)
 		{
 			bestMoves.clear();
 			bestMoves.push_back(move);
-			LOG_INFO("found better move\n");
+			LOG_INFO("found better move");
 			max_score = score;
 		}
 		else if (score == max_score)
@@ -95,11 +100,11 @@ std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
 	for (const auto& move : moves)
 	{
 		TestMove2(move);
-		int moveScore = alphabeta(3, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
-		// int score = minimax(3, false);
+		int moveScore = alphabeta(searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
+		// int score = minimax(searchDepth - 1, false);
 		if (moveScore > maxScore)
 		{
-			LOG_INFO("found better move\n");
+			LOG_INFO("found better move");
 			maxScore = moveScore;
 			bestMoves.clear();
 		}
@@ -133,7 +138,7 @@ int AIPlayer::minimax(int depth, bool isMaximizingPlayer)
 	else
 	{
 		int min_score = std::numeric_limits<int>::max();
-		m_opponentPlayer->CalculateMoves();
+		m_opponentPlayer->CalculateLegalMoves();
 		if (m_opponentPlayer->IsCheckMate())
 			return 10000;
 		std::vector<Move> moves = m_opponentPlayer->GetPossibleMoves();
@@ -160,7 +165,7 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 	if (isMaximizingPlayer)
 	{
 		score = std::numeric_limits<int>::min();
-		CalculateMoves();
+		CalculateLegalMoves();
 		std::vector<Move> moves = GetPossibleMoves();
 		if (moves.size() == 0)
 			return -10000;
@@ -177,10 +182,10 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 	else
 	{
 		score = std::numeric_limits<int>::max();
-		m_opponentPlayer->CalculateMoves();
+		m_opponentPlayer->CalculateLegalMoves();
 		if (m_opponentPlayer->IsCheckMate())
 		{
-			LOG_INFO("checkmate\n");
+			LOG_INFO("checkmate");
 			return 10000;
 		}
 		std::vector<Move> moves = m_opponentPlayer->GetPossibleMoves();
@@ -200,52 +205,12 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 // should probably move the TestMove2 and UndoMove2 to the Board class
 void AIPlayer::TestMove2(const Move& move)
 {
-	m_movesStack.push(move);
-	// if (move.isCastle)
-	// {
-	// 	Piece* targetRook = m_pBoard->GetCell(move.target)->GetPiece();
-	// 	if (targetRook == nullptr)
-	// 		LOG_INFO("something went wrong...\n");
-	// 	m_movesStack.top().otherAffectedPiece = targetRook;
-	// }
-	// TODO more fine grain control about how to undo a move
-	// TODO undo a castle
 	move.piece->Move(move.target);
 }
 
 void AIPlayer::UndoMove2()
 {
-	Move lastMove = m_movesStack.top();
-	m_movesStack.pop();
-	Piece* movedPiece = lastMove.piece;
-	// std::cout << "undoing moving " << movedPiece->Type() << " from " << m_pBoard->GetBoardCoordinates(lastMove.target) << " to " << m_pBoard->GetBoardCoordinates(lastMove.origin) << std::endl;
-	if (movedPiece->Pos() != lastMove.target)
-		LOG_DEBUG("an error might have occured");
-
-	movedPiece->Move(lastMove.origin);
-
-	// reset the first move
-	if (lastMove.wasFirstMove)
-		movedPiece->ReseFirstMove();
-
-	// if the move was a castle...
-	if (lastMove.isCastle)
-	{
-		Piece* rook = lastMove.otherAffectedPiece;
-		// reset the position of the rook since it was where the king was going
-		rook->Move(lastMove.target);
-	}
-	else
-	{
-		// reset the captured piece
-		Piece* capturedPiece = lastMove.otherAffectedPiece;
-		if (capturedPiece != nullptr)
-		{
-			// std::cout << "resetting captured piece: " << capturedPiece->Type() << " at " << m_pBoard->GetBoardCoordinates(lastMove.target) << std::endl;
-			capturedPiece->ResetCaptured();
-			m_pBoard->PlacePiece(capturedPiece);
-		}
-	}
+	m_pBoard->UndoMove();
 }
 
 int AIPlayer::EvaluateBoard() const

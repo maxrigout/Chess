@@ -5,7 +5,6 @@
 #include "Chess/Common.h"
 
 #include <vector>
-#include <stack>
 #include <thread>
 
 class AIPlayer : public Player
@@ -40,8 +39,6 @@ private:
 
 	pt2di m_lastMoveStart{-1, -1};
 	pt2di m_lastMoveEnd{-2, -2};
-
-	std::stack<Move> m_movesStack;
 
 	Player* m_opponentPlayer = nullptr;
 

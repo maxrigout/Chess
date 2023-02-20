@@ -21,7 +21,6 @@ void Logger::Debug(const char* file, const char* function, int lineNumber, const
 	return Log("DEBUG", file, function, lineNumber, msg.c_str());
 }
 
-
 void Logger::Error(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
 	if (s_errorMessages.count(msg))

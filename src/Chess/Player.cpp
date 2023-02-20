@@ -24,22 +24,21 @@ Player::Player(Board* board, TEAM team)
 		pawn_direction = PAWN_DIRECTION::DOWN;
 	}
 
-	Piece *r1, *r2, *b1, *b2, *k1, *k2, *q, *p;
-	r1 = new	Rook	(m_pBoard, team, { 0, king_row });
-	k1 = new	Knight	(m_pBoard, team, { 1, king_row });
-	b1 = new	Bishop	(m_pBoard, team, { 2, king_row });
-	q = new		Queen	(m_pBoard, team, { 3, king_row });
-	m_king = new	King	(m_pBoard, team, { 4, king_row });
-	b2 = new	Bishop	(m_pBoard, team, { 5, king_row });
-	k2 = new	Knight	(m_pBoard, team, { 6, king_row });
-	r2 = new	Rook	(m_pBoard, team, { 7, king_row });
+	Piece *r1, *r2, *b1, *b2, *k1, *k2, *q;
+	r1 = 		new Rook	(m_pBoard, team, { 0, king_row });
+	k1 = 		new Knight	(m_pBoard, team, { 1, king_row });
+	b1 = 		new Bishop	(m_pBoard, team, { 2, king_row });
+	q = 		new	Queen	(m_pBoard, team, { 3, king_row });
+	m_king = 	new King	(m_pBoard, team, { 4, king_row });
+	b2 = 		new Bishop	(m_pBoard, team, { 5, king_row });
+	k2 = 		new Knight	(m_pBoard, team, { 6, king_row });
+	r2 = 		new Rook	(m_pBoard, team, { 7, king_row });
 
 	m_pieces = { r1, k1, b1, q, m_king, b2, k2, r2 };
 
 	for (int i = 0; i < m_pBoard->GetWidth(); ++i)
 	{
-		p = new Pawn(m_pBoard, team, { i, pawn_row }, pawn_direction);
-		m_pieces.push_back(p);
+		m_pieces.push_back(new Pawn(m_pBoard, team, { i, pawn_row }, pawn_direction));
 	}
 
 	for (const auto& piece : m_pieces)
@@ -91,7 +90,7 @@ void Player::UpdatePieces(float dt)
 	}
 }
 
-void Player::CalculateMoves()
+void Player::CalculateLegalMoves()
 {
 	for (auto& piece : m_pieces)
 	{
@@ -102,6 +101,7 @@ void Player::CalculateMoves()
 	if (GetKing()->Check())
 	{
 		std::cout << "Check!\n";
+		std::cout << m_pBoard->ToString();
 		std::vector<Move> possibleMoves = GetPossibleMoves();
 		for (auto& piece : m_pieces)
 		{
@@ -186,7 +186,7 @@ char Player::TestMove(const Move& move)
 bool Player::IsCheck() const
 {
 	pt2di kingPosition = m_king->Pos();
-	return m_pBoard->IsCellAttacked(kingPosition);
+	return m_pBoard->IsCellAttacked(kingPosition, m_team);
 }
 
 bool Player::IsHypotheticalCheck() const
