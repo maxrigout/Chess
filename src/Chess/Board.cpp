@@ -383,6 +383,8 @@ void Board::TestMove()
 
 void Board::UndoMove()
 {
+	if (m_moveStack.empty())
+		return;
 	MoveEvent lastEvent = m_moveStack.top();
 	Piece* piece = lastEvent.piece;
 	m_moveStack.pop();
