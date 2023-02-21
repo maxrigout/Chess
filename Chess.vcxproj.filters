@@ -60,11 +60,14 @@
     <ClCompile Include="src\renderer2d\sdl\Renderer2D_SDL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chess\Pieces\Rook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\DebugLogger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\chess\Board.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -123,6 +126,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer2d\sdl\Renderer2D_SDL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

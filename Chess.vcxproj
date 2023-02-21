@@ -54,7 +54,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)deps\libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
@@ -67,7 +67,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)deps\libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>
       </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
@@ -83,10 +83,12 @@
     <ClCompile Include="src\chess\pieces\FastPiece.cpp" />
     <ClCompile Include="src\chess\pieces\King.cpp" />
     <ClCompile Include="src\chess\pieces\Pawn.cpp" />
+    <ClCompile Include="src\Chess\Pieces\Rook.cpp" />
     <ClCompile Include="src\chess\pieces\SlowPiece.cpp" />
     <ClCompile Include="src\chess\Player.cpp" />
     <ClCompile Include="src\chess\players\AIPlayer.cpp" />
     <ClCompile Include="src\chess\players\HumanPlayer.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\renderer2d\sdl\Renderer2D_SDL.cpp" />
   </ItemGroup>
@@ -107,7 +109,7 @@
     <ClInclude Include="src\chess\Player.h" />
     <ClInclude Include="src\chess\players\AIPlayer.h" />
     <ClInclude Include="src\chess\players\HumanPlayer.h" />
-    <ClInclude Include="src\DebugLogger.h" />
+    <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\math\point2d.h" />
     <ClInclude Include="src\math\vector2d.h" />
     <ClInclude Include="src\renderer2d\Renderer2D.h" />
