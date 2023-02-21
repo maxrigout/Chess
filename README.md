@@ -35,7 +35,7 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
       |-- SDL2_ttf
       |-- Contains the SDL2_tff header
       |
-   |-- includes
+   |-- libraries
       | Contains all the 3rd party libraries used for linking
       |
  |-- resources
