@@ -41,7 +41,8 @@ Board::Board(int width, int height)
 			m_cells[y * m_width + x].m_coordinates = { x, y };
 		}
 	}
-	m_benchCursor = { m_width - 1, 0 };
+	// m_benchCursor = { m_width - 1, 0 };
+	m_benchCursor = { 0, 0 };
 }
 
 Board::Board(const Board& other)
@@ -440,25 +441,38 @@ void Board::UndoMove(int i)
 
 pt2di Board::GetNextBenchLocation()
 {
-	m_benchCursor.x++;
-	// 
-	if ((m_benchCursor.x + 1) * m_cellDim.w > m_screenDim.w)
+	int leftMostSlot = m_width * m_cellDim.w + 2 * m_margin.w;
+	if (m_benchCursor.x == 0)
 	{
-		m_benchCursor.y++;
-		m_benchCursor.x = m_width;
+		// initialize
+		// emove the cell width because if we're initializeing, 
+		// we want the x position to be equal to the leftMostSlot.
+		m_benchCursor.x = leftMostSlot - m_cellDim.w;
 	}
-	return { m_benchCursor.x * m_cellDim.w + 2 * m_margin.w, m_benchCursor.y * m_cellDim.h };
+	m_benchCursor.x += m_cellDim.w;
+	// this checks if the slot will fit (in width) inside the window.
+	if (m_benchCursor.x + m_cellDim.w > m_screenDim.w)
+	{
+		// we go to the next row
+		m_benchCursor.y += m_cellDim.h;
+		m_benchCursor.x = leftMostSlot;
+	}
+	return m_benchCursor;
 }
 
 pt2di Board::GetPreviousBenchLocation()
 {
-	m_benchCursor.x--;
-	if (m_benchCursor.x < m_width)
+	int leftMostSlot = m_width * m_cellDim.w + 2 * m_margin.w;
+	int extraRoomPx = m_screenDim.w - leftMostSlot; // extra room in px.. needs to be a multiple of m_cellDim.w
+	int numberExtraSlots = extraRoomPx / m_cellDim.w; // number of horizontal slots for the bench
+	int rightMostSlot = leftMostSlot + m_cellDim.w * (numberExtraSlots - 1);
+	m_benchCursor.x -= m_cellDim.w;
+	// this checks if we bled into the board
+	if (m_benchCursor.x < leftMostSlot)
 	{
-		m_benchCursor.y--;
-		// int extraRoom = m_screenDim.w - (m_cellDim.w * m_width); // in px
-		int numberExtraCells = m_screenDim.w / m_width - m_cellDim.w;
-		m_benchCursor.x = m_width + numberExtraCells - 1;
+		// we want to go up a row
+		m_benchCursor.y -= m_cellDim.h;
+		m_benchCursor.x = rightMostSlot;
 	}
-	return pt2di{ m_benchCursor.x * m_cellDim.w + 2 * m_margin.w, m_benchCursor.y * m_cellDim.h };
+	return m_benchCursor;
 }

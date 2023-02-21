@@ -154,7 +154,7 @@ void Game::LoadGraphics()
 	sprites.push_back({ { 1270, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K1" });
 	m_piecesSprites = m_pRenderer->LoadSpriteSheet("resources/graphics/pieces3.png", sprites);
 
-	m_pRenderer->LoadTexture("resources/graphics/board2.png", "board");
+	m_pRenderer->LoadTexture("resources/graphics/board3.png", "board");
 }
 
 void Game::Run()
