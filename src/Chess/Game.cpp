@@ -116,7 +116,7 @@ void Game::InitBoard()
 	m_pPlayer2 = new HumanPlayer(m_pBoard, TEAM::TWO);
 	// m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO);
 
-	// ((AIPlayer*)m_pPlayer2)->SetOpponentPlayer(m_pPlayer1);
+	m_pPlayer2->SetOpponentPlayer(m_pPlayer1);
 
 	m_pActivePlayer = m_pPlayer1;
 	m_pPlayer2->AttackCells();

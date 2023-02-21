@@ -15,7 +15,7 @@ public:
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
-	void SetOpponentPlayer(Player* player) { m_opponentPlayer = player; }
+	virtual void SetOpponentPlayer(Player* player) override { m_opponentPlayer = player; }
 
 private:
 	std::vector<Move> GetHypotheticalMoves();
