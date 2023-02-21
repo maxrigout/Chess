@@ -75,19 +75,22 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 * TODO
 
 ## Todo
-- [x] Project refactor
-- [x] Renderer refactor
-- [x] Text (label for the pieces)
-- [x] AI (AlphaBeta)
-- [x] Better graphics
-- [x] Better AI
+- [x] Project refactor (02-08-2023)
+- [x] Renderer refactor (02-10-2023)
+- [x] Text (label for the pieces) (02-10-2023)
+- [x] AI (AlphaBeta) (02-12-2023)
+- [x] Better graphics (02-20-2023)
+- [x] Better AI (02-17-2023)
 - [ ] Window and input system
 - [ ] Setup script
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
 
 ## Issues to resolve
-- [x] The King's moves aren't properly calculated when using the AIPlayer.
+- [x] The King's moves aren't properly calculated when using the AIPlayer. (02-18-2023)
    * it was actually a bug in how the king's moves were calculated.
 - [ ] The AIPlayer is using the "real" board and the "real" opponent to do its calculations.
-- [x] Cannot undo a "castle" move.
+- [x] Cannot undo a "castle" move. (02-19-2023)
+   * created a new move system.
 - [ ] The pieces are moved when the AIPlayer is testing moves.
+- [ ] AI does not take a piece when it can.
+- [ ] moves aren't properly undone when the AI Plays.
