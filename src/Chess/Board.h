@@ -28,6 +28,7 @@ public:
 	void SetCellDim(const vec2di& dim);
 	const vec2di& GetCellDim() const { return m_cellDim; }
 	void SetMargin(const vec2di& margin) { m_margin = margin; }
+	const vec2di& GetMargin() const { return m_margin; }
 
 	Piece* GetPieceAtCell(const pt2di& pos) const;
 	void PlacePiece(Piece* piece);
@@ -65,6 +66,8 @@ public:
 	std::string ToString() const;
 
 	void SetScreenDim(const vec2di& dims) { m_screenDim = dims; }
+
+	size_t GetStackSize() const { return m_moveStack.size(); }
 
 private:
 	Cell* GetCell(const pt2di& pos);

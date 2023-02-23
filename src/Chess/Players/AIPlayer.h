@@ -7,6 +7,8 @@
 #include <vector>
 #include <thread>
 
+class TestClass;
+
 class AIPlayer : public Player
 {
 public:
@@ -17,7 +19,6 @@ public:
 
 	virtual void SetOpponentPlayer(Player* player) override { m_opponentPlayer = player; }
 
-private:
 	std::vector<Move> GetHypotheticalMoves();
 	int EvaluateBoard() const;
 	std::vector<Move> GetBestMove(const std::vector<Move>& moves);
@@ -35,6 +36,7 @@ private:
 	void UndoMove2();
 	int EvaluateBoard2() const;
 
+private:
 	int m_boardScore;
 
 	pt2di m_lastMoveStart{-1, -1};
@@ -44,4 +46,9 @@ private:
 
 	std::thread m_playThread;
 	bool m_isPlaying = false;
+
+	size_t m_stackSizeAtBeginningOfTurn = 0;
+
+	friend class TestClass;
+
 };

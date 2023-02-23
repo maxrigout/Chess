@@ -3,7 +3,7 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: clang++ build active file",
+            "label": "C/C++: clang++ build the project",
             "command": "/usr/bin/clang++",
             "args": [
                 "-Wall",
@@ -37,6 +37,57 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "detail": "compiler: /usr/bin/clang++"
+        },
+        {
+            "type": "shell",
+            "label": "Run Tests",
+            "command": "./test",
+            "args": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": ["compile test"],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "detail": "runs tests in the tests folder."
+        },
+        {
+            "type": "shell",
+            "label": "compile test",
+            "command": "/usr/bin/clang++",
+            "args": [
+                "-Wall",
+                "-std=c++17",
+                "-fcolor-diagnostics",
+                "-fansi-escape-codes",
+                "-g",
+                "-Ideps/include",
+                "-Isrc",
+                "-Itests",
+                "${workspaceFolder}/tests/*.cpp",
+                "-o",
+                "${workspaceFolder}/test",
+                "-F/Library/Frameworks",
+                "-framework",
+                "SDL2",
+                "-framework",
+                "SDL2_ttf",
+                "-framework",
+                "SDL2_image"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": false
             },
             "detail": "compiler: /usr/bin/clang++"
         }

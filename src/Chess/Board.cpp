@@ -176,8 +176,8 @@ void Board::DrawCellsBasic(const Renderer2D* renderer) const
 			Color color = ((i + j) % 2 == 0) ? EVEN_CELL_COLOR : ODD_CELL_COLOR;
 			renderer->FillRect({ i * cell.w, j * cell.h }, cell, color);
 			// if we want to draw the cells that are attacked
-			// if (m_cells[j * m_width + i].IsAttacked())
-			// 	HighlightCell(renderer, {i, j}, {15, 15}, RED);
+			if (m_cells[j * m_width + i].m_attackedBy != TEAM::NONE)
+				HighlightCell(renderer, {i, j}, {15, 15}, RED);
 			// 	DrawSelectedCell(renderer, {i, j}, 5, DARK_BLUE);
 		}
 	}
@@ -302,7 +302,7 @@ std::string Board::ToString() const
 	{
 		out += '-';
 	}
-	out += "+\n";
+	out += "+";
 	return out;
 }
 
@@ -364,7 +364,7 @@ bool Board::CaptureLocation(const pt2di& location)
 		return false;
 
 	capturedPiece->GetCaptured(GetNextBenchLocation());
-	MoveEvent event{ capturedPiece, location, capturedPiece->Pos(), EventType::GetCaptured };
+	MoveEvent event{ capturedPiece, location, capturedPiece->Pos(), EventType::GetCaptured, capturedPiece->IsFirstMove(), false };
 	m_moveStack.push(event);
 	cell->m_piece = nullptr;
 	return true;
@@ -406,8 +406,8 @@ void Board::UndoMove(int i)
 	if (m_moveStack.empty())
 		return;
 	MoveEvent lastEvent = m_moveStack.top();
-	Piece* piece = lastEvent.piece;
 	m_moveStack.pop();
+	Piece* piece = lastEvent.piece;
 
 	Cell* currentCell = GetCell(piece->Pos());
 	Cell* destinationCell = GetCell(lastEvent.origin);

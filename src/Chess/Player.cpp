@@ -382,28 +382,17 @@ std::vector<Move> Player::GetPossibleMoves()
 		if (piece->IsCaptured())
 			continue;
 
-		// make sure we copy the available moves because we're resetting it after
+		// make sure we copy the available moves because we're resetting it after.
+		// We're resetting the moves because we don't want to display the moves
+		// that aren't valid to the player
 		std::vector<pt2di> availableMoves = piece->GetAvailableMoves();
 		piece->ResetAvailableMoves();
 		for (const auto& availableMove : availableMoves)
 		{
 			// verify the move won't put yourself in check
 			Move move = { piece, availableMove, piece->Pos(), nullptr, piece->IsFirstMove() };
-			// tag the move as a castle move
-			// vec2di moveVect = move.target - piece->Pos();
-			// if (move.piece->Type() == 'K' && (moveVect.x > 1 || moveVect.x < -1))
-			// {
-			// 	move.otherAffectedPiece = m_pBoard->GetPieceAtCell(move.target);
-			// 	if (move.otherAffectedPiece == nullptr)
-			// 	{
-			// 		std::cout << "something went wrong\n";
-			// 		// raise(SIGTRAP);
-			// 		__builtin_debugtrap();
-			// 	}
-			// 	move.isCastle = true;
-			// }
 			char old_cell = TestMove(move);
-			// if the move take the king out of check
+			// if the move takes the king out of check
 			if (!IsHypotheticalCheck())
 			{
 				if (m_pBoard->DoesCellHavePiece(move.target))
@@ -441,8 +430,7 @@ MoveInfo Player::MoveSelectedPiece(const pt2di& position)
 
 	m_selectedPiece->Move(position); // move the piece
 	m_selectedPiece = nullptr; // deselect the piece
-	EndTurn();// end the current player's turn and allow the other player to play
-
+	
 	return { MoveInfo::NONE };
 }
 

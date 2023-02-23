@@ -19,7 +19,12 @@ void HumanPlayer::Play(const PlayingContext& context)
 		return;
 	}
 
+	// attempt to move the piece
 	MoveInfo info = MoveSelectedPiece(context.selectedCellPosition);
-	if (info.reason != MoveInfo::NONE)
-		SelectPiece(context.selectedCellPosition);
+	if (info.reason == MoveInfo::NONE)
+	{
+		EndTurn(); // end the current player's turn and allow the other player to play
+		return;
+	}
+	SelectPiece(context.selectedCellPosition);
 }

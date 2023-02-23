@@ -8,13 +8,7 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 | SDL2_ttf | [https://github.com/libsdl-org/SDL_ttf](https://github.com/libsdl-org/SDL_ttf) |
 | SDL2_image | [https://github.com/libsdl-org/SDL_image](https://github.com/libsdl-org/SDL_image) |
 
-* Once the dependencies are installed create the following directories at the root of the project:
-    * deps/include
-       * SDL2
-       * SDL2_ttf
-       * SDL2_image
-    * deps/libraries
-    * fonts
+* run the scripts/setup.sh file.
 * You should have the following structure:
 ```
  |-- .vscode
@@ -51,7 +45,8 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
    | Contains the source code for the project
    |
 ```
-* Add a font to the fonts folder. (You might need to change the font that's loaded in src/Renderer2D/SDL/Renderer2D_SDL.cpp, line 25, wip)
+* Add a font to the resources/fonts folder. (You might need to change the font that's loaded in src/Renderer2D/SDL/Renderer2D_SDL.cpp, line 25, wip)
+* Add graphics to the resources/graphics folder. You'll need an image for the board and for the pieces. You can configure how the images are interpreted in the "loadGraphics" member function of the Game class (Game.cpp line 129). For the board image, you'll need to change the variables at lines 78, 79 and 80.
 
 ## How To Build
 ### Mac OS (with VS Code)
@@ -74,6 +69,10 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 ### Linux
 * TODO
 
+## Running the Tests
+### Mac OS
+   * run the scripts/test.sh file
+
 ## Todo
 - [x] Project refactor (02-08-2023)
 - [x] Renderer refactor (02-10-2023)
@@ -82,7 +81,7 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 - [x] Better graphics (02-20-2023)
 - [x] Better AI (02-17-2023)
 - [ ] Window and input system
-- [ ] Setup script
+- [x] Setup script (02-22-2023)
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
 
 ## Issues to resolve
@@ -91,6 +90,8 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 - [ ] The AIPlayer is using the "real" board and the "real" opponent to do its calculations.
 - [x] Cannot undo a "castle" move. (02-19-2023)
    * created a new move system.
-- [ ] The pieces are moved when the AIPlayer is testing moves.
-- [ ] AI does not take a piece when it can.
-- [ ] moves aren't properly undone when the AI Plays.
+- [ ] The pieces are moved when the AIPlayer is testing moves. (side effect of the AIPlayer using the real board)
+- [x] AI does not take a piece when it can. (02-22-2023)
+- [ ] Moves aren't properly undone when the AI Plays. (happens with the knights sometimes)
+- [x] Some piece's first move state isn't reset properly. (affects pawns and kings) (02-22-2023)
+   * when a captured move was added, it was using the default value (false) instead of using the piece's first move state.

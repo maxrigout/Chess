@@ -6,6 +6,8 @@
 
 std::set<std::string> s_errorMessages;
 
+// https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+
 void Logger::Log(const char* debugLevel, const char* file, const char* function, int lineNumber, const char* msg)
 {
 	std::cout << "[" << debugLevel << "][" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
@@ -13,12 +15,14 @@ void Logger::Log(const char* debugLevel, const char* file, const char* function,
 
 void Logger::Info(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
-	std::cout << "[INFO][" << GetTime() << "]" << " - " << msg << std::endl;
+	// display the level in green
+	std::cout << "\x1B[32m" << "[INFO]" << "\x1B[0m" << "[" << GetTime() << "]" << " - " << msg << std::endl;
 }
 
 void Logger::Debug(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
-	return Log("DEBUG", file, function, lineNumber, msg.c_str());
+	// display the level in yellow
+	std::cout << "\x1B[33m" << "[DEBUG]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
 }
 
 void Logger::Error(const char* file, const char* function, int lineNumber, const std::string& msg)
@@ -26,7 +30,8 @@ void Logger::Error(const char* file, const char* function, int lineNumber, const
 	if (s_errorMessages.count(msg))
 		return;
 	s_errorMessages.insert(msg);
-	Log("ERROR", file, function, lineNumber, msg.c_str());
+	// display the level in red
+	std::cout << "\x1B[31m" << "[ERROR]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
 }
 
 void Logger::Fatal(const char* file, const char* function, int lineNumber, const std::string& msg)

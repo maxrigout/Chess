@@ -13,7 +13,9 @@ unsigned int searchDepth = 3;
 AIPlayer::AIPlayer(Board* pBoard, TEAM team)
 	: Player(pBoard, team)
 {
-	srand(time(0));
+	long seed = time(0);
+	srand(seed);
+	LOG_DEBUG("AIPlayer seed: " + std::to_string(seed));
 	if (searchDepth % 2)
 		searchDepth++;
 }
@@ -37,9 +39,10 @@ void AIPlayer::Play(const PlayingContext& context)
 
 void AIPlayer::PlayThread()
 {
+	m_stackSizeAtBeginningOfTurn = m_pBoard->GetStackSize();
 	m_isPlaying = true;
 	CopyBoard();
-	LOG_INFO(GetCopyAsString());
+	// LOG_INFO("\n" + GetCopyAsString());
 	std::vector<Move> possibleMoves = GetPossibleMoves();
 
 	// RandomPlay
@@ -97,11 +100,23 @@ std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
 {
 	int maxScore = std::numeric_limits<int>::min();
 	std::vector<Move> bestMoves;
+	LOG_INFO("analyzing " + std::to_string(moves.size()) + " moves");
+	int i = 0;
 	for (const auto& move : moves)
 	{
 		TestMove2(move);
-		int moveScore = alphabeta(searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
-		// int score = minimax(searchDepth - 1, false);
+		// we're searching searchDepth - 1 because we're already searching level 1 in this function.
+		// int moveScore = alphabeta(searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
+		int moveScore = minimax(searchDepth - 1, false);
+		char message[200] = { 0 };
+		snprintf(message, 200, "move %d: %c (%s -> %s) - score %d (%d)",
+			i++,
+			move.piece->Type(),
+			m_pBoard->GetBoardCoordinates(move.origin).c_str(),
+			m_pBoard->GetBoardCoordinates(move.target).c_str(),
+			moveScore,
+			maxScore);
+		LOG_DEBUG(message);
 		if (moveScore > maxScore)
 		{
 			LOG_INFO("found better move");
@@ -112,13 +127,18 @@ std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
 			bestMoves.push_back(move);
 		UndoMove2();
 	}
+	char message[200] = { 0 };
+	snprintf(message, 200, "found %lu moves. Max score %d",
+		bestMoves.size(),
+		maxScore);
+	LOG_DEBUG(message);
 	return bestMoves;
 }
 
 int AIPlayer::minimax(int depth, bool isMaximizingPlayer)
 {
 	// TODO: properly handle checkmates
-	if (depth == 0 || IsCheckMate())
+	if (depth <= 0 || IsCheckMate())
 		return EvaluateBoard2();
 
 	if (isMaximizingPlayer)
@@ -158,7 +178,7 @@ int AIPlayer::minimax(int depth, bool isMaximizingPlayer)
 int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 {
 	// TODO: properly handle checkmates
-	if (depth == 0 || IsCheckMate())
+	if (depth <= 0 || IsCheckMate())
 		return EvaluateBoard2();
 
 	int score = 0;
@@ -192,7 +212,7 @@ int AIPlayer::alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer)
 		for (const auto& move : moves)
 		{
 			TestMove2(move);
-			int score = std::min(score, alphabeta(depth - 1, alpha, beta, !isMaximizingPlayer));
+			score = std::min(score, alphabeta(depth - 1, alpha, beta, !isMaximizingPlayer));
 			UndoMove2();
 			if (score < alpha)
                 break; //(* α cutoff *)
@@ -211,6 +231,8 @@ void AIPlayer::TestMove2(const Move& move)
 void AIPlayer::UndoMove2()
 {
 	m_pBoard->UndoMove();
+	if (m_stackSizeAtBeginningOfTurn > m_pBoard->GetStackSize())
+		LOG_ERROR("board move stack size decreased!");
 }
 
 int AIPlayer::EvaluateBoard() const
@@ -236,15 +258,18 @@ int AIPlayer::EvaluateBoard2() const
 			out += GetPieceValue(m_pBoard->GetPieceAtCell({ i, j }));
 		}
 	}
+	// LOG_DEBUG("\n" + m_pBoard->ToString());
+	// LOG_DEBUG("evaluate board returned: " + std::to_string(out) + "\n\n");
+
 	return out;
 }
 
-int AIPlayer::GetPiecePoints(Piece* piece) const
-{
-	if (piece == nullptr)
-		return 0;
-	return GetPiecePoints(piece->Type());
-}
+// int AIPlayer::GetPiecePoints(Piece* piece) const
+// {
+// 	if (piece == nullptr)
+// 		return 0;
+// 	return GetPiecePoints(piece->Type());
+// }
 
 int AIPlayer::GetPiecePoints(char type) const
 {
@@ -277,5 +302,6 @@ int AIPlayer::GetPieceValue(char type) const
 
 void AIPlayer::DrawLastMove(const Renderer2D* renderer) const
 {
-	renderer->DrawArrow(m_lastMoveStart, m_lastMoveEnd, MAGENTA);
+	vec2di offset = m_pBoard->GetMargin();
+	renderer->DrawArrow(m_lastMoveStart + offset, m_lastMoveEnd + offset, MAGENTA);
 }

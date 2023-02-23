@@ -20,7 +20,14 @@ private:
 	static std::string GetTime();
 };
 
+#ifndef NO_LOG
 #define LOG_INFO(msg) Logger::Info(__FILE__, __func__, __LINE__, msg)
 #define LOG_DEBUG(msg) Logger::Debug(__FILE__, __func__, __LINE__, msg)
 #define LOG_ERROR(msg) Logger::Error(__FILE__, __func__, __LINE__, msg)
 #define LOG_FATAL(msg) Logger::Fatal(__FILE__, __func__, __LINE__, msg)
+#else
+#define LOG_INFO(msg)
+#define LOG_DEBUG(msg)
+#define LOG_ERROR(msg)
+#define LOG_FATAL(msg)
+#endif
