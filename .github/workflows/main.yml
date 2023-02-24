@@ -26,7 +26,7 @@ jobs:
         run: |
           mkdir release
           cp out release/chess.app
-          cp -r resources release/resources
+          cp -R resources release/resources
       
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
