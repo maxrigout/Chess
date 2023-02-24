@@ -14,11 +14,23 @@ jobs:
       - uses: actions/checkout@v2
       
       - name: Run Setup Script
-        run: ${{github.workspace}}/scripts/setup.sh
+        run: ${{github.workspace}}/scripts/macos/setup.sh
         
       - name: Downloading SDL
-        run: ${{github.workspace}}/scripts/download_sdl.sh
+        run: ${{github.workspace}}/scripts/macos/download_sdl.sh
         
       - name: Build
-        run: ${{github.workspace}}/scripts/build.sh
+        run: ${{github.workspace}}/scripts/macos/build.sh
+
+      - name: Create Artifact
+        run: |
+          mkdir release
+          cp out release/chess.app
+          cp -r resources release/resources
+      
+      - name: Publish Artifact
+        uses: actions/upload-artifact@v2
+        with: 
+          name: macos-release
+          path: release
           
