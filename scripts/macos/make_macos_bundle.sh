@@ -5,5 +5,6 @@ PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd ..
 
 cd $PROJECT_DIR
 mkdir -p $OUTPUT_BUNDLE_NAME.app/Contents/MacOS
+mkdir -p $OUTPUT_BUNDLE_NAME.app/Contents/Resources
 cp $INPUT_BIN $OUTPUT_BUNDLE_NAME.app/Contents/MacOS/$OUTPUT_BUNDLE_NAME
 cp -R resources/ $OUTPUT_BUNDLE_NAME.app/Contents/Resources
