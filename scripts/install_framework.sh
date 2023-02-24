@@ -13,7 +13,7 @@ sudo hdiutil attach $FRAMEWORK_NAME.dmg
 echo "Copying the framework"
 cp -R /Volumes/$FRAMEWORK_NAME/$FRAMEWORK_NAME.framework deps/frameworks
 echo "Copying the headers"
-cp -R $PROJECT_DIR/deps/frameworks/$FRAMEWORK_NAME.framework/Versions/Current/Headers deps/include/$FRAMEWORK_NAME
+cp -R $PROJECT_DIR/deps/frameworks/$FRAMEWORK_NAME.framework/Versions/Current/Headers/ deps/include/$FRAMEWORK_NAME
 # cleanup
 echo "Cleanup"
 sudo hdiutil detach /Volumes/$FRAMEWORK_NAME
