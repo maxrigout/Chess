@@ -1,4 +1,4 @@
-name: CI
+name: build
 
 on:
   push:
@@ -9,8 +9,12 @@ on:
   
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
       - name: run a one line script
-        run: ${{github.workspace}}/scripts/build.sh
+        run: |
+          ${{github.workspace}}/scripts/setup.sh
+          ${{github.workspace}}/scripts/download_sdl.sh
+          ${{github.workspace}}/scripts/build.sh
+          
