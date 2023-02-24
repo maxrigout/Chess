@@ -1,4 +1,4 @@
-PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pwd )
+PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd ../.. && pwd )
 
 rm -r $PROJECT_DIR/obj/test
 mkdir -p $PROJECT_DIR/obj/test
