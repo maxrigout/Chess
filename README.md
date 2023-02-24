@@ -1,5 +1,5 @@
 # Chess
-[![CI](https://github.com/maxrigout/Chess/actions/workflows/main.yml/badge.svg)](https://github.com/maxrigout/Chess/actions/workflows/main.yml)
+[![CI](https://github.com/maxrigout/Chess/actions/workflows/main.yml/badge.svg)](https://github.com/maxrigout/Chess/actions/workflows/main.yml)\
 Custom chess engine, using SDL. It features an AI using the Minimax algorithm with AlphaBeta pruning. The AI's moves calculations are done on a separate thread.
 
 ## Dependencies
