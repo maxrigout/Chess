@@ -12,9 +12,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - name: run a one line script
-        run: |
-          ${{github.workspace}}/scripts/setup.sh
-          ${{github.workspace}}/scripts/download_sdl.sh
-          ${{github.workspace}}/scripts/build.sh
+      
+      - name: Run Setup Script
+        run: ${{github.workspace}}/scripts/setup.sh
+        
+      - name: Downloading SDL
+        run: ${{github.workspace}}/scripts/download_sdl.sh
+        
+      - name: Build
+        run: ${{github.workspace}}/scripts/build.sh
           
