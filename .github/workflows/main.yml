@@ -24,9 +24,9 @@ jobs:
 
       - name: Create Artifact
         run: |
+          ${{github.workspace}}/scripts/macos/make_macos_bundle.sh out chess
           mkdir release
-          cp out release/chess.app
-          cp -R resources release/resources
+          cp -R out.app release/chess.app
       
       - name: Publish Artifact
         uses: actions/upload-artifact@v2

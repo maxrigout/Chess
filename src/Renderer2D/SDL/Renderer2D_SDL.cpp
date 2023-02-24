@@ -1,6 +1,7 @@
 #include "Renderer2D_SDL.h"
 #include "SDL2_image/SDL_image.h"
 
+#include "Assets.h"
 #include "Logger.h"
 
 SDL_Color toSDL_Color(const Color& color)
@@ -26,7 +27,7 @@ Renderer2D_SDL::Renderer2D_SDL(SDL_Renderer* renderer)
 	if (IMG_Init(IMG_INIT_JPG) < 0)
 		LOG_ERROR(std::string("Error initializing SDL_image: ") + IMG_GetError());
 
-	defaultFont = TTF_OpenFont("resources/fonts/Vanilla Caramel.otf", 64);
+	defaultFont = TTF_OpenFont(FONT_PATH, 64);
 	// defaultFont = TTF_OpenFont("Fonts/VirtualNote.ttf", 64);
 	if (defaultFont == nullptr)
 	{

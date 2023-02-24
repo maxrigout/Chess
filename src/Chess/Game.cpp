@@ -10,6 +10,7 @@
 
 #include "Renderer2D/SDL/Renderer2D_SDL.h"
 
+#include "Assets.h"
 #include "Logger.h"
 
 Game::Game()
@@ -153,9 +154,9 @@ void Game::LoadGraphics()
 	sprites.push_back({ { 842, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R1" });
 	sprites.push_back({ { 1056, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q1" });
 	sprites.push_back({ { 1270, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K1" });
-	m_piecesSprites = m_pRenderer->LoadSpriteSheet("resources/graphics/pieces3.png", sprites);
+	m_piecesSprites = m_pRenderer->LoadSpriteSheet(PIECES_TEXTURE_PATH, sprites);
 
-	m_pRenderer->LoadTexture("resources/graphics/board3.png", "board");
+	m_pRenderer->LoadTexture(BOARD_TEXTURE_PATH, "board");
 }
 
 void Game::Run()

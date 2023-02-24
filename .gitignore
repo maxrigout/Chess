@@ -2,6 +2,7 @@ out
 test
 
 deps/
+release/
 resources/
 *.dSYM
 **/.DS_Store
