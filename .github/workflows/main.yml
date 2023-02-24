@@ -27,8 +27,8 @@ jobs:
           cd ${{github.workspace}}
           ${{github.workspace}}/scripts/macos/make_macos_bundle.sh out chess
           mkdir release
-          cp -R chess.app release/chess.app
           cp scripts/macos/Info.plist chess.app/Contents/Info.plist
+          cp -R chess.app release/chess.app
       
       - name: Publish Artifact
         uses: actions/upload-artifact@v2
