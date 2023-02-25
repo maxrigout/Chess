@@ -107,8 +107,8 @@ void Piece::ResetCaptured()
 
 const std::vector<pt2di>& Piece::GetAvailableMoves()
 {
-	if (!m_isMovesCalculated)
-		CalculateAvailableMoves();
+	// if (!m_isMovesCalculated)
+	CalculateAvailableMoves();
 	return m_availableMoves;
 }
 

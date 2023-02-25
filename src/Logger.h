@@ -10,6 +10,7 @@ public:
 	// static void Debug(const char* file, const char* function, int lineNumber, const char* msg);
 	// static void Error(const char* file, const char* function, int lineNumber, const char* msg);
 	// static void Fatal(const char* file, const char* function, int lineNumber, const char* msg);
+	static void Tag(const char* tag, const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Info(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Debug(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Error(const char* file, const char* function, int lineNumber, const std::string& msg);
@@ -20,7 +21,8 @@ private:
 	static std::string GetTime();
 };
 
-#ifndef NO_LOG
+#ifndef RELEASE
+#define LOG_TAG(tag, msg) Logger::Tag(tag, __FILE__, __func__, __LINE__, msg)
 #define LOG_INFO(msg) Logger::Info(__FILE__, __func__, __LINE__, msg)
 #define LOG_DEBUG(msg) Logger::Debug(__FILE__, __func__, __LINE__, msg)
 #define LOG_ERROR(msg) Logger::Error(__FILE__, __func__, __LINE__, msg)

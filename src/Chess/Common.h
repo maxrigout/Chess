@@ -34,12 +34,8 @@ struct MoveInfo
 
 struct Move
 {
-	Piece* piece;
 	pt2di target;
 	pt2di origin;
-	Piece* otherAffectedPiece;
-	bool wasFirstMove = false;
-	bool isCastle = false;
 };
 
 enum class EventType

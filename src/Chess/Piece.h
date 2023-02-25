@@ -10,6 +10,8 @@
 
 extern MoveInfo MainInfo;
 
+class Board;
+
 class Piece
 {
 public:
@@ -58,4 +60,6 @@ protected:
 	pt2df m_screenPosition;
 	pt2df m_targetScreenPosition;
 	float m_speed = 15.0f;
+
+	friend class Board;
 };

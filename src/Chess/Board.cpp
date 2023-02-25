@@ -1,9 +1,16 @@
 #include "Board.h"
 #include "Piece.h"
+#include "Chess/Pieces/Pawn.h"
+#include "Chess/Pieces/Rook.h"
+#include "Chess/Pieces/Knight.h"
+#include "Chess/Pieces/Bishop.h"
+#include "Chess/Pieces/Queen.h"
+#include "Chess/Pieces/King.h"
 
 #include "Logger.h"
 
 #include <iostream>
+#include <sstream>
 
 bool isUpperCase(char c)
 {
@@ -43,24 +50,35 @@ Board::Board(int width, int height)
 	}
 	// m_benchCursor = { m_width - 1, 0 };
 	m_benchCursor = { 0, 0 };
+	CreatePlayer1Pieces();
+	CreatePlayer2Pieces();
 }
 
 Board::Board(const Board& other)
 {
 	m_width = other.m_width;
 	m_height = other.m_height;
+	m_screenDim = other.m_screenDim;
+	m_cellDim = other.m_cellDim;
 	m_cells = new Cell[m_width * m_height];
-	for (int y = 0; y < m_height; ++y)
+	for (int i = 0; i < m_width * m_height; ++i)
 	{
-		for (int x = 0; x < m_width; ++x)
+		m_cells[i].m_coordinates = other.m_cells[i].m_coordinates;
+		m_cells[i].m_attackedBy = other.m_cells[i].m_attackedBy;
+		Piece* otherPiece = other.m_cells[i].m_piece;
+		if (otherPiece != nullptr)
 		{
-			m_cells[y * m_width + x] = Cell(other.m_cells[y * m_width + x]);
+			Piece* piece = CopyPiece(otherPiece);
+			PlacePiece(piece);
+			AddPieceToTeam(piece, otherPiece->Team());
 		}
 	}
 }
 
 Board::~Board()
 {
+	DeletePieces(m_player2Pieces);
+	DeletePieces(m_player1Pieces);
 	delete[] m_cells;
 }
 
@@ -394,17 +412,12 @@ void Board::ResetCellsAttack()
 	}
 }
 
-void Board::TestMove()
-{
-
-}
-
-void Board::UndoMove(int i)
+bool Board::UndoMove(int i)
 {
 	if (i)
 		LOG_DEBUG("undo move " + std::to_string(i));
 	if (m_moveStack.empty())
-		return;
+		return false;
 	MoveEvent lastEvent = m_moveStack.top();
 	m_moveStack.pop();
 	Piece* piece = lastEvent.piece;
@@ -424,19 +437,8 @@ void Board::UndoMove(int i)
 
 	if (lastEvent.hasSideEffect)
 		UndoMove(i++);
-
-	// if (lastEvent.eventType == EventType::Castle)
-	// 	UndoMove();
-
-	// // hack because the GetCaptured event happens before the Move event
-	// if (m_moveStack.empty())
-	// 	return;
-	// if (m_moveStack.top().eventType == EventType::GetCaptured)
-	// {
-	// 	// if a piece was captured, the bench location would have been updated
-	// 	GetPreviousBenchLocation();
-	// 	UndoMove();
-	// }
+	
+	return true;
 }
 
 pt2di Board::GetNextBenchLocation()
@@ -475,4 +477,142 @@ pt2di Board::GetPreviousBenchLocation()
 		m_benchCursor.x = rightMostSlot;
 	}
 	return m_benchCursor;
+}
+
+std::vector<Piece*> Board::CreatePieces(TEAM team)
+{
+	std::vector<Piece*> pieces;
+
+	int pawn_row = 6;
+	int king_row = 7;
+	PAWN_DIRECTION pawn_direction = PAWN_DIRECTION::UP;
+	if (team == TEAM::TWO)
+	{
+		pawn_row = 1;
+		king_row = 0;
+		pawn_direction = PAWN_DIRECTION::DOWN;
+	}
+
+	Piece *r1, *r2, *b1, *b2, *k1, *k2, *q, *k;
+	r1 = 	new Rook	(this, team, { 0, king_row });
+	k1 = 	new Knight	(this, team, { 1, king_row });
+	b1 = 	new Bishop	(this, team, { 2, king_row });
+	q = 	new	Queen	(this, team, { 3, king_row });
+	k = 	new King	(this, team, { 4, king_row });
+	b2 = 	new Bishop	(this, team, { 5, king_row });
+	k2 = 	new Knight	(this, team, { 6, king_row });
+	r2 = 	new Rook	(this, team, { 7, king_row });
+
+	pieces = { r1, k1, b1, q, k, b2, k2, r2 };
+
+	for (int i = 0; i < GetWidth(); ++i)
+	{
+		pieces.push_back(new Pawn(this, team, { i, pawn_row }, pawn_direction));
+	}
+
+	for (const auto& piece : pieces)
+		PlacePiece(piece);
+
+	return pieces;
+}
+
+void Board::DeletePieces(const std::vector<Piece*>& pieces)
+{
+	for (const auto piece : pieces)
+		delete piece;
+}
+
+void Board::CreatePlayer1Pieces()
+{
+	m_player1Pieces = CreatePieces(TEAM::ONE);
+}
+
+void Board::CreatePlayer2Pieces()
+{
+	m_player2Pieces = CreatePieces(TEAM::TWO);
+}
+
+std::string Board::MoveStackToString() const
+{
+	auto s = m_moveStack;
+	std::stringstream ss;
+	const int maxSz = 200;
+	char data[maxSz] = {0};
+	while (!s.empty())
+	{
+		auto m = s.top();
+		int charWritten = 0;
+		if (m.eventType == EventType::GetCaptured)
+		{
+			charWritten = snprintf(data, maxSz, "(captured %c%d: %s) < ", m.piece->Type(), (m.piece->Team() == TEAM::TWO) + 1, GetBoardCoordinates(m.origin).c_str());
+			// ss << " < ( captured " << m.piece->Type() << ": " + GetBoardCoordinates(m.origin) << ")";
+		}
+		else if (m.eventType == EventType::Castle)
+		{
+			charWritten = snprintf(data, maxSz, "(castle %c%d) < ", m.piece->Type(), (m.piece->Team() == TEAM::TWO) + 1);
+		}
+		else if (m.eventType == EventType::Move)
+		{
+			charWritten = snprintf(data, maxSz,"(move %c%d: %s -> %s) < ", m.piece->Type(), (m.piece->Team() == TEAM::TWO) + 1, GetBoardCoordinates(m.origin).c_str(), GetBoardCoordinates(m.target).c_str());
+		}
+		data[charWritten - 3] = 0;
+		ss << data;
+		s.pop();
+	}
+	return ss.str();
+}
+
+std::vector<Piece*> Board::GetPlayerPieces(TEAM team) const
+{
+	if (team == TEAM::ONE)
+		return m_player1Pieces;
+
+	if (team == TEAM::TWO)
+		return m_player2Pieces;
+
+	return {};
+}
+
+Piece* Board::CopyPiece(Piece* piece)
+{
+	Piece* copiedPiece = nullptr;
+	switch (piece->Type())
+	{
+		case 'P': copiedPiece = new Pawn(this, piece->Team(), piece->Pos(), PAWN_DIRECTION::UP); break;
+		case 'R': copiedPiece = new Rook(this, piece->Team(), piece->Pos()); break;
+		case 'H': copiedPiece = new Knight(this, piece->Team(), piece->Pos()); break;
+		case 'B': copiedPiece = new Bishop(this, piece->Team(), piece->Pos()); break;
+		case 'Q': copiedPiece = new Queen(this, piece->Team(), piece->Pos()); break;
+		case 'K': copiedPiece = new King(this, piece->Team(), piece->Pos()); break;
+	}
+	copiedPiece->m_boardPosition = piece->m_boardPosition;
+	copiedPiece->m_moves = piece->m_moves;
+	copiedPiece->m_availableMoves = piece->m_availableMoves;
+	copiedPiece->m_team = piece->m_team;
+	copiedPiece->m_teamColor = piece->m_teamColor;
+	copiedPiece->m_pieceType = piece->m_pieceType;
+	copiedPiece->m_isCaptured = piece->m_isCaptured;
+	copiedPiece->m_isFirstMove = piece->m_isFirstMove;
+	copiedPiece->m_isMovesCalculated = false;
+	copiedPiece->m_id = piece->m_id;
+	copiedPiece->m_screenPosition = piece->m_screenPosition;
+	copiedPiece->m_targetScreenPosition = piece->m_targetScreenPosition;
+	copiedPiece->m_speed = piece->m_speed;
+	return copiedPiece;
+}
+
+void Board::AddPieceToTeam(Piece* piece, TEAM team)
+{
+	if (team == TEAM::ONE)
+		m_player1Pieces.push_back(piece);
+	if (team == TEAM::TWO)
+		m_player2Pieces.push_back(piece);
+}
+
+void Board::CreatePieces()
+{
+	DeletePieces(m_player1Pieces);
+	DeletePieces(m_player2Pieces);
+	CreatePlayer1Pieces();
+	CreatePlayer2Pieces();
 }

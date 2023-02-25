@@ -1,9 +1,9 @@
-#ifdef __APPLE__
-#define BOARD_TEXTURE_PATH "../Resources/graphics/board3.png"
-#define PIECES_TEXTURE_PATH "../Resources/graphics/pieces3.png"
-#define FONT_PATH "../Resources/fonts/Vanilla Caramel.otf"
-#elif defined _WIN32
+#if defined RELEASE && __APPLE__
+#define BOARD_TEXTURE_PATH "../graphics/board3.png"
+#define PIECES_TEXTURE_PATH "../graphics/pieces4.png"
+#define FONT_PATH "../fonts/FatBrush.ttf"
+#else
 #define BOARD_TEXTURE_PATH "resources/graphics/board3.png"
-#define PIECES_TEXTURE_PATH "resources/graphics/pieces3.png"
-#define FONT_PATH "resources/fonts/Vanilla Caramel.otf"
+#define PIECES_TEXTURE_PATH "resources/graphics/pieces4.png"
+#define FONT_PATH "resources/fonts/FatBrush.ttf"
 #endif

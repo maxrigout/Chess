@@ -112,6 +112,7 @@ void Game::InitBoard()
 
 	m_pRenderer->SetCellDim(cellRenderPx);
 	m_pBoard->SetCellDim(m_pRenderer->GetCellDim());
+	m_pBoard->CreatePieces();
 
 	// Player set up
 	// the pieces set up should be done in the constructor
@@ -141,19 +142,19 @@ void Game::FreeBoard()
 void Game::LoadGraphics()
 {
 	std::vector<SpriteDescriptor> sprites;
-	sprites.push_back({ { 201, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P2" });
-	sprites.push_back({ { 415, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H2" });
-	sprites.push_back({ { 628, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B2" });
-	sprites.push_back({ { 842, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R2" });
-	sprites.push_back({ { 1056, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q2" });
-	sprites.push_back({ { 1270, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K2" });
+	sprites.push_back({ { 201, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P1" });
+	sprites.push_back({ { 415, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H1" });
+	sprites.push_back({ { 628, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B1" });
+	sprites.push_back({ { 842, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R1" });
+	sprites.push_back({ { 1056, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q1" });
+	sprites.push_back({ { 1270, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K1" });
 
-	sprites.push_back({ { 201, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P1" });
-	sprites.push_back({ { 415, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H1" });
-	sprites.push_back({ { 628, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B1" });
-	sprites.push_back({ { 842, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R1" });
-	sprites.push_back({ { 1056, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q1" });
-	sprites.push_back({ { 1270, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K1" });
+	sprites.push_back({ { 201, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P2" });
+	sprites.push_back({ { 415, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H2" });
+	sprites.push_back({ { 628, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B2" });
+	sprites.push_back({ { 842, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R2" });
+	sprites.push_back({ { 1056, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q2" });
+	sprites.push_back({ { 1270, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K2" });
 	m_piecesSprites = m_pRenderer->LoadSpriteSheet(PIECES_TEXTURE_PATH, sprites);
 
 	m_pRenderer->LoadTexture(BOARD_TEXTURE_PATH, "board");
@@ -215,8 +216,8 @@ void Game::HandleInput()
 				if (event.key.keysym.sym == SDLK_z && !zDown)
 				{
 					zDown = true;
-					m_pBoard->UndoMove();
-					SwitchPlayers();
+					if (m_pBoard->UndoMove())
+						SwitchPlayers();
 				}
 				break;
 
@@ -325,5 +326,8 @@ void Game::SwitchPlayers()
 		m_isGameOver = true;
 		return;
 	}
-	LOG_INFO("player " + std::to_string(player + 1) + "'s turn");
+	std::string msg = "player " + std::to_string(player + 1) + "'s turn";
+	LOG_INFO(msg);
+	msg = "Chess - " + msg;
+	SDL_SetWindowTitle(m_pWindow, msg.c_str());
 }

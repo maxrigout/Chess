@@ -1,4 +1,4 @@
-name: build
+name: macos-build
 
 on:
   push:
@@ -20,13 +20,12 @@ jobs:
         run: ${{github.workspace}}/scripts/macos/download_sdl.sh
         
       - name: Build
-        run: ${{github.workspace}}/scripts/macos/build.sh
+        run: ${{github.workspace}}/scripts/macos/build_release.sh
 
       - name: Create Artifact
         run: |
           cd ${{github.workspace}}
           ./scripts/macos/make_macos_bundle.sh out chess
-          cp scripts/macos/Info.plist chess.app/Contents/Info.plist
           mkdir release
           cp -R chess.app release/chess.app
       

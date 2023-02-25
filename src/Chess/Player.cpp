@@ -13,47 +13,20 @@ Player::Player(Board* board, TEAM team)
 	: m_pBoard{ board }, m_team{ team }
 {
 	m_pBoardCopy = std::make_unique<char[]>(m_pBoard->GetWidth() * m_pBoard->GetHeight());
-
-	int pawn_row = 6;
-	int king_row = 7;
-	PAWN_DIRECTION pawn_direction = PAWN_DIRECTION::UP;
-	if (team == TEAM::TWO)
-	{
-		pawn_row = 1;
-		king_row = 0;
-		pawn_direction = PAWN_DIRECTION::DOWN;
-	}
-
-	Piece *r1, *r2, *b1, *b2, *k1, *k2, *q;
-	r1 = 		new Rook	(m_pBoard, team, { 0, king_row });
-	k1 = 		new Knight	(m_pBoard, team, { 1, king_row });
-	b1 = 		new Bishop	(m_pBoard, team, { 2, king_row });
-	q = 		new	Queen	(m_pBoard, team, { 3, king_row });
-	m_king = 	new King	(m_pBoard, team, { 4, king_row });
-	b2 = 		new Bishop	(m_pBoard, team, { 5, king_row });
-	k2 = 		new Knight	(m_pBoard, team, { 6, king_row });
-	r2 = 		new Rook	(m_pBoard, team, { 7, king_row });
-
-	m_pieces = { r1, k1, b1, q, m_king, b2, k2, r2 };
-
-	for (int i = 0; i < m_pBoard->GetWidth(); ++i)
-	{
-		m_pieces.push_back(new Pawn(m_pBoard, team, { i, pawn_row }, pawn_direction));
-	}
-
+	m_pieces = m_pBoard->GetPlayerPieces(m_team);
 	for (const auto& piece : m_pieces)
 	{
-		board->PlacePiece(piece);
+		if (piece->Type() == 'K')
+		{
+			m_king = (King*)piece;
+			break;
+		}
 	}
 }
 
 Player::~Player()
 {
-	for (const auto& p : m_pieces)
-	{
-		delete p;
-	}
-	m_pieces.clear();
+	// the player does not own the pieces anymore...
 }
 
 std::string Player::GetCopyAsString() const
@@ -114,7 +87,7 @@ void Player::CalculateLegalMoves()
 			if (!IsHypotheticalCheck())
 			{
 				m_legalMoves.push_back(move);
-				move.piece->AddAvailableMove(move.target);
+				m_pBoard->GetPieceAtCell(move.origin)->AddAvailableMove(move.target);
 			}	
 			// undo the move
 			UndoMove(move, old_cell);
@@ -168,13 +141,14 @@ void Player::AttackCells()
 
 void Player::UndoMove(const Move& move, char old_cell)
 {
+	Piece* piece = m_pBoard->GetPieceAtCell(move.origin);
 	GetCopiedCell(move.target.x, move.target.y) = old_cell;
-	GetCopiedCell(move.piece->Pos().x, move.piece->Pos().y) = move.piece->Type() * move.piece->GetMod(m_team);
+	GetCopiedCell(move.origin.x, move.origin.y) = piece->Type() * piece->GetMod(m_team);
 }
 
 char Player::TestMove(const Move& move)
 {
-	pt2di s = move.piece->Pos();
+	pt2di s = move.origin;
 	pt2di e = move.target;
 	char piece = GetCopiedCell(s.x, s.y);
 	char old_cell = GetCopiedCell(e.x, e.y);
@@ -340,7 +314,7 @@ bool Player::IsMoveValid(const Move& move) const
 {
 	for (const auto& m : m_legalMoves)
 	{
-		if (move.piece == m.piece && move.target == m.target)
+		if (move.origin == m.origin && move.target == m.target)
 		{
 			return true;
 		}
@@ -390,13 +364,11 @@ std::vector<Move> Player::GetPossibleMoves()
 		for (const auto& availableMove : availableMoves)
 		{
 			// verify the move won't put yourself in check
-			Move move = { piece, availableMove, piece->Pos(), nullptr, piece->IsFirstMove() };
+			Move move = { availableMove, piece->Pos() };
 			char old_cell = TestMove(move);
 			// if the move takes the king out of check
 			if (!IsHypotheticalCheck())
 			{
-				if (m_pBoard->DoesCellHavePiece(move.target))
-					move.otherAffectedPiece = m_pBoard->GetPieceAtCell(move.target);
 				piece->AddAvailableMove(move.target);
 				possibleMoves.push_back(move);
 			}
@@ -438,7 +410,7 @@ bool Player::IsMoveLegal(const Piece* piece, const pt2di& target) const
 {
 	for (const auto& move : m_legalMoves)
 	{
-		if (move.target == target && move.piece->GetId() == piece->GetId())
+		if (move.target == target && move.origin == piece->Pos())
 			return true;
 	}
 	return false;

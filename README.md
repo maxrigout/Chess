@@ -1,6 +1,9 @@
 # Chess
 [![CI](https://github.com/maxrigout/Chess/actions/workflows/main.yml/badge.svg)](https://github.com/maxrigout/Chess/actions/workflows/main.yml)\
 Custom chess engine, using SDL. It features an AI using the Minimax algorithm with AlphaBeta pruning. The AI's moves calculations are done on a separate thread.
+You can read more about the AI here:\
+Minimax: https://en.wikipedia.org/wiki/Minimax
+Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 
 ## Dependencies
 | Name | Url |
@@ -46,7 +49,7 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
    | Contains the source code for the project
    |
 ```
-* Add a font to the resources/fonts folder. (You might need to change the font that's loaded in src/Renderer2D/SDL/Renderer2D_SDL.cpp, line 25, wip)
+* Add a font to the resources/fonts folder. (You might need to change the font that's loaded in src/Assets.h, line 25, wip)
 * Add graphics to the resources/graphics folder. You'll need an image for the board and for the pieces. You can configure how the images are interpreted in the "loadGraphics" member function of the Game class (Game.cpp line 129). For the board image, you'll need to change the variables at lines 78, 79 and 80.
 
 ## How To Build
@@ -84,15 +87,19 @@ Custom chess engine, using SDL. It features an AI using the Minimax algorithm wi
 - [ ] Window and input system
 - [x] Setup script (02-22-2023)
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
+- [ ] User better testing framework.
 
 ## Issues to resolve
 - [x] The King's moves aren't properly calculated when using the AIPlayer. (02-18-2023)
    * it was actually a bug in how the king's moves were calculated.
-- [ ] The AIPlayer is using the "real" board and the "real" opponent to do its calculations.
+- [x] The AIPlayer is using the "real" board and the "real" opponent to do its calculations. (02-25-2023)
+   * made a copy of the board
 - [x] Cannot undo a "castle" move. (02-19-2023)
    * created a new move system.
-- [ ] The pieces are moved when the AIPlayer is testing moves. (side effect of the AIPlayer using the real board)
+- [x] The pieces are moved when the AIPlayer is testing moves. (side effect of the AIPlayer using the real board) (02-25-2023)
+   * solved when coping the board
 - [x] AI does not take a piece when it can. (02-22-2023)
 - [ ] Moves aren't properly undone when the AI Plays. (happens with the knights sometimes)
+- [ ] Issues with the undo system... meaning that I have to create a new copy of the board for each move I want to test
 - [x] Some piece's first move state isn't reset properly. (affects pawns and kings) (02-22-2023)
    * when a captured move was added, it was using the default value (false) instead of using the piece's first move state.

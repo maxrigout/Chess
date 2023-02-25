@@ -28,13 +28,13 @@ public:
 	int GetPieceValue(char type) const;
 
 	void PlayThread();
-	int minimax(int depth, bool isMaximizingPlayer);
-	int alphabeta(int depth, int alpha, int beta, bool isMaximizingPlayer);
+	int minimax(Board* pBoard, int depth, bool isMaximizingPlayer);
+	int alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMaximizingPlayer);
 
 	std::vector<Move> GetBestMoves2(const std::vector<Move>& moves);
-	void TestMove2(const Move& move);
-	void UndoMove2();
-	int EvaluateBoard2() const;
+	void TestMove2(Board* pBoard, const Move& move);
+	void UndoMove2(Board* pBoard);
+	int EvaluateBoard2(Board* pBoard) const;
 
 private:
 	int m_boardScore;
@@ -48,6 +48,18 @@ private:
 	bool m_isPlaying = false;
 
 	size_t m_stackSizeAtBeginningOfTurn = 0;
+
+	class DummyPlayer : public Player
+	{
+	public:
+		DummyPlayer(Board* pBoard, TEAM team) : Player(pBoard, team) {}
+		virtual ~DummyPlayer() = default;
+		virtual void Play(const PlayingContext& context) {}
+	};
+
+	Board* m_boardCopy;
+	DummyPlayer* m_copyOfThis;
+	DummyPlayer* m_copyOfOpponent;
 
 	friend class TestClass;
 

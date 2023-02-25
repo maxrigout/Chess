@@ -13,6 +13,11 @@ void Logger::Log(const char* debugLevel, const char* file, const char* function,
 	std::cout << "[" << debugLevel << "][" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
 }
 
+void Logger::Tag(const char* tag, const char* file, const char* function, int lineNumber, const std::string& msg)
+{
+	std::cout << "[" << tag << "][] - " << msg << std::endl;
+}
+
 void Logger::Info(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
 	// display the level in green

@@ -13,6 +13,7 @@
 
 #include <string>
 #include <stack>
+#include <vector>
 
 class King;
 
@@ -30,6 +31,8 @@ public:
 	void SetMargin(const vec2di& margin) { m_margin = margin; }
 	const vec2di& GetMargin() const { return m_margin; }
 
+	std::vector<Piece*> GetPlayerPieces(TEAM team) const;
+
 	Piece* GetPieceAtCell(const pt2di& pos) const;
 	void PlacePiece(Piece* piece);
 	void MovePiece(Piece* piece, const pt2di& target, bool hasSideEffect); // set hasSideEffect if this event caused another
@@ -39,8 +42,7 @@ public:
 	bool IsCellAttacked(const pt2di& pos, TEAM team) const;
 	void ResetCellsAttack();
 
-	void TestMove();
-	void UndoMove(int i = 0);
+	bool UndoMove(int i = 0);
 
 	pt2di GetNextBenchLocation();
 	pt2di GetPreviousBenchLocation();
@@ -64,10 +66,12 @@ public:
 	std::string GetBoardCoordinates(const pt2di& position) const;
 
 	std::string ToString() const;
+	std::string MoveStackToString() const;
 
 	void SetScreenDim(const vec2di& dims) { m_screenDim = dims; }
 
 	size_t GetStackSize() const { return m_moveStack.size(); }
+	void CreatePieces();
 
 private:
 	Cell* GetCell(const pt2di& pos);
@@ -75,9 +79,22 @@ private:
 	void DrawCellsBasic(const Renderer2D* renderer) const;
 	void DrawCellsTextured(const Renderer2D* renderer) const;
 
+
+	std::vector<Piece*> CreatePieces(TEAM team);
+	void DeletePieces(const std::vector<Piece*>& pieces);
+	void CreatePlayer1Pieces();
+	void CreatePlayer2Pieces();
+
+	Piece* CopyPiece(Piece* piece);
+	void PlacePiece(Piece* piece, const pt2di& pos);
+	void AddPieceToTeam(Piece* piece, TEAM team);
+
 	Cell* m_cells;
 	int m_width;
 	int m_height;
+
+	std::vector<Piece*> m_player1Pieces;
+	std::vector<Piece*> m_player2Pieces;
 
 	vec2di m_cellDim;
 	vec2di m_screenDim;
