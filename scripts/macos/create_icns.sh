@@ -1,4 +1,4 @@
-input_filepath="rcs/icon.png"
+input_filepath="rsc/icon.png"
 output_iconset_name="chess.iconset"
 mkdir $output_iconset_name
 
