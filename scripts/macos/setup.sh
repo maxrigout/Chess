@@ -6,7 +6,8 @@ mkdir {include,libraries,frameworks}
 cd include
 mkdir {SDL2,SDL2_image,SDL2_ttf}
 
-cd $BASE_DIR
-mkdir resources
-cd resources
-mkdir {fonts,graphics}
+# no longer needed
+# cd $BASE_DIR
+# mkdir resources
+# cd resources
+# mkdir {fonts,graphics}
