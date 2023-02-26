@@ -74,21 +74,26 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 				info.reason = MoveInfo::INVALID_CELL;
 				return false;
 			}
-			Piece* piece = m_pBoard->GetPieceAtCell(target);
-			if (piece == nullptr && !m_pBoard->IsCellAttacked(target, m_team))
-			{
-				info.reason = MoveInfo::NONE;
-				return true;
-			}
-			if (piece != nullptr && piece->IsSameTeam(m_team))
-			{
-				info.reason = MoveInfo::ALREADY_OCCUPIED | MoveInfo::SAME_TEAM;
-				return false;
-			}
 			if (m_pBoard->IsCellAttacked(target, m_team))
 			{
 				info.reason = MoveInfo::CELL_GUARDED;
 				return false;
+			}
+			Piece* piece = m_pBoard->GetPieceAtCell(target);
+			if (piece == nullptr)
+			{
+				info.reason = MoveInfo::NONE;
+				return true;
+			}
+			if (piece->IsSameTeam(m_team))
+			{
+				info.reason = MoveInfo::ALREADY_OCCUPIED | MoveInfo::SAME_TEAM;
+				return false;
+			}
+			if (!m_pBoard->IsCellAttacked(target, m_team))
+			{
+				info.reason = MoveInfo::NONE;
+				return true;
 			}
 			break;	
 		}

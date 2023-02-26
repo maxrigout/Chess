@@ -117,7 +117,7 @@ void Game::InitBoard()
 	// Player set up
 	// the pieces set up should be done in the constructor
 	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE);
-	m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO);
+	m_pPlayer2 = new HumanPlayer(m_pBoard, TEAM::TWO);
 
 	m_pPlayer2->SetOpponentPlayer(m_pPlayer1);
 

@@ -12,6 +12,8 @@
 #include <iostream>
 #include <sstream>
 
+// #define DRAW_DEBUG
+
 bool isUpperCase(char c)
 {
 	return c >= 'A' && c <= 'Z';
@@ -160,6 +162,16 @@ void Board::DrawCellsTextured(const Renderer2D* renderer) const
 	const vec2di& windowDim = renderer->GetWindowDim();
 	int sz = std::min(windowDim.x, windowDim.y);
 	renderer->DrawSprite({ 0, 0 }, { sz, sz }, "board");
+#ifdef DRAW_DEBUG
+	for (int j = 0; j < m_height; j++)
+	{
+		for (int i = 0; i < m_width; i++)
+		{
+			if (m_cells[j * m_width + i].m_attackedBy != TEAM::NONE)
+				HighlightCell(renderer, {i, j}, {15, 15}, RED);
+		}
+	}
+#endif
 }
 
 void Board::DrawCellsBasic(const Renderer2D* renderer) const
