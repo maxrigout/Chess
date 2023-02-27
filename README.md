@@ -87,7 +87,7 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 - [ ] Window and input system
 - [x] Setup script (02-22-2023)
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
-- [ ] User better testing framework.
+- [ ] Use better testing framework. ([https://github.com/catchorg/Catch2](catch2) or [https://github.com/google/googletest](googletest))
 - [ ] Game configurator (ie configure the AI difficulty, human vs human etc..)
 - [ ] GUI
 - [ ] Ability to reset a game
