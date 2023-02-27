@@ -117,7 +117,7 @@ void Game::InitBoard()
 	// Player set up
 	// the pieces set up should be done in the constructor
 	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE);
-	m_pPlayer2 = new HumanPlayer(m_pBoard, TEAM::TWO);
+	m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO);
 
 	m_pPlayer2->SetOpponentPlayer(m_pPlayer1);
 
@@ -289,6 +289,8 @@ void Game::Render()
 
 	m_pPlayer1->DrawLastMove(m_pRenderer);
 	m_pPlayer2->DrawLastMove(m_pRenderer);
+
+	m_pBoard->DrawHourglass(m_pRenderer);
 
 	m_pRenderer->End();
 }

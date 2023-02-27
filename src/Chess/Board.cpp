@@ -628,3 +628,24 @@ void Board::CreatePieces()
 	CreatePlayer1Pieces();
 	CreatePlayer2Pieces();
 }
+
+// TODO move this inside a GUI manager class
+void Board::ShowHourglass(const std::string& additionalMessage) const
+{
+
+}
+
+void Board::UpdateHourglass(float dt)
+{
+
+}
+
+void Board::ResetHourglass() const
+{
+
+}
+
+void Board::DrawHourglass(const Renderer2D* renderer) const
+{
+
+}

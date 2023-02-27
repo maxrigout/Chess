@@ -6,7 +6,7 @@
 #include "Chess/Pieces/Queen.h"
 #include "Chess/Pieces/King.h"
 
-#include <iostream>
+#include "Logger.h"
 #include <signal.h>
 
 Player::Player(Board* board, TEAM team)
@@ -73,8 +73,8 @@ void Player::CalculateLegalMoves()
 	CopyBoard();
 	if (GetKing()->Check())
 	{
-		std::cout << "Check!\n";
-		std::cout << m_pBoard->ToString();
+		LOG_INFO("Check!\n");
+		// std::cout << m_pBoard->ToString();
 		std::vector<Move> possibleMoves = GetPossibleMoves();
 		for (auto& piece : m_pieces)
 		{

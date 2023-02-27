@@ -88,6 +88,9 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 - [x] Setup script (02-22-2023)
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
 - [ ] User better testing framework.
+- [ ] Game configurator (ie configure the AI difficulty, human vs human etc..)
+- [ ] GUI
+- [ ] Ability to reset a game
 
 ## Issues to resolve
 - [x] The King's moves aren't properly calculated when using the AIPlayer. (02-18-2023)

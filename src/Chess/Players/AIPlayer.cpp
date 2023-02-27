@@ -8,6 +8,7 @@
 
 #include "Logger.h"
 
+// TODO add to configuration
 unsigned int searchDepth = 3;
 
 AIPlayer::AIPlayer(Board* pBoard, TEAM team)
@@ -16,8 +17,6 @@ AIPlayer::AIPlayer(Board* pBoard, TEAM team)
 	long seed = time(0);
 	srand(seed);
 	LOG_DEBUG("AIPlayer seed: " + std::to_string(seed));
-	if (searchDepth % 2)
-		searchDepth++;
 }
 
 AIPlayer::~AIPlayer()
@@ -34,6 +33,11 @@ void AIPlayer::Play(const PlayingContext& context)
 		if (m_playThread.joinable())
 			m_playThread.join();
 		m_playThread = std::thread(&AIPlayer::PlayThread, this);
+		m_pBoard->ShowHourglass("AI Player thinking...");
+	}
+	else
+	{
+		m_pBoard->UpdateHourglass(context.dt);
 	}
 }
 
@@ -53,9 +57,9 @@ void AIPlayer::PlayThread()
 	std::vector<Move> bestMoves = GetBestMoves2(possibleMoves);
 	Move move = bestMoves[rand() % bestMoves.size()];
 	Piece* pieceToMove = m_pBoard->GetPieceAtCell(move.origin);
-	m_lastMoveStart = pieceToMove->Pos();
 	pieceToMove->Move(move.target);
-	m_lastMoveEnd = pieceToMove->Pos();
+	m_lastMoveStart = move.origin;
+	m_lastMoveEnd = move.target;
 	LOG_INFO("AI Player finished playing");
 	EndTurn();
 	m_isPlaying = false;
@@ -257,6 +261,8 @@ int AIPlayer::GetPieceValue(char type) const
 
 void AIPlayer::DrawLastMove(const Renderer2D* renderer) const
 {
-	vec2di offset = m_pBoard->GetMargin();
-	renderer->DrawArrow(m_lastMoveStart + offset, m_lastMoveEnd + offset, MAGENTA);
+	vec2di offset = m_pBoard->GetCellDim() / 2;
+	pt2di arrowStart = m_pBoard->BoardToWindowCoordinates(m_lastMoveStart) + offset;
+	pt2di arrowEnd = m_pBoard->BoardToWindowCoordinates(m_lastMoveEnd) + offset;
+	renderer->DrawArrow(arrowStart, arrowEnd, MAGENTA);
 }

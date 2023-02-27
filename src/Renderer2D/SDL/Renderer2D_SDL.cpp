@@ -161,12 +161,12 @@ void Renderer2D_SDL::DrawText(const pt2di& topLeft, const vec2di& dimensions, co
 	SDL_DestroyTexture(message);
 }
 
-void Renderer2D_SDL::DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const
+void Renderer2D_SDL::DrawArrow(const pt2di& screenStart, const pt2di& screenEnd, const Color& color) const
 {
 	const double headBaseSize = 30.0;
 	const double headHeight = 30.0;
-	pt2dd screenStart(start.x * m_cellDim.w + m_cellDim.w / 2, start.y * m_cellDim.h + m_cellDim.h / 2), 
-		screenEnd(end.x * m_cellDim.w + m_cellDim.w / 2, end.y * m_cellDim.h + m_cellDim.h / 2);
+	// pt2dd screenStart(start.x * m_cellDim.w + m_cellDim.w / 2, start.y * m_cellDim.h + m_cellDim.h / 2), 
+	// 	screenEnd(end.x * m_cellDim.w + m_cellDim.w / 2, end.y * m_cellDim.h + m_cellDim.h / 2);
 	vec2dd arrowVector = screenEnd - screenStart;
 	vec2dd arrowDir = arrowVector / arrowVector.Norm();
 	// go back by headHeight units:

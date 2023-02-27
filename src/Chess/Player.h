@@ -12,7 +12,8 @@
 struct PlayingContext
 {
 	pt2di selectedCellPosition;
-	int processingDelay;
+	int maxProcessingDelay;
+	float dt;
 };
 
 class Player
