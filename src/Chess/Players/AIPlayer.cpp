@@ -8,6 +8,8 @@
 
 #include "Logger.h"
 
+#define MAKE_COPIES
+
 // TODO add to configuration
 unsigned int searchDepth = 4;
 
@@ -46,9 +48,12 @@ void AIPlayer::PlayThread()
 	m_stackSizeAtBeginningOfTurn = m_pBoard->GetStackSize();
 	m_isPlaying = true;
 	CopyBoard();
-	m_boardCopy = new Board(*m_pBoard);
+#if !defined MAKE_COPIES
+	m_boardCopy = std::make_unique<Board>(*m_pBoard);
+	m_copyOfThis = std::make_unique<MaximizingPlayer>(m_boardCopy.get(), m_team);
+	m_copyOfOpponent = std::make_unique<MinimizingPlayer>(m_boardCopy.get(), GetOpposingTeam());
+#endif
 	std::vector<Move> possibleMoves = GetPossibleMoves();
-	delete m_boardCopy;
 	// RandomPlay
 	//int r = rand() % possibleMoves.size();
 	//pGame->arrow_start = possibleMoves[r].p->Pos();
@@ -56,6 +61,7 @@ void AIPlayer::PlayThread()
 	//pGame->arrow_end = possibleMoves[r].p->Pos();
 
 	std::vector<Move> bestMoves = GetBestMoves(possibleMoves);
+
 	Move move = bestMoves[rand() % bestMoves.size()];
 	Piece* pieceToMove = m_pBoard->GetPieceAtCell(move.origin);
 	pieceToMove->Move(move.target);
@@ -177,12 +183,15 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 		CopyOfThis.CalculateLegalMoves();
 		std::vector<Move> moves = CopyOfThis.GetPossibleMoves();
 		if (moves.size() == 0)
-			return -10000;
+			return score;
 		for (const auto& move : moves)
 		{
-			// Board board(*pBoard);
-			// TestMove(&board, move);
-			// score = std::max(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
+#if defined MAKE_COPIES
+			 Board board(*pBoard);
+			 Piece* pieceToMove = board.GetPieceAtCell(move.origin);
+			 TestMove(pieceToMove, move);
+			 score = std::max(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
+#else
 			Piece* pieceToMove = pBoard->GetPieceAtCell(move.origin);
 			if (pieceToMove == nullptr)
 			{
@@ -193,6 +202,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 			TestMove(pieceToMove, move);
 			score = std::max(score, alphabeta(pBoard, depth - 1, alpha, beta, !isMaximizingPlayer));
 			UndoMove(pBoard);
+#endif
 			if (score > beta)
                 break; // (* β cutoff *)
             alpha = std::max(alpha, score);
@@ -206,16 +216,17 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 		if (copyOfOpponent.IsCheckMate())
 		{
 			LOG_INFO("checkmate");
-			return 10000;
+			return score;
 		}
 		std::vector<Move> moves = copyOfOpponent.GetPossibleMoves();
-		// if (MovesHaveCastle(moves))
-		// 	LOG_DEBUG("opponent moves has a castle");
 		for (const auto& move : moves)
 		{
-			// Board board(*pBoard);
-			// TestMove(&board, move);
-			// score = std::min(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
+#if defined MAKE_COPIES
+			 Board board(*pBoard);
+			 Piece* pieceToMove = board.GetPieceAtCell(move.origin);
+			 TestMove(pieceToMove, move);
+			 score = std::min(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
+#else
 			Piece* pieceToMove = pBoard->GetPieceAtCell(move.origin);
 			if (pieceToMove == nullptr)
 			{
@@ -226,6 +237,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 			TestMove(pieceToMove, move);
 			score = std::min(score, alphabeta(pBoard, depth - 1, alpha, beta, !isMaximizingPlayer));
 			UndoMove(pBoard);
+#endif
 			if (score < alpha)
                 break; //(* α cutoff *)
             beta = std::min(beta, score);

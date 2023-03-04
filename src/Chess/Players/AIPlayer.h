@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <thread>
+#include <memory>
 
 class TestClass;
 
@@ -71,9 +72,9 @@ private:
 		void Minimize();
 	};
 
-	Board* m_boardCopy;
-	MaximizingPlayer* m_copyOfThis;
-	MinimizingPlayer* m_copyOfOpponent;
+	std::unique_ptr<Board> m_boardCopy;
+	std::unique_ptr<MaximizingPlayer> m_copyOfThis;
+	std::unique_ptr<MinimizingPlayer> m_copyOfOpponent;
 
 	friend class TestClass;
 
