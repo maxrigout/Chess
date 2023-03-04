@@ -141,15 +141,15 @@ void Player::AttackCells()
 
 void Player::UndoMove(const Move& move, char old_cell)
 {
-	Piece* piece = m_pBoard->GetPieceAtCell(move.origin);
+	char piece = GetCopiedCell(move.target.x, move.target.y);
 	GetCopiedCell(move.target.x, move.target.y) = old_cell;
-	GetCopiedCell(move.origin.x, move.origin.y) = piece->Type() * piece->GetMod(m_team);
+	GetCopiedCell(move.origin.x, move.origin.y) = piece;
 }
 
 char Player::TestMove(const Move& move)
 {
-	pt2di s = move.origin;
-	pt2di e = move.target;
+	const pt2di& s = move.origin;
+	const pt2di& e = move.target;
 	char piece = GetCopiedCell(s.x, s.y);
 	char old_cell = GetCopiedCell(e.x, e.y);
 	GetCopiedCell(s.x, s.y) = COPY_EMPTY_CELL;
@@ -291,6 +291,7 @@ bool Player::IsHypotheticalCheck() const
 	// check if there's a pawn
 	for (auto& d : dir_pawn)
 	{
+		// TODO: need to multiply the y by -1 depending on which team we're on
 		pt2di cell = king_pos + d * enemy_team_mod;
 		if (inBounds(cell))
 		{
@@ -374,6 +375,7 @@ std::vector<Move> Player::GetPossibleMoves()
 			}
 			// undo the move
 			UndoMove(move, old_cell);
+			// UndoMove(move, old_cell);
 		}
 	}
 	return possibleMoves;

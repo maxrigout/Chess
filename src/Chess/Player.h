@@ -23,7 +23,6 @@ public:
 	virtual ~Player();
 	virtual void Play(const PlayingContext& context) = 0;
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
-	virtual void SetOpponentPlayer(Player* plauer) {};
 	void UpdatePieces(float dt);
 	bool HasEndedTurn() const { return m_hasTurnEnded; }
 	void BeginTurn() { m_hasTurnEnded = false; CalculateLegalMoves(); }
@@ -53,6 +52,7 @@ protected:
 	char GetCopiedCell(int x, int y) const { return m_pBoardCopy[y * m_pBoard->GetWidth() + x]; }
 	bool IsCheck2() const;
 	bool IsMoveLegal(const Piece* piece, const pt2di& target) const;
+	TEAM GetOpposingTeam() { return m_team == TEAM::TWO? TEAM::ONE : TEAM::TWO; }
 
 	std::unique_ptr<char[]> m_pBoardCopy;
 	Board* m_pBoard = nullptr;

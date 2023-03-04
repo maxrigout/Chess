@@ -17,11 +17,7 @@ public:
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
-	virtual void SetOpponentPlayer(Player* player) override { m_opponentPlayer = player; }
-
-	std::vector<Move> GetHypotheticalMoves();
 	int EvaluateBoard() const;
-	std::vector<Move> GetBestMove(const std::vector<Move>& moves);
 	int GetPiecePoints(Piece* piece) const;
 	int GetPiecePoints(char type) const;
 	int GetPieceValue(Piece* piece) const;
@@ -31,15 +27,15 @@ public:
 	int minimax(Board* pBoard, int depth, bool isMaximizingPlayer);
 	int alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMaximizingPlayer);
 
-	std::vector<Move> GetBestMoves2(const std::vector<Move>& moves);
-	void TestMove2(Board* pBoard, const Move& move);
-	void UndoMove2(Board* pBoard);
-	int EvaluateBoard2(Board* pBoard) const;
+	std::vector<Move> GetBestMoves(const std::vector<Move>& moves);
+	void TestMove(Piece* piece, const Move& move);
+	void UndoMove(Board* pBoard);
+	int EvaluateBoard(Board* pBoard) const;
 
 private:
 	int m_boardScore;
 
-	pt2di m_lastMoveStart{-1, -1};
+	pt2di m_lastMoveStart{-3, -3};
 	pt2di m_lastMoveEnd{-2, -2};
 
 	Player* m_opponentPlayer = nullptr;
@@ -57,9 +53,27 @@ private:
 		virtual void Play(const PlayingContext& context) {}
 	};
 
+	class MaximizingPlayer : public Player
+	{
+	public:
+		MaximizingPlayer(Board* pBoard, TEAM team) : Player(pBoard, team) {}
+		virtual ~MaximizingPlayer() = default;
+		virtual void Play(const PlayingContext& context) {}
+		void Maximize();
+	};
+
+	class MinimizingPlayer : public Player
+	{
+	public:
+		MinimizingPlayer(Board* pBoard, TEAM team) : Player(pBoard, team) {}
+		virtual ~MinimizingPlayer() = default;
+		virtual void Play(const PlayingContext& context) {}
+		void Minimize();
+	};
+
 	Board* m_boardCopy;
-	DummyPlayer* m_copyOfThis;
-	DummyPlayer* m_copyOfOpponent;
+	MaximizingPlayer* m_copyOfThis;
+	MinimizingPlayer* m_copyOfOpponent;
 
 	friend class TestClass;
 

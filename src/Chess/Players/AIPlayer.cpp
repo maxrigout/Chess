@@ -9,7 +9,7 @@
 #include "Logger.h"
 
 // TODO add to configuration
-unsigned int searchDepth = 3;
+unsigned int searchDepth = 4;
 
 AIPlayer::AIPlayer(Board* pBoard, TEAM team)
 	: Player(pBoard, team)
@@ -46,15 +46,16 @@ void AIPlayer::PlayThread()
 	m_stackSizeAtBeginningOfTurn = m_pBoard->GetStackSize();
 	m_isPlaying = true;
 	CopyBoard();
+	m_boardCopy = new Board(*m_pBoard);
 	std::vector<Move> possibleMoves = GetPossibleMoves();
-
+	delete m_boardCopy;
 	// RandomPlay
 	//int r = rand() % possibleMoves.size();
 	//pGame->arrow_start = possibleMoves[r].p->Pos();
 	//possibleMoves[r].p->Move(possibleMoves[r].target);
 	//pGame->arrow_end = possibleMoves[r].p->Pos();
 
-	std::vector<Move> bestMoves = GetBestMoves2(possibleMoves);
+	std::vector<Move> bestMoves = GetBestMoves(possibleMoves);
 	Move move = bestMoves[rand() % bestMoves.size()];
 	Piece* pieceToMove = m_pBoard->GetPieceAtCell(move.origin);
 	pieceToMove->Move(move.target);
@@ -65,24 +66,35 @@ void AIPlayer::PlayThread()
 	m_isPlaying = false;
 }
 
-std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
+std::vector<Move> AIPlayer::GetBestMoves(const std::vector<Move>& moves)
 {
 	int maxScore = std::numeric_limits<int>::min();
-	std::vector<Move> bestMoves;
+	std::vector<Move> bestMoves = {};
 	LOG_INFO("analyzing " + std::to_string(moves.size()) + " moves");
 	int i = 0;
+	Board board(*m_pBoard);
 	for (const auto& move : moves)
 	{
-		Board board(*m_pBoard);
-		TestMove2(&board, move);
+		char message[200] = { 0 };
+		snprintf(message, 200, "move %d: (%s -> %s)",
+			i,
+			m_pBoard->GetBoardCoordinates(move.origin).c_str(),
+			m_pBoard->GetBoardCoordinates(move.target).c_str());
+		LOG_DEBUG(message);
+		Piece* pieceToMove = board.GetPieceAtCell(move.origin);
+		if (pieceToMove == nullptr)
+		{
+			LOG_DEBUG("\n" + board.ToString() + "\n" + board.GetBoardCoordinates(move.origin) + " -> " + board.GetBoardCoordinates(move.target));
+			LOG_DEBUG("piece is nullptr");
+			continue;
+		}
+		TestMove(pieceToMove, move);
 		// we're searching searchDepth - 1 because we're already searching level 1 in this function.
 		int moveScore = alphabeta(&board, searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
 		// int moveScore = minimax(&board, searchDepth - 1, false);
-		char message[200] = { 0 };
-		Piece* piece = m_pBoard->GetPieceAtCell(move.origin);
 		snprintf(message, 200, "move %d: %c (%s -> %s) - score %d (%d)",
-			i++,
-			piece->Type(),
+			i,
+			pieceToMove->Type(),
 			m_pBoard->GetBoardCoordinates(move.origin).c_str(),
 			m_pBoard->GetBoardCoordinates(move.target).c_str(),
 			moveScore,
@@ -96,7 +108,8 @@ std::vector<Move> AIPlayer::GetBestMoves2(const std::vector<Move>& moves)
 		}
 		if (moveScore >= maxScore)
 			bestMoves.push_back(move);
-		// UndoMove2(&board);
+		UndoMove(&board);
+		++i;
 	}
 	char message[200] = { 0 };
 	snprintf(message, 200, "found %lu moves. Max score %d",
@@ -110,7 +123,7 @@ int AIPlayer::minimax(Board* pBoard, int depth, bool isMaximizingPlayer)
 {
 	// TODO: properly handle checkmates
 	if (depth <= 0 || IsCheckMate())
-		return EvaluateBoard2(pBoard);
+		return EvaluateBoard(pBoard);
 
 	if (isMaximizingPlayer)
 	{
@@ -118,11 +131,12 @@ int AIPlayer::minimax(Board* pBoard, int depth, bool isMaximizingPlayer)
 		std::vector<Move> moves = GetPossibleMoves();
 		for (const auto& move : moves)
 		{
-			TestMove2(pBoard, move);
+			Piece* pieceToMove = pBoard->GetPieceAtCell(move.origin);
+			TestMove(pieceToMove, move);
 			int score = minimax(pBoard, depth - 1, !isMaximizingPlayer);
 			if (score > max_score)
 				max_score = score;
-			UndoMove2(pBoard);
+			UndoMove(pBoard);
 		}
 		return max_score;
 	}
@@ -133,17 +147,16 @@ int AIPlayer::minimax(Board* pBoard, int depth, bool isMaximizingPlayer)
 		if (m_opponentPlayer->IsCheckMate())
 			return 10000;
 		std::vector<Move> moves = m_opponentPlayer->GetPossibleMoves();
-		// if (MovesHaveCastle(moves))
-		// 	LOG_DEBUG("opponent moves has a castle");
 		// for (const auto& move : moves)
 		for (int i = 0; i < moves.size(); ++i)
 		{
 			const auto& move = moves[i];
-			TestMove2(pBoard, move);
+			Piece* pieceToMove = pBoard->GetPieceAtCell(move.origin);
+			TestMove(pieceToMove, move);
 			int score = minimax(pBoard, depth - 1, !isMaximizingPlayer);
 			if (score < min_score)
 				min_score = score;
-			UndoMove2(pBoard);
+			UndoMove(pBoard);
 		}
 		return min_score;
 	}
@@ -154,7 +167,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 {
 	// TODO: properly handle checkmates
 	if (depth <= 0 || IsCheckMate())
-		return EvaluateBoard2(pBoard);
+		return EvaluateBoard(pBoard);
 
 	int score = 0;
 	if (isMaximizingPlayer)
@@ -167,10 +180,19 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 			return -10000;
 		for (const auto& move : moves)
 		{
-			Board board(*pBoard);
-			TestMove2(&board, move);
-			score = std::max(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
-			// UndoMove2(pBoard);
+			// Board board(*pBoard);
+			// TestMove(&board, move);
+			// score = std::max(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
+			Piece* pieceToMove = pBoard->GetPieceAtCell(move.origin);
+			if (pieceToMove == nullptr)
+			{
+				LOG_DEBUG("\n" + pBoard->ToString() + "\n" + pBoard->GetBoardCoordinates(move.origin) + " -> " + pBoard->GetBoardCoordinates(move.target));
+				LOG_DEBUG("piece is nullptr");
+				continue;
+			}
+			TestMove(pieceToMove, move);
+			score = std::max(score, alphabeta(pBoard, depth - 1, alpha, beta, !isMaximizingPlayer));
+			UndoMove(pBoard);
 			if (score > beta)
                 break; // (* β cutoff *)
             alpha = std::max(alpha, score);
@@ -179,7 +201,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 	else
 	{
 		score = std::numeric_limits<int>::max();
-		DummyPlayer copyOfOpponent(pBoard, m_team == TEAM::ONE? TEAM::TWO : TEAM::ONE);
+		DummyPlayer copyOfOpponent(pBoard, GetOpposingTeam());
 		copyOfOpponent.CalculateLegalMoves();
 		if (copyOfOpponent.IsCheckMate())
 		{
@@ -191,10 +213,19 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 		// 	LOG_DEBUG("opponent moves has a castle");
 		for (const auto& move : moves)
 		{
-			Board board(*pBoard);
-			TestMove2(&board, move);
-			score = std::min(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
-			// UndoMove2(pBoard);
+			// Board board(*pBoard);
+			// TestMove(&board, move);
+			// score = std::min(score, alphabeta(&board, depth - 1, alpha, beta, !isMaximizingPlayer));
+			Piece* pieceToMove = pBoard->GetPieceAtCell(move.origin);
+			if (pieceToMove == nullptr)
+			{
+				LOG_DEBUG("\n" + pBoard->ToString() + "\n" + pBoard->GetBoardCoordinates(move.origin) + " -> " + pBoard->GetBoardCoordinates(move.target));
+				LOG_DEBUG("piece is nullptr");
+				continue;
+			}
+			TestMove(pieceToMove, move);
+			score = std::min(score, alphabeta(pBoard, depth - 1, alpha, beta, !isMaximizingPlayer));
+			UndoMove(pBoard);
 			if (score < alpha)
                 break; //(* α cutoff *)
             beta = std::min(beta, score);
@@ -203,20 +234,17 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 	return score;
 }
 
-// should probably move the TestMove2 and UndoMove2 to the Board class
-void AIPlayer::TestMove2(Board* pBoard, const Move& move)
+void AIPlayer::TestMove(Piece* piece, const Move& move)
 {
-	// move.piece->Move(move.target);
-	Piece* p = pBoard->GetPieceAtCell(move.origin);
-	p->Move(move.target);
+	piece->Move(move.target);
 }
 
-void AIPlayer::UndoMove2(Board* pBoard)
+void AIPlayer::UndoMove(Board* pBoard)
 {
 	pBoard->UndoMove();
 }
 
-int AIPlayer::EvaluateBoard2(Board* pBoard) const
+int AIPlayer::EvaluateBoard(Board* pBoard) const
 {
 	int out = 0;
 	for (int i = 0; i < pBoard->GetWidth(); i++)

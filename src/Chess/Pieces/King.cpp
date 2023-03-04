@@ -115,13 +115,12 @@ void King::Move(const pt2di& target)
 			// if we're testing this move... the rook should be present (ie not nullptr)
 			if (rightRook == nullptr)
 			{
-				LOG_ERROR("right rook is nullptr?...");
-				LOG_ERROR(m_pBoard->ToString());
+				LOG_ERROR("\nright rook is nullptr?...\n" + m_pBoard->ToString());
 				return;
 			}
 			if (rightRook->Type() != 'R')
 			{
-				LOG_ERROR("cannot castle at this time... Piece is not a rook!");
+				LOG_ERROR("\ncannot castle at this time... Piece is not a rook!" + m_pBoard->ToString());
 				return;
 			}
 			Piece::Move(target);
@@ -134,13 +133,12 @@ void King::Move(const pt2di& target)
 			Piece* leftRook = m_pBoard->GetPieceAtCell(m_boardPosition + vec2di(-4, 0));
 			if (leftRook == nullptr)
 			{
-				LOG_ERROR("left rook is nullptr?...");
-				LOG_ERROR(m_pBoard->ToString());
+				LOG_ERROR("\nleft rook is nullptr?...\n" + m_pBoard->ToString());
 				return;
 			}
 			if (leftRook->Type() != 'R')
 			{
-				LOG_ERROR("cannot castle at this time... Piece is not a rook!");
+				LOG_ERROR("\ncannot castle at this time... Piece is not a rook!" + m_pBoard->ToString());
 				return;
 			}
 			Piece::Move(target);

@@ -1,6 +1,7 @@
 out
 test
 
+# MacOS
 deps/
 release/
 resources/
@@ -9,6 +10,7 @@ resources/
 .DS_Store
 *.app
 
+# Windows
 .vs/
 bin/
 obj/
@@ -16,7 +18,12 @@ obj/
 
 src/Utils/
 
+# Visual Studio
 *.sln
 *.vcxproj
 *.filters
 *.user
+
+# Make
+*.make
+Makefile

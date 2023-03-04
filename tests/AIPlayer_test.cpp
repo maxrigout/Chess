@@ -58,7 +58,7 @@ TEST_FUNCTION(testing_EvaluateBoard)
 
 	aiPlay();
 
-	auto value = ai.EvaluateBoard2();
+	auto value = ai.EvaluateBoard();
 
 	IS_EQUAL(20, value);
 }

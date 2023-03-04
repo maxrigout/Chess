@@ -28,6 +28,11 @@ project "Chess"
 		"deps/include/**.cpp",
 	}
 
+	removefiles
+	{
+		"src/Utils/**"
+	}
+
 	includedirs
 	{
 		"src",
