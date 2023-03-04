@@ -1,138 +1,136 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="Chess">
+      <UniqueIdentifier>{3B2EF60C-A742-1EBE-70C4-C11DDC971AEF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    <Filter Include="Chess\Pieces">
+      <UniqueIdentifier>{6379D547-4FDC-64EC-F861-9DA2E4A3306F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    <Filter Include="Chess\Players">
+      <UniqueIdentifier>{4ACE4749-B68E-C37F-7FC9-0CFDEB48085C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{AFF4887C-9B2B-8A0D-4418-7010302E060F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer2D">
+      <UniqueIdentifier>{32641300-1E1C-554D-8723-2EA973FAEF3D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Renderer2D\SDL">
+      <UniqueIdentifier>{245DC9E6-102B-BDEC-F9BE-2D13E52B9951}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="src\Assets.h" />
+    <ClInclude Include="src\Chess\Board.h">
+      <Filter>Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Cell.h">
+      <Filter>Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Common.h">
+      <Filter>Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Game.h">
+      <Filter>Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Piece.h">
+      <Filter>Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\Bishop.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\FastPiece.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\King.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\Knight.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\Pawn.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\Queen.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\Rook.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Pieces\SlowPiece.h">
+      <Filter>Chess\Pieces</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Player.h">
+      <Filter>Chess</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Players\AIPlayer.h">
+      <Filter>Chess\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chess\Players\HumanPlayer.h">
+      <Filter>Chess\Players</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\Math\point2d.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Math\vector2d.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer2D\Renderer2D.h">
+      <Filter>Renderer2D</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer2D\SDL\Renderer2D_SDL.h">
+      <Filter>Renderer2D\SDL</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Chess\Board.cpp">
+      <Filter>Chess</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\Board.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Cell.cpp">
+      <Filter>Chess</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\Cell.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Common.cpp">
+      <Filter>Chess</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\Common.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Game.cpp">
+      <Filter>Chess</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\Game.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Piece.cpp">
+      <Filter>Chess</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\Piece.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Pieces\Bishop.cpp">
+      <Filter>Chess\Pieces</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\Player.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Pieces\FastPiece.cpp">
+      <Filter>Chess\Pieces</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\pieces\Bishop.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Pieces\King.cpp">
+      <Filter>Chess\Pieces</Filter>
     </ClCompile>
-    <ClCompile Include="src\chess\pieces\FastPiece.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\chess\pieces\King.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\chess\pieces\Pawn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\chess\pieces\SlowPiece.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\chess\players\AIPlayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\chess\players\HumanPlayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\renderer2d\sdl\Renderer2D_SDL.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Logger.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="src\Chess\Pieces\Pawn.cpp">
+      <Filter>Chess\Pieces</Filter>
     </ClCompile>
     <ClCompile Include="src\Chess\Pieces\Rook.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Chess\Pieces</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\chess\Board.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\Cell.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\Common.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\Piece.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\Player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\Bishop.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\FastPiece.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\King.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\Knight.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\Pawn.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\Queen.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\Rook.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\pieces\SlowPiece.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\players\AIPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\chess\players\HumanPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math\point2d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\math\vector2d.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer2d\Renderer2D.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\renderer2d\sdl\Renderer2D_SDL.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Logger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Assets.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClCompile Include="src\Chess\Pieces\SlowPiece.cpp">
+      <Filter>Chess\Pieces</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chess\Player.cpp">
+      <Filter>Chess</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chess\Players\AIPlayer.cpp">
+      <Filter>Chess\Players</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chess\Players\HumanPlayer.cpp">
+      <Filter>Chess\Players</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\Renderer2D\SDL\Renderer2D_SDL.cpp">
+      <Filter>Renderer2D\SDL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
 </Project>

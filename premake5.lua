@@ -10,8 +10,8 @@ workspace "Chess"
 
 	projectName = "Chess"
 	baseDir = ""
-	intdir = devFolder .. "bin-int/%{cfg.buildcfg}_%{cfg.architecture}"
-	outputdir = devFolder .. "bin/%{cfg.buildcfg}_%{cfg.architecture}"
+	intdir = "obj/%{cfg.buildcfg}_%{cfg.architecture}"
+	outputdir = "bin/%{cfg.buildcfg}_%{cfg.architecture}"
 
 project "Chess"
 	-- location "%{prj.name}"
@@ -24,16 +24,16 @@ project "Chess"
 
 	files 
 	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
-		"%{prj.name}/deps/include/**.h",
-		"%{prj.name}/deps/include/**.cpp"
+		"src/**.h",
+		"src/**.cpp",
+		"deps/include/**.cpp",
 	}
 
 	includedirs
 	{
-		"%{prj.name}/src",
-		"%{prj.name}/deps/include",
+		"src",
+		"deps/include",
+		"deps/include/SDL2"
 	}
 
 	postbuildcommands
@@ -52,7 +52,7 @@ project "Chess"
 	filter "system:windows"
 		libdirs
 		{
-			"%{prj.name}/deps/libraries",
+			"deps/libraries",
 		}    
 		links
 		{
@@ -74,3 +74,6 @@ project "Chess"
 	filter "system:linux"
 		-- TODO
 project "Tests"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++17"

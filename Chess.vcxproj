@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -11,26 +11,26 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>17.0</VCProjectVersion>
-    <ProjectGuid>{F36DA118-93BE-4880-8F42-FB86A52FE87C}</ProjectGuid>
+    <ProjectGuid>{3B2EF60C-A742-1EBE-70C4-C11DDC971AEF}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <RootNamespace>Chess</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -40,81 +40,101 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>bin\Debug_x86_64\</OutDir>
+    <IntDir>obj\Debug_x86_64\</IntDir>
+    <TargetName>Chess</TargetName>
+    <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(Configuration)-$(Platform)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>bin\Release_x86_64\</OutDir>
+    <IntDir>obj\Release_x86_64\</IntDir>
+    <TargetName>Chess</TargetName>
+    <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)deps\include\SDL2\;$(SolutionDir)deps\include\;$(SolutionDir)src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>src;deps\include;deps\include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)deps\libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <EntryPointSymbol>
-      </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>deps\libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)deps\include\SDL2\;$(SolutionDir)deps\include\;$(SolutionDir)src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <AdditionalIncludeDirectories>src;deps\include;deps\include\SDL2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)deps\libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <EntryPointSymbol>
-      </EntryPointSymbol>
       <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_ttf.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>deps\libraries;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\chess\Board.cpp" />
-    <ClCompile Include="src\chess\Cell.cpp" />
-    <ClCompile Include="src\chess\Common.cpp" />
-    <ClCompile Include="src\chess\Game.cpp" />
-    <ClCompile Include="src\chess\Piece.cpp" />
-    <ClCompile Include="src\chess\pieces\Bishop.cpp" />
-    <ClCompile Include="src\chess\pieces\FastPiece.cpp" />
-    <ClCompile Include="src\chess\pieces\King.cpp" />
-    <ClCompile Include="src\chess\pieces\Pawn.cpp" />
-    <ClCompile Include="src\Chess\Pieces\Rook.cpp" />
-    <ClCompile Include="src\chess\pieces\SlowPiece.cpp" />
-    <ClCompile Include="src\chess\Player.cpp" />
-    <ClCompile Include="src\chess\players\AIPlayer.cpp" />
-    <ClCompile Include="src\chess\players\HumanPlayer.cpp" />
-    <ClCompile Include="src\Logger.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\renderer2d\sdl\Renderer2D_SDL.cpp" />
+    <ClInclude Include="src\Assets.h" />
+    <ClInclude Include="src\Chess\Board.h" />
+    <ClInclude Include="src\Chess\Cell.h" />
+    <ClInclude Include="src\Chess\Common.h" />
+    <ClInclude Include="src\Chess\Game.h" />
+    <ClInclude Include="src\Chess\Piece.h" />
+    <ClInclude Include="src\Chess\Pieces\Bishop.h" />
+    <ClInclude Include="src\Chess\Pieces\FastPiece.h" />
+    <ClInclude Include="src\Chess\Pieces\King.h" />
+    <ClInclude Include="src\Chess\Pieces\Knight.h" />
+    <ClInclude Include="src\Chess\Pieces\Pawn.h" />
+    <ClInclude Include="src\Chess\Pieces\Queen.h" />
+    <ClInclude Include="src\Chess\Pieces\Rook.h" />
+    <ClInclude Include="src\Chess\Pieces\SlowPiece.h" />
+    <ClInclude Include="src\Chess\Player.h" />
+    <ClInclude Include="src\Chess\Players\AIPlayer.h" />
+    <ClInclude Include="src\Chess\Players\HumanPlayer.h" />
+    <ClInclude Include="src\Logger.h" />
+    <ClInclude Include="src\Math\point2d.h" />
+    <ClInclude Include="src\Math\vector2d.h" />
+    <ClInclude Include="src\Renderer2D\Renderer2D.h" />
+    <ClInclude Include="src\Renderer2D\SDL\Renderer2D_SDL.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Assets.h" />
-    <ClInclude Include="src\chess\Board.h" />
-    <ClInclude Include="src\chess\Cell.h" />
-    <ClInclude Include="src\chess\Common.h" />
-    <ClInclude Include="src\chess\Game.h" />
-    <ClInclude Include="src\chess\Piece.h" />
-    <ClInclude Include="src\chess\pieces\Bishop.h" />
-    <ClInclude Include="src\chess\pieces\FastPiece.h" />
-    <ClInclude Include="src\chess\pieces\King.h" />
-    <ClInclude Include="src\chess\pieces\Knight.h" />
-    <ClInclude Include="src\chess\pieces\Pawn.h" />
-    <ClInclude Include="src\chess\pieces\Queen.h" />
-    <ClInclude Include="src\chess\pieces\Rook.h" />
-    <ClInclude Include="src\chess\pieces\SlowPiece.h" />
-    <ClInclude Include="src\chess\Player.h" />
-    <ClInclude Include="src\chess\players\AIPlayer.h" />
-    <ClInclude Include="src\chess\players\HumanPlayer.h" />
-    <ClInclude Include="src\Logger.h" />
-    <ClInclude Include="src\math\point2d.h" />
-    <ClInclude Include="src\math\vector2d.h" />
-    <ClInclude Include="src\renderer2d\Renderer2D.h" />
-    <ClInclude Include="src\renderer2d\sdl\Renderer2D_SDL.h" />
+    <ClCompile Include="src\Chess\Board.cpp" />
+    <ClCompile Include="src\Chess\Cell.cpp" />
+    <ClCompile Include="src\Chess\Common.cpp" />
+    <ClCompile Include="src\Chess\Game.cpp" />
+    <ClCompile Include="src\Chess\Piece.cpp" />
+    <ClCompile Include="src\Chess\Pieces\Bishop.cpp" />
+    <ClCompile Include="src\Chess\Pieces\FastPiece.cpp" />
+    <ClCompile Include="src\Chess\Pieces\King.cpp" />
+    <ClCompile Include="src\Chess\Pieces\Pawn.cpp" />
+    <ClCompile Include="src\Chess\Pieces\Rook.cpp" />
+    <ClCompile Include="src\Chess\Pieces\SlowPiece.cpp" />
+    <ClCompile Include="src\Chess\Player.cpp" />
+    <ClCompile Include="src\Chess\Players\AIPlayer.cpp" />
+    <ClCompile Include="src\Chess\Players\HumanPlayer.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\Renderer2D\SDL\Renderer2D_SDL.cpp" />
+    <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
