@@ -14,7 +14,6 @@ workspace "Chess"
 	outputdir = "bin/%{cfg.buildcfg}_%{cfg.architecture}"
 
 project "Chess"
-	-- location "%{prj.name}"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"

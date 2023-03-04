@@ -15,3 +15,8 @@ obj/
 *.dll
 
 src/Utils/
+
+*.sln
+*.vcxproj
+*.filters
+*.user
