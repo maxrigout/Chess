@@ -93,6 +93,7 @@
     <ClCompile Include="src\renderer2d\sdl\Renderer2D_SDL.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Assets.h" />
     <ClInclude Include="src\chess\Board.h" />
     <ClInclude Include="src\chess\Cell.h" />
     <ClInclude Include="src\chess\Common.h" />
