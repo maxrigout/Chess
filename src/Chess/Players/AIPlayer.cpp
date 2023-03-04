@@ -29,7 +29,7 @@ AIPlayer::~AIPlayer()
 
 void AIPlayer::Play(const PlayingContext& context)
 {
-	// create a thread is it's not playing
+	// create a thread if it's not playing
 	if (!m_isPlaying)
 	{
 		if (m_playThread.joinable())
@@ -54,12 +54,6 @@ void AIPlayer::PlayThread()
 	m_copyOfOpponent = std::make_unique<MinimizingPlayer>(m_boardCopy.get(), GetOpposingTeam());
 #endif
 	std::vector<Move> possibleMoves = GetPossibleMoves();
-	// RandomPlay
-	//int r = rand() % possibleMoves.size();
-	//pGame->arrow_start = possibleMoves[r].p->Pos();
-	//possibleMoves[r].p->Move(possibleMoves[r].target);
-	//pGame->arrow_end = possibleMoves[r].p->Pos();
-
 	std::vector<Move> bestMoves = GetBestMoves(possibleMoves);
 
 	Move move = bestMoves[rand() % bestMoves.size()];

@@ -36,8 +36,8 @@ public:
 private:
 	int m_boardScore;
 
-	pt2di m_lastMoveStart{-3, -3};
-	pt2di m_lastMoveEnd{-2, -2};
+	pt2di m_lastMoveStart{-100, -100};
+	pt2di m_lastMoveEnd{-100, -100};
 
 	Player* m_opponentPlayer = nullptr;
 
