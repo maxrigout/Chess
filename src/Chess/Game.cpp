@@ -63,6 +63,8 @@ void Game::FreeSDL()
 	if (!m_isSDLInitialized)
 		return;
 
+	delete m_pRenderer;
+
 	SDL_DestroyWindow(m_pWindow);
 	SDL_Quit();
 
@@ -131,8 +133,9 @@ void Game::FreeBoard()
 	if (!m_isBoardInitialized)
 		return;
 
-	delete m_pPlayer1;
 	delete m_pPlayer2;
+	delete m_pPlayer1;
+	delete m_pBoard;
 
 	m_isBoardInitialized = false;
 }
