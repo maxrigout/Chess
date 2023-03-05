@@ -6,6 +6,15 @@
 #include <string>
 #include <vector>
 
+enum class RendererBackendType
+{
+	Unspec,
+	OpenGL,
+	Vulkan,
+	Metal,
+	SDL2,
+};
+
 struct Color
 {
 	uint8_t r, g, b, a = 255;

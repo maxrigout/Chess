@@ -84,7 +84,7 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 - [x] AI (AlphaBeta) (02-12-2023)
 - [x] Better graphics (02-20-2023)
 - [x] Better AI (02-17-2023)
-- [ ] Window and input system
+- [x] Window and input system (03-05-2023)
 - [x] Setup script (02-22-2023)
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
 - [ ] Use better testing framework. ([catch2](https://github.com/catchorg/Catch2) or [googletest](https://github.com/google/googletest))

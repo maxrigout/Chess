@@ -4,14 +4,10 @@
 #include "Chess/Board.h"
 #include "Chess/Piece.h"
 #include "Chess/Player.h"
+#include "Core/Window.h"
 #include "Renderer2D/Renderer2D.h"
 
-enum class MouseButton
-{
-	LEFT = 1,
-	RIGHT = 2,
-	MIDDLE = 3,
-};
+// #define MANUALLY_CREATE_WINDOW
 
 class Game final
 {
@@ -25,6 +21,7 @@ public:
 	void Cleanup();
 
 private:
+	void InitWindow(int width, int height);
 	void InitSDL(int width, int height);
 	void FreeSDL();
 
@@ -42,16 +39,34 @@ private:
 	void SelectCell(const pt2di& cellBoardPosition);
 	void SwitchPlayers();
 
-	SDL_Window* m_pWindow;
-	pt2di m_mousePos;
-	unsigned int m_mouseButtonState = 0;
+#ifndef MANUALLY_CREATE_WINDOW
+	bool OnWindowClose(const WindowCloseEvent& event);
+	bool OnMouseMove(const MouseMoveEvent& event);
+	bool OnMouseButtonDown(const MouseButtonDownEvent& event);
+	bool OnMouseButtonUp(const MouseButtonUpEvent& event);
+	bool OnKeyboardDown(const KeyboardDownEvent& event);
+	bool OnKeyboardUp(const KeyboardUpEvent& event);
+#endif
 
+#ifdef MANUALLY_CREATE_WINDOW
+	SDL_Window* m_pWindow;
+	unsigned int m_mouseButtonState = 0;
+#else
+	Window* m_pWindow;
+	bool m_mouseLeftDown = false;
+	bool m_mouseRightDown = false;
+	bool m_mouseMiddleDown = false;
+	bool m_isZPressed = false;
+#endif
 	Renderer2D* m_pRenderer = nullptr;
+	bool m_isSDLInitialized = false;
+
+	pt2di m_mousePos;
+
 
 	bool m_isInitialized = false;
-	bool m_isSDLInitialized = false;
 	bool m_isBoardInitialized = false;
-	bool m_isPlaying;
+	bool m_isPlaying = true;
 	bool m_isGameOver = false;
 
 	pt2di m_hoveredCellPos{-1, 0};
