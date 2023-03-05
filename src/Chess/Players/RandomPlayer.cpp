@@ -1,5 +1,3 @@
-#pragma once
-
 #include "RandomPlayer.h"
 #include "Core/Logger.h"
 
@@ -24,7 +22,7 @@ void RandomPlayer::Play(const PlayingContext& context)
 	{
 		if (m_playThread.joinable())
 			m_playThread.join();
-		m_playThread = std::thread(&AIPlayer::PlayThread, this);
+		m_playThread = std::thread(&RandomPlayer::PlayThread, this);
 		m_pBoard->ShowHourglass("RandomPlayer thinking...");
 	}
 	else
