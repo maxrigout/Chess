@@ -48,30 +48,12 @@ void Game::InitWindow(int width, int height)
 	m_pWindow->Create(info);
 	m_pRenderer = m_pWindow->CreateRenderer();
 
-	m_pWindow->OnWindowClose([&](const WindowCloseEvent& event)
-	{
-		return OnWindowClose(event);
-	});
-	m_pWindow->OnMouseMove([&](const MouseMoveEvent& event)
-	{
-		return OnMouseMove(event);
-	});
-	m_pWindow->OnMouseButtonDown([&](const MouseButtonDownEvent& event)
-	{
-		return OnMouseButtonDown(event);
-	});
-	m_pWindow->OnMouseButtonUp([&](const MouseButtonUpEvent& event)
-	{
-		return OnMouseButtonUp(event);
-	});
-	m_pWindow->OnKeyboardDown([&](const KeyboardDownEvent& event)
-	{
-		return OnKeyboardDown(event);
-	});
-	m_pWindow->OnKeyboardUp([&](const KeyboardUpEvent& event)
-	{
-		return OnKeyboardUp(event);
-	});
+	m_pWindow->OnWindowClose(std::bind(&Game::OnWindowClose, this, std::placeholders::_1));
+	m_pWindow->OnMouseMove(std::bind(&Game::OnMouseMove, this, std::placeholders::_1));
+	m_pWindow->OnMouseButtonDown(std::bind(&Game::OnMouseButtonDown, this, std::placeholders::_1));
+	m_pWindow->OnMouseButtonUp(std::bind(&Game::OnMouseButtonUp, this, std::placeholders::_1));
+	m_pWindow->OnKeyboardDown(std::bind(&Game::OnKeyboardDown, this, std::placeholders::_1));
+	m_pWindow->OnKeyboardUp(std::bind(&Game::OnKeyboardUp, this, std::placeholders::_1));
 	m_isSDLInitialized = true;
 #endif
 }
