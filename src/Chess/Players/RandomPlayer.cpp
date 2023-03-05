@@ -1,7 +1,7 @@
 #pragma once
 
 #include "RandomPlayer.h"
-#include "Logger.h"
+#include "Core/Logger.h"
 
 RandomPlayer::RandomPlayer(Board* pBoard, TEAM team)
 	: Player(pBoard, team)

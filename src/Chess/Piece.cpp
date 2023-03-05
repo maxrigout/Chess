@@ -1,6 +1,5 @@
 #include "Piece.h"
 
-#include <iostream>
 #include <string>
 
 int GenerateUniquePieceId()

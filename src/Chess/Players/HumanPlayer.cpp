@@ -1,6 +1,6 @@
 #include "HumanPlayer.h"
 
-#include "Logger.h"
+#include "Core/Logger.h"
 
 #include <iostream>
 

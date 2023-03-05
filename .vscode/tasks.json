@@ -17,6 +17,7 @@
                 "${workspaceFolder}/src/Chess/*.cpp",
                 "${workspaceFolder}/src/Chess/Pieces/*.cpp",
                 "${workspaceFolder}/src/Chess/Players/*.cpp",
+                "${workspaceFolder}/src/Core/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/SDL/*.cpp",
                 "-o",
                 "${workspaceFolder}/out",

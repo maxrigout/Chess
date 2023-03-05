@@ -11,7 +11,7 @@
 #include "Renderer2D/SDL/Renderer2D_SDL.h"
 
 #include "Assets.h"
-#include "Logger.h"
+#include "Core/Logger.h"
 
 Game::Game()
 {

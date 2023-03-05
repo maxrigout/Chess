@@ -2,7 +2,7 @@
 
 #include "Rook.h"
 
-#include "Logger.h"
+#include "Core/Logger.h"
 
 King::King(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
 	: SlowPiece(pBoard, 'K', team, initialBoardPosition, { {1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {1, 0}, {-1, 0}, {0, -1}, {0, 1} })

@@ -6,7 +6,7 @@
 #include "Chess/Pieces/Queen.h"
 #include "Chess/Pieces/King.h"
 
-#include "Logger.h"
+#include "Core/Logger.h"
 
 #define MAKE_COPIES
 

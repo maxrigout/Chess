@@ -2,7 +2,7 @@
 #include "SDL2_image/SDL_image.h"
 
 #include "Assets.h"
-#include "Logger.h"
+#include "Core/Logger.h"
 
 SDL_Color toSDL_Color(const Color& color)
 {
