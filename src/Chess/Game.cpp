@@ -230,23 +230,13 @@ void Game::HandleInput()
 
 bool Game::IsMouseButtonPressed(MouseButton button)
 {
-	uint32_t mask = 0;
 	switch (button)
 	{
-	case MouseButton::LEFT:
-		mask |= SDL_BUTTON_LMASK;
-		break;
-	case MouseButton::RIGHT:
-		mask |= SDL_BUTTON_RMASK;
-		break;
-	case MouseButton::MIDDLE:
-		mask |= SDL_BUTTON_MMASK;
-		break;
-	
-	default:
-		break;
+	case MouseButton::LEFT: return m_mouseButtonState == SDL_BUTTON_LEFT;
+	case MouseButton::RIGHT: return m_mouseButtonState == SDL_BUTTON_RIGHT;
+	case MouseButton::MIDDLE: return m_mouseButtonState == SDL_BUTTON_MIDDLE;
 	}
-	return m_mouseButtonState & mask;
+	return false;
 }
 
 void Game::Update(float dt)
