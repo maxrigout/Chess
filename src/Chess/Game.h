@@ -7,8 +7,6 @@
 #include "Core/Window.h"
 #include "Renderer2D/Renderer2D.h"
 
-// #define MANUALLY_CREATE_WINDOW
-
 class Game final
 {
 public:
@@ -39,38 +37,31 @@ private:
 	void SelectCell(const pt2di& cellBoardPosition);
 	void SwitchPlayers();
 
-#ifndef MANUALLY_CREATE_WINDOW
 	bool OnWindowClose(const WindowCloseEvent& event);
 	bool OnMouseMove(const MouseMoveEvent& event);
 	bool OnMouseButtonDown(const MouseButtonDownEvent& event);
 	bool OnMouseButtonUp(const MouseButtonUpEvent& event);
 	bool OnKeyboardDown(const KeyboardDownEvent& event);
 	bool OnKeyboardUp(const KeyboardUpEvent& event);
-#endif
 
-#ifdef MANUALLY_CREATE_WINDOW
-	SDL_Window* m_pWindow;
-	unsigned int m_mouseButtonState = 0;
-#else
 	Window* m_pWindow;
 	bool m_mouseLeftDown = false;
 	bool m_mouseRightDown = false;
 	bool m_mouseMiddleDown = false;
 	bool m_isZPressed = false;
-#endif
+	bool m_isWindowInitialized = false;
+
 	Renderer2D* m_pRenderer = nullptr;
-	bool m_isSDLInitialized = false;
 
 	pt2di m_mousePos;
 
-
-	bool m_isInitialized = false;
 	bool m_isBoardInitialized = false;
+	bool m_isInitialized = false;
 	bool m_isPlaying = true;
 	bool m_isGameOver = false;
 
-	pt2di m_hoveredCellPos{-1, 0};
-	pt2di m_selectedCellPos{-1, 0};
+	pt2di m_hoveredCellPos{ -1, 0 };
+	pt2di m_selectedCellPos{ -1, 0 };
 
 	Board* m_pBoard;
 	TEAM m_activeTeam = TEAM::NONE;

@@ -14,5 +14,4 @@ public:
 	virtual bool IsMoveValid(const pt2di& target, MoveInfo& info = MainInfo) const override;
 	virtual bool CanAttack(const pt2di& target) const override;
 	virtual void AttackCells() const override;
-
 };

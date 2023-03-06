@@ -14,6 +14,7 @@ struct PlayingContext
 	pt2di selectedCellPosition;
 	int maxProcessingDelay;
 	float dt;
+	bool shouldQuit;
 };
 
 class Player
@@ -69,5 +70,4 @@ private:
 	bool m_hasTurnEnded = false;
 };
 
-#include "Chess/Players/HumanPlayer.h"
-#include "Chess/Players/AIPlayer.h"
+#include "Chess/Players/Players.h"

@@ -57,4 +57,3 @@ std::string Logger::GetTime()
 	strftime(timeStr, maxSize, "%X", timeinfo);
 	return timeStr;
 }
-

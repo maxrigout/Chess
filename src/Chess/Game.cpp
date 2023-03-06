@@ -9,7 +9,6 @@
 #include "Chess/Players/HumanPlayer.h"
 
 #include "Core/SDL/Window_SDL.h"
-// #include "Renderer2D/SDL/Renderer2D_SDL.h"
 
 #include "Assets.h"
 #include "Core/Logger.h"
@@ -26,20 +25,14 @@ Game::~Game()
 
 void Game::Init(int width, int height)
 {
-#ifdef MANUALLY_CREATE_WINDOW
-	InitSDL(width, height);
-#else
 	InitWindow(width, height);
-#endif
 	InitBoard();
 	LoadGraphics();
-	m_isInitialized = m_isSDLInitialized && m_isBoardInitialized;
+	m_isInitialized = m_isWindowInitialized && m_isBoardInitialized;
 }
 
 void Game::InitWindow(int width, int height)
 {
-#ifdef MANUALLY_CREATE_WINDOW
-#else
 	WindowCreationInfo info{};
 	info.title = "Chess";
 	info.width = width;
@@ -48,58 +41,15 @@ void Game::InitWindow(int width, int height)
 	m_pWindow->Create(info);
 	m_pRenderer = m_pWindow->CreateRenderer();
 
+	// Setting the callbacks
 	m_pWindow->OnWindowClose(std::bind(&Game::OnWindowClose, this, std::placeholders::_1));
 	m_pWindow->OnMouseMove(std::bind(&Game::OnMouseMove, this, std::placeholders::_1));
 	m_pWindow->OnMouseButtonDown(std::bind(&Game::OnMouseButtonDown, this, std::placeholders::_1));
 	m_pWindow->OnMouseButtonUp(std::bind(&Game::OnMouseButtonUp, this, std::placeholders::_1));
 	m_pWindow->OnKeyboardDown(std::bind(&Game::OnKeyboardDown, this, std::placeholders::_1));
 	m_pWindow->OnKeyboardUp(std::bind(&Game::OnKeyboardUp, this, std::placeholders::_1));
-	m_isSDLInitialized = true;
-#endif
-}
 
-void Game::InitSDL(int width, int height)
-{
-#ifdef MANUALLY_CREATE_WINDOW
-	if (m_isSDLInitialized)
-		return;
-	
-	SDL_Init(SDL_INIT_VIDEO);
-
-	// SDL_WindowFlags windowFlags = SDL_WINDOW_VULKAN;
-
-	m_pWindow = SDL_CreateWindow(
-		"Chess", // window title
-		SDL_WINDOWPOS_UNDEFINED, // window x
-		SDL_WINDOWPOS_UNDEFINED, // window y
-		width, // width in px
-		height, // height in px
-		0
-	);
-
-	if (m_pRenderer != nullptr)
-		delete m_pRenderer;
-	
-	m_pRenderer = new Renderer2D_SDL(SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
-	//m_pRenderer->SetWindowDim({ width, height }); // optional
-
-	m_isSDLInitialized = true;
-#endif
-}
-
-void Game::FreeSDL()
-{
-#ifdef MANUALLY_CREATE_WINDOW
-	if (!m_isSDLInitialized)
-		return;
-
-	delete m_pRenderer;
-
-	SDL_DestroyWindow(m_pWindow);
-	SDL_Quit();
-
-	m_isSDLInitialized = false;
-#endif
+	m_isWindowInitialized = true;
 }
 
 void Game::InitBoard()
@@ -113,12 +63,8 @@ void Game::InitBoard()
 	vec2di baseCellSize = { 137, 137 };
 	vec2di baseBoardTextureSize = { 1280, 1280 };
 	int width, height;
-#ifdef MANUALLY_CREATE_WINDOW
-	SDL_GetWindowSize(m_pWindow, &width, &height);
-#else
 	width = m_pWindow->GetWidth();
 	height = m_pWindow->GetHeight();
-#endif
 
 	int boardWidth = m_pBoard->GetWidth();
 	int boardHeight = m_pBoard->GetHeight();
@@ -215,76 +161,16 @@ void Game::Run()
 void Game::Cleanup()
 {
 	FreeBoard();
-#ifdef MANUALLY_CREATE_WINDOW
-	FreeSDL();
-#else
 	delete m_pWindow;
-#endif
 }
 
 void Game::HandleInput()
 {
-#ifdef MANUALLY_CREATE_WINDOW
-	static bool zDown = false;
-	SDL_Event event;
-	while (SDL_PollEvent(&event))
-	{
-		switch(event.type)
-		{
-			case SDL_QUIT:
-				m_isPlaying = false;
-				break;
-
-			case SDL_MOUSEMOTION:
-				m_mousePos.x = event.motion.x;
-				m_mousePos.y = event.motion.y;
-				// std::cout << "SDL_MOUSEMOTION: (" << m_mousePos.x << ", " << m_mousePos.y << ")\n";
-				break;
-
-			case SDL_MOUSEBUTTONUP:
-				m_mouseButtonState = 0;
-				break;
-
-			case SDL_MOUSEBUTTONDOWN:
-				m_mouseButtonState = event.button.button;
-				break;
-
-			case SDL_MOUSEWHEEL:
-				// std::cout << "SDL_MOUSEWHEEL: " << event.wheel.y << "\n";
-				break;
-
-			case SDL_KEYDOWN:
-				// std::cout << "SDL_KEYDOWN: " << event.key.keysym.scancode << "\n";
-				if (event.key.keysym.sym == SDLK_z && !zDown)
-				{
-					zDown = true;
-					if (m_pBoard->UndoMove())
-						SwitchPlayers();
-				}
-				break;
-
-			case SDL_KEYUP:
-				// std::cout << "SDL_KEYUP: " << event.key.keysym.scancode << "\n";
-				if (event.key.keysym.sym == SDLK_z)
-					zDown = false;
-				break;
-		}
-	}
-#else
 	m_pWindow->PollEvents();
-#endif
 }
 
 bool Game::IsMouseButtonPressed(MouseButton button)
 {
-#ifdef MANUALLY_CREATE_WINDOW
-	switch (button)
-	{
-	case MouseButton::Left: return m_mouseButtonState == SDL_BUTTON_LEFT;
-	case MouseButton::Right: return m_mouseButtonState == SDL_BUTTON_RIGHT;
-	case MouseButton::Middle: return m_mouseButtonState == SDL_BUTTON_MIDDLE;
-	}
-#else
 	switch (button)
 	{
 	case MouseButton::Left: return m_mouseLeftDown;
@@ -292,7 +178,6 @@ bool Game::IsMouseButtonPressed(MouseButton button)
 	case MouseButton::Middle: return m_mouseMiddleDown;
 	default: break;
 	}
-#endif
 	return false;
 }
 
@@ -312,7 +197,7 @@ void Game::Update(float dt)
 	m_pPlayer1->UpdatePieces(dt);
 	m_pPlayer2->UpdatePieces(dt);
 	if (!m_isGameOver)
-		m_pActivePlayer->Play({ m_selectedCellPos, 0 });
+		m_pActivePlayer->Play({ m_selectedCellPos, 0, dt, m_isPlaying });
 }
 
 void Game::Render()
@@ -376,14 +261,9 @@ void Game::SwitchPlayers()
 	std::string msg = "player " + std::to_string(player + 1) + "'s turn";
 	LOG_INFO(msg);
 	msg = "Chess - " + msg;
-#ifdef MANUALLY_CREATE_WINDOW
-	SDL_SetWindowTitle(m_pWindow, msg.c_str());
-#else
 	m_pWindow->SetTitle(msg);
-#endif
 }
 
-#ifndef MANUALLY_CREATE_WINDOW
 bool Game::OnWindowClose(const WindowCloseEvent& event) 
 {
 	m_isPlaying = false;
@@ -441,4 +321,3 @@ bool Game::OnKeyboardUp(const KeyboardUpEvent& event)
 	}
 	return false;
 }
-#endif
