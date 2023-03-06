@@ -53,11 +53,15 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 * Add graphics to the resources/graphics folder. You'll need an image for the board and for the pieces. You can configure how the images are interpreted in the "loadGraphics" member function of the Game class (Game.cpp line 129). For the board image, you'll need to change the variables at lines 78, 79 and 80.
 
 ## How To Build
-### Mac OS (with VS Code)
+### Mac OS
 * Copy the `SDL2`, `SDL2_ttf` and `SDL2_image` headers inside `deps/include/SDL2`, `deps/include/SDL2_ttf` and `deps/include/SDL2_image` respectively.
     * Alternatively, you can change line 14 in the .vscode/tasks.json file to point to your own SDL2/SDL2_ttf/SDL2_image installation.
-* Open the project in VS Code.
-* Go to Terminal > Run Build Task to build the project.
+* With VS Code:
+   * Open the project in VS Code.
+   * Go to Terminal > Run Build Task to build the project.
+* With Make:
+   * Run `scripts/macos/generate_project.bat` from the root of the project.
+   * Run `make` to build the project with make.
 
 ### Windows (with Visual Studio 2022)
 * Copy the SDL2, SDL2_ttf and SDL2_image headers inside `deps/include/SDL2`, `deps/include/SDL2_ttf` and `deps/include/SDL2_image` respectively.
@@ -66,6 +70,7 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
     * SDL2main.lib
     * SDL2_ttf.lib
     * SDL2_image.lib (tbd)
+* Run `scripts/windows/generate_project.bat` from the root of the project.
 * Open the .sln file.
 * Build the project.
     * If the program crashes during execution due to missing dlls, then you'll need to copy the dlls to the root of the project.
@@ -86,7 +91,9 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 - [x] Better AI (02-17-2023)
 - [x] Window and input system (03-05-2023)
 - [x] Setup script (02-22-2023)
+- [x] AI Timeout (03-05-2023)
 - [ ] Implementing different rendering backends (Vulkan / Metal etc...)
+- [ ] Network play
 - [ ] Use better testing framework. ([catch2](https://github.com/catchorg/Catch2) or [googletest](https://github.com/google/googletest))
 - [ ] Game configurator (ie configure the AI difficulty, human vs human etc..)
 - [ ] GUI
