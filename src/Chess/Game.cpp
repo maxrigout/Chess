@@ -13,6 +13,8 @@
 #include "Assets.h"
 #include "Core/Logger.h"
 
+#define MAX_AI_THINKING_TIMEOUT_SECOND 10
+
 Game::Game()
 {
 	
@@ -197,7 +199,7 @@ void Game::Update(float dt)
 	m_pPlayer1->UpdatePieces(dt);
 	m_pPlayer2->UpdatePieces(dt);
 	if (!m_isGameOver)
-		m_pActivePlayer->Play({ m_selectedCellPos, 0, dt, m_isPlaying });
+		m_pActivePlayer->Play({ m_selectedCellPos, MAX_AI_THINKING_TIMEOUT_SECOND, dt, !m_isPlaying });
 }
 
 void Game::Render()

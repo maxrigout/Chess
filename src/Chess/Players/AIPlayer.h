@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 #include <memory>
+#include <chrono>
 
 class TestClass;
 
@@ -26,7 +27,7 @@ public:
 
 	void PlayThread();
 	int minimax(Board* pBoard, int depth, bool isMaximizingPlayer);
-	int alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMaximizingPlayer);
+	int alphabeta(Board* pBoard,  int depth, int alpha, int beta, bool isMaximizingPlayer);
 
 	std::vector<Move> GetBestMoves(const std::vector<Move>& moves);
 	void TestMove(Piece* piece, const Move& move);
@@ -42,7 +43,9 @@ private:
 	Player* m_opponentPlayer = nullptr;
 
 	std::thread m_playThread;
+	std::chrono::time_point<std::chrono::high_resolution_clock> m_playBegin;
 	bool m_isPlaying = false;
+	bool m_shouldQuit = false;
 
 	size_t m_stackSizeAtBeginningOfTurn = 0;
 

@@ -34,11 +34,19 @@ void AIPlayer::Play(const PlayingContext& context)
 	{
 		if (m_playThread.joinable())
 			m_playThread.join();
+		m_shouldQuit = false;
+		m_playBegin = std::chrono::high_resolution_clock::now();
 		m_playThread = std::thread(&AIPlayer::PlayThread, this);
 		m_pBoard->ShowHourglass("AI Player thinking...");
 	}
 	else
 	{
+		auto now = std::chrono::high_resolution_clock::now();
+		int timeEllapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - m_playBegin).count();
+		bool timeExeeced = timeEllapsedSeconds > context.maxProcessingDelay;
+		if (timeExeeced)
+			LOG_INFO("time exceeded!");
+		m_shouldQuit = context.shouldQuit || timeExeeced;
 		m_pBoard->UpdateHourglass(context.dt);
 	}
 }
@@ -68,6 +76,7 @@ void AIPlayer::PlayThread()
 
 std::vector<Move> AIPlayer::GetBestMoves(const std::vector<Move>& moves)
 {
+	// TODO: cleanup
 	int maxScore = std::numeric_limits<int>::min();
 	std::vector<Move> bestMoves = {};
 	LOG_INFO("analyzing " + std::to_string(moves.size()) + " moves");
@@ -110,6 +119,9 @@ std::vector<Move> AIPlayer::GetBestMoves(const std::vector<Move>& moves)
 			bestMoves.push_back(move);
 		UndoMove(&board);
 		++i;
+		// wrap it up if we need to quit
+		if (m_shouldQuit)
+			break;
 	}
 	char message[200] = { 0 };
 	snprintf(message, 200, "found %lu moves. Max score %d",
@@ -121,6 +133,7 @@ std::vector<Move> AIPlayer::GetBestMoves(const std::vector<Move>& moves)
 
 int AIPlayer::minimax(Board* pBoard, int depth, bool isMaximizingPlayer)
 {
+	// TODO: cleanup
 	// TODO: properly handle checkmates
 	if (depth <= 0 || IsCheckMate())
 		return EvaluateBoard(pBoard);
@@ -165,8 +178,9 @@ int AIPlayer::minimax(Board* pBoard, int depth, bool isMaximizingPlayer)
 
 int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMaximizingPlayer)
 {
+	// TODO: cleanup
 	// TODO: properly handle checkmates
-	if (depth <= 0 || IsCheckMate())
+	if (depth <= 0 || IsCheckMate() || m_shouldQuit)
 		return EvaluateBoard(pBoard);
 
 	int score = 0;
@@ -200,6 +214,9 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 			if (score > beta)
                 break; // (* β cutoff *)
             alpha = std::max(alpha, score);
+			// wrap it up if we need to quit
+			if (m_shouldQuit)
+				break;
 		}
 	}
 	else
@@ -235,6 +252,9 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 			if (score < alpha)
                 break; //(* α cutoff *)
             beta = std::min(beta, score);
+			// wrap it up if we need to quit
+			if (m_shouldQuit)
+				break;
 		}
 	}
 	return score;
