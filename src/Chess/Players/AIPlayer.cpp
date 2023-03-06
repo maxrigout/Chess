@@ -34,7 +34,7 @@ void AIPlayer::Play(const PlayingContext& context)
 	{
 		if (m_playThread.joinable())
 			m_playThread.join();
-		m_shouldQuit = false;
+		m_shouldStopProcessing = false;
 		m_playBegin = std::chrono::high_resolution_clock::now();
 		m_playThread = std::thread(&AIPlayer::PlayThread, this);
 		m_pBoard->ShowHourglass("AI Player thinking...");
@@ -46,7 +46,7 @@ void AIPlayer::Play(const PlayingContext& context)
 		bool timeExeeced = timeEllapsedSeconds > context.maxProcessingDelay;
 		if (timeExeeced)
 			LOG_INFO("time exceeded!");
-		m_shouldQuit = context.shouldQuit || timeExeeced;
+		m_shouldStopProcessing = context.shouldQuit || timeExeeced;
 		m_pBoard->UpdateHourglass(context.dt);
 	}
 }
@@ -120,7 +120,7 @@ std::vector<Move> AIPlayer::GetBestMoves(const std::vector<Move>& moves)
 		UndoMove(&board);
 		++i;
 		// wrap it up if we need to quit
-		if (m_shouldQuit)
+		if (m_shouldStopProcessing)
 			break;
 	}
 	char message[200] = { 0 };
@@ -180,7 +180,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 {
 	// TODO: cleanup
 	// TODO: properly handle checkmates
-	if (depth <= 0 || IsCheckMate() || m_shouldQuit)
+	if (depth <= 0 || IsCheckMate() || m_shouldStopProcessing)
 		return EvaluateBoard(pBoard);
 
 	int score = 0;
@@ -215,7 +215,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
                 break; // (* β cutoff *)
             alpha = std::max(alpha, score);
 			// wrap it up if we need to quit
-			if (m_shouldQuit)
+			if (m_shouldStopProcessing)
 				break;
 		}
 	}
@@ -253,7 +253,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
                 break; //(* α cutoff *)
             beta = std::min(beta, score);
 			// wrap it up if we need to quit
-			if (m_shouldQuit)
+			if (m_shouldStopProcessing)
 				break;
 		}
 	}

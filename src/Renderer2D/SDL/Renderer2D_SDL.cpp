@@ -163,6 +163,10 @@ void Renderer2D_SDL::DrawText(const pt2di& topLeft, const vec2di& dimensions, co
 
 void Renderer2D_SDL::DrawArrow(const pt2di& screenStart, const pt2di& screenEnd, const Color& color) const
 {
+	if (screenStart.x < 0 || screenStart.y < 0)
+		return;
+	if (screenEnd.x < 0 || screenEnd.y < 0)
+		return;
 	const double headBaseSize = 30.0;
 	const double headHeight = 30.0;
 	// pt2dd screenStart(start.x * m_cellDim.w + m_cellDim.w / 2, start.y * m_cellDim.h + m_cellDim.h / 2), 
