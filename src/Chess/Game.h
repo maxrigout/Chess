@@ -20,8 +20,6 @@ public:
 
 private:
 	void InitWindow(int width, int height);
-	void InitSDL(int width, int height);
-	void FreeSDL();
 
 	void InitBoard();
 	void FreeBoard();

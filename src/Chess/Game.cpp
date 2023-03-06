@@ -163,6 +163,7 @@ void Game::Run()
 void Game::Cleanup()
 {
 	FreeBoard();
+	delete m_pRenderer;
 	delete m_pWindow;
 }
 
