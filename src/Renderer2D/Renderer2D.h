@@ -15,40 +15,47 @@ enum class RendererBackendType
 	SDL2,
 };
 
-struct Color
+struct PixelColor
 {
-	uint8_t r, g, b, a = 255;
+	uint8_t r, g, b, a;
 };
 
-static const Color WHITE{255, 255, 255, 255};
-static const Color RED{255, 0, 0, 255};
-static const Color GREEN{0, 255, 0, 255};
-static const Color BLUE{0, 0, 255, 255};
-static const Color BLACK{0, 0, 0, 255};
-static const Color GREY{200, 200, 200, 255};
-static const Color YELLOW{255, 255, 0, 255};
-static const Color CYAN{0, 255, 255, 255};
-static const Color MAGENTA{255, 0, 255, 255};
-static const Color PURPLE{100, 100, 200, 255};
-static const Color PURPLE2{127, 127, 255, 255};
+struct Color
+{
+	float r, g, b, a;
+	PixelColor ToPixelColor() const { return {(uint8_t)(255 * r), (uint8_t)(255 * g), (uint8_t)(255 * b), (uint8_t)(255 * a) }; }
 
-static const Color DARK_RED{127, 0, 0, 255};
-static const Color DARK_GREEN{0, 127, 0, 255};
-static const Color DARK_BLUE{0, 0, 127, 255};
-static const Color DARK_GREY{100, 100, 100, 255};
-static const Color DARK_YELLOW{127, 127, 0, 255};
-static const Color DARK_CYAN{0, 127, 127, 255};
-static const Color DARK_MAGENTA{127, 0, 127, 255};
-static const Color DARK_PURPLE{50, 50, 100, 255};
-static const Color DARK_PURPLE2{63, 63, 127, 255};
+};
 
-static const Color VERY_DARK_RED{63, 0, 0, 255};
-static const Color VERY_DARK_GREEN{0, 63, 0, 255};
-static const Color VERY_DARK_BLUE{0, 0, 63, 255};
-static const Color VERY_DARK_GREY{50, 50, 50, 255};
-static const Color VERY_DARK_YELLOW{63, 63, 0, 255};
-static const Color VERY_DARK_CYAN{0, 63, 63, 255};
-static const Color VERY_DARK_MAGENTA{63, 0, 63, 255};
+static const Color WHITE{ 1.0f, 1.0f, 1.0f, 1.0f };
+static const Color RED{ 1.0f, 0.0f, 0.0f, 1.0f };
+static const Color GREEN{ 0.0f, 1.0f, 0.0f, 1.0f };
+static const Color BLUE{ 0.0f, 0.0f, 1.0f, 1.0f };
+static const Color BLACK{ 0.0f, 0.0f, 0.0f, 1.0f };
+static const Color GREY{ 0.7843f, 0.7843f, 0.7843f, 1.0f };
+static const Color YELLOW{ 1.0f, 1.0f, 0.0f, 1.0f };
+static const Color CYAN{ 0.0f, 1.0f, 1.0f, 1.0f };
+static const Color MAGENTA{ 1.0f, 0.0f, 1.0f, 1.0f };
+static const Color PURPLE{ 0.392157f, 0.392157f, 0.7843f, 1.0f };
+static const Color PURPLE2{ 0.5f, 0.5f, 1.0f, 1.0f };
+
+static const Color DARK_RED{ 0.5f, 0.0f, 0.0f, 1.0f };
+static const Color DARK_GREEN{ 0.0f, 0.5f, 0, 1.0f };
+static const Color DARK_BLUE{ 0.0f, 0.0f, 0.5f, 1.0f };
+static const Color DARK_GREY{ 0.392157f, 0.392157f, 0.392157f, 1.0f };
+static const Color DARK_YELLOW{ 0.5f, 0.5f, 0.0f, 1.0f };
+static const Color DARK_CYAN{ 0.0f, 0.5f, 0.5f, 1.0f };
+static const Color DARK_MAGENTA{ 0.5f, 0.0f, 0.5f, 1.0f };
+static const Color DARK_PURPLE{ 0.1991f, 0.1991f, 0.392157f, 1.0f };
+static const Color DARK_PURPLE2{ 0.2471f, 0.2471f, 0.5f, 1.0f };
+
+static const Color VERY_DARK_RED{ 0.2471f, 0.0f, 0.0f, 1.0f };
+static const Color VERY_DARK_GREEN{ 0, 0.2471f, 0.0f, 1.0f };
+static const Color VERY_DARK_BLUE{ 0.0f, 0.0f, 0.2471f, 1.0f };
+static const Color VERY_DARK_GREY{ 0.1991f, 0.1991f, 0.1991f, 1.0f };
+static const Color VERY_DARK_YELLOW{ 0.2471f, 0.2471f, 0.0f, 1.0f };
+static const Color VERY_DARK_CYAN{ 0.0f, 0.2471f, 0.2471f, 1.0f };
+static const Color VERY_DARK_MAGENTA{ 0.2471f, 0.0f, 0.2471f, 1.0f };
 
 enum class SpriteOffsetType
 {
@@ -62,7 +69,7 @@ struct SpriteDescriptor
 {
 	pt2di offset{-1, -1};
 	vec2di size{-1, -1};
-	SpriteOffsetType type = SpriteOffsetType::TopLeft;
+	SpriteOffsetType offsetType = SpriteOffsetType::TopLeft;
 	std::string tag = "";
 };
 
@@ -87,15 +94,15 @@ public:
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const = 0;
 	
 	virtual SpriteID LoadTexture(const char* path, const std::string& tag) = 0;
-	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprite) = 0;
+	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors) = 0;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const = 0;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const = 0;
 	
 	virtual vec2di GetSpriteSize(const std::string& spriteTag) const = 0;
-	virtual const vec2di& GetWindowDim() const = 0;
+	// virtual const vec2di& GetWindowDim() const = 0;
 	virtual const vec2di& GetCellDim() const = 0;
 	virtual const vec2di& GetViewPortDim() const = 0;
-	virtual void SetWindowDim(const vec2di& dim) = 0;
+	// virtual void SetWindowDim(const vec2di& dim) = 0;
 	virtual void SetCellDim(const vec2di& dim) = 0;
 	virtual void SetViewPortDim(const vec2di& dim) = 0;
 };

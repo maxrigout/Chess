@@ -4,7 +4,7 @@ mkdir -p $BASE_DIR/deps
 cd $BASE_DIR/deps
 mkdir {include,libraries,frameworks}
 cd include
-mkdir {SDL2,SDL2_image,SDL2_ttf}
+mkdir {SDL2,SDL2_image,SDL2_ttf,stb}
 
 # no longer needed
 # cd $BASE_DIR

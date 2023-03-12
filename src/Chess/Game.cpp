@@ -39,6 +39,7 @@ void Game::InitWindow(int width, int height)
 	info.title = "Chess";
 	info.width = width;
 	info.height = height;
+	info.flags.rendererBackend = RendererBackendType::OpenGL;
 	m_pWindow = new Window_SDL();
 	m_pWindow->Create(info);
 	m_pRenderer = m_pWindow->CreateRenderer();
@@ -60,7 +61,7 @@ void Game::InitBoard()
 		return;
 
 	m_pBoard = new Board(8, 8);
-	m_pBoard->SetScreenDim(m_pRenderer->GetWindowDim());
+	m_pBoard->SetScreenDim(m_pRenderer->GetViewPortDim());
 	vec2di baseMargin = { 95, 95 };
 	vec2di baseCellSize = { 137, 137 };
 	vec2di baseBoardTextureSize = { 1280, 1280 };
@@ -163,7 +164,8 @@ void Game::Run()
 void Game::Cleanup()
 {
 	FreeBoard();
-	delete m_pRenderer;
+	m_pWindow->FreeRenderer();
+	// delete m_pRenderer;
 	delete m_pWindow;
 }
 

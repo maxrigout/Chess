@@ -4,13 +4,14 @@
 #include "Assets.h"
 #include "Core/Logger.h"
 
-SDL_Color toSDL_Color(const Color& color)
+static SDL_Color toSDL_Color(const Color& color)
 {
+	PixelColor pixelColor = color.ToPixelColor();
 	SDL_Color c;
-	c.a = color.a;
-	c.b = color.b;
-	c.g = color.g;
-	c.r = color.r;
+	c.a = pixelColor.a;
+	c.b = pixelColor.b;
+	c.g = pixelColor.g;
+	c.r = pixelColor.r;
 	return c;
 }
 
@@ -201,7 +202,7 @@ Renderer2D::SpriteID Renderer2D_SDL::LoadTexture(const char* path, const std::st
 	return spriteId;
 }
 
-std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& sprites)
+std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
 {
 	std::vector<SpriteID> result;
 	SDL_Texture* sheet = IMG_LoadTexture(m_renderer, path);
@@ -209,11 +210,11 @@ std::vector<Renderer2D::SpriteID> Renderer2D_SDL::LoadSpriteSheet(const char* pa
 	SDL_QueryTexture(sheet, NULL, NULL, &width, &height);
 	m_textures.push_back({ sheet, { width, height } });
 	int textureId = m_textures.size() - 1;
-	for (const auto& sprite : sprites)
+	for (const auto& sprite : spriteDescriptors)
 	{
 		pt2di offset = sprite.offset;
 		vec2di size = sprite.size;
-		switch (sprite.type)
+		switch (sprite.offsetType)
 		{
 		case SpriteOffsetType::TopLeft:
 			break;
@@ -281,10 +282,10 @@ vec2di Renderer2D_SDL::GetSpriteSize(const std::string& spriteTag) const
 	return { -1, -1 };
 }
 
-const vec2di& Renderer2D_SDL::GetWindowDim() const
-{
-	return m_windowDim;
-}
+// const vec2di& Renderer2D_SDL::GetWindowDim() const
+// {
+// 	return m_windowDim;
+// }
 const vec2di& Renderer2D_SDL::GetCellDim() const
 {
 	return m_cellDim;
@@ -293,10 +294,10 @@ const vec2di& Renderer2D_SDL::GetViewPortDim() const
 {
 	return m_viewPortDim;
 }
-void Renderer2D_SDL::SetWindowDim(const vec2di& dim)
-{
-	m_windowDim = dim;
-}
+// void Renderer2D_SDL::SetWindowDim(const vec2di& dim)
+// {
+// 	m_windowDim = dim;
+// }
 void Renderer2D_SDL::SetCellDim(const vec2di& dim)
 {
 	m_cellDim = dim;

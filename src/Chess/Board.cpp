@@ -159,7 +159,7 @@ void Board::DrawCells(const Renderer2D* renderer) const
 
 void Board::DrawCellsTextured(const Renderer2D* renderer) const
 {
-	const vec2di& windowDim = renderer->GetWindowDim();
+	const vec2di& windowDim = renderer->GetViewPortDim();
 	int sz = std::min(windowDim.x, windowDim.y);
 	renderer->DrawSprite({ 0, 0 }, { sz, sz }, "board");
 #ifdef DRAW_DEBUG
@@ -176,7 +176,7 @@ void Board::DrawCellsTextured(const Renderer2D* renderer) const
 
 void Board::DrawCellsBasic(const Renderer2D* renderer) const
 {
-	vec2di screen = renderer->GetWindowDim();
+	vec2di screen = renderer->GetViewPortDim();
 	vec2di cell = renderer->GetCellDim();
 
 	pt2di p1 = { 0, 0 };

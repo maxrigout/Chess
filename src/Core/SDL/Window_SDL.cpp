@@ -1,6 +1,11 @@
 #include "Window_SDL.h"
 
 #include "Renderer2D/SDL/Renderer2D_SDL.h"
+#include "Renderer2D/OpenGL/Renderer2D_OpenGL.h"
+
+#include "Core/Logger.h"
+
+// #include <SDL2/SDL_syswm.h>
 
 #include <string>
 
@@ -8,8 +13,9 @@ static MouseButton mouseButtonMap[6];
 static Key keyboardMap[SDL_NUM_SCANCODES];
 static bool isSDLInitialized = false;
 static int numInstances = 0;
+static int isOpenGLInitialized = false;
 
-Uint32 GetWindowFlags(const WindowFlags& flags)
+static Uint32 GetWindowFlags(const WindowFlags& flags)
 {
 	Uint32 f = 0;
 	switch (flags.rendererBackend)
@@ -130,7 +136,7 @@ Window_SDL::Window_SDL()
 Window_SDL::~Window_SDL()
 {
 	if (m_pRenderer != nullptr)
-		SDL_DestroyRenderer(m_pRenderer);
+		SDL_DestroyRenderer(m_pSDLRenderer);
 	SDL_DestroyWindow(m_pWindow);
 
 	numInstances--;
@@ -152,7 +158,30 @@ void Window_SDL::Create(const WindowCreationInfo& createInfo)
 	if (y < 0)
 		y = SDL_WINDOWPOS_UNDEFINED;
 	
+	m_rendererType = createInfo.flags.rendererBackend;
 	Uint32 windowFlags = GetWindowFlags(createInfo.flags);
+	
+#ifdef SUPPORT_OPENGL
+	// need to load opengl before creating the window
+	if (createInfo.flags.rendererBackend == RendererBackendType::OpenGL && !isOpenGLInitialized)
+	{
+		// Default OpenGL is fine.
+		if (SDL_GL_LoadLibrary(NULL) != 0)
+			LOG_ERROR(std::string("cannot load OpenGL library") + SDL_GetError());
+		// Request an OpenGL 4.5 context (should be core)
+		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		// Also request a depth buffer
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+		isOpenGLInitialized = true;
+	}
+#endif
+	// SDL_SysWMinfo info;
+	
 	m_pWindow = SDL_CreateWindow(
 		createInfo.title.c_str(), // window title
 		x, // window x
@@ -162,22 +191,81 @@ void Window_SDL::Create(const WindowCreationInfo& createInfo)
 		windowFlags
 	);
 
-	if (createInfo.flags.rendererBackend == RendererBackendType::SDL2
-		|| createInfo.flags.rendererBackend == RendererBackendType::Unspec)
-	{
-		// create the renderer
-	}
+	// need to create the vulkan surface here....
+	// SDL_Vulkan_CreateSurface(m_pWindow, m_instance, &m_surface);
 }
 
 Renderer2D* Window_SDL::CreateRenderer()
 {
+	switch (m_rendererType)
+	{
+	case RendererBackendType::Unspec:
+	case RendererBackendType::SDL2: return CreateSDLRenderer();
+	case RendererBackendType::OpenGL: return CreateOpenGLRenderer();
+	case RendererBackendType::Vulkan: return CreateVulkanRenderer();
+	case RendererBackendType::Metal: return CreateMetalRenderer();
+	// TODO: DirectX
+	default:
+		break;
+	}
+	return nullptr;
+}
+
+Renderer2D* Window_SDL::CreateSDLRenderer()
+{
 	if (m_pWindow == nullptr)
 		return nullptr;
 	if (m_pRenderer != nullptr)
-		return nullptr;
-	m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	return new Renderer2D_SDL(m_pRenderer);
+		return m_pRenderer;
+	m_pSDLRenderer = SDL_CreateRenderer(m_pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	m_pRenderer = new Renderer2D_SDL(m_pSDLRenderer);
+	m_pRenderer->SetViewPortDim({ m_width, m_height });
+	return m_pRenderer;
 }
+
+Renderer2D* Window_SDL::CreateOpenGLRenderer()
+{
+#ifdef SUPPORT_OPENGL
+	SDL_GLContext context = SDL_GL_CreateContext(m_pWindow);
+	if (context == NULL)
+		LOG_ERROR("Failed to create OpenGL Context");
+	Renderer2D_OpenGL::LoadOpenGLLibrary(SDL_GL_GetProcAddress);
+	Renderer2D_OpenGL* openGLRenderer = new Renderer2D_OpenGL();
+	openGLRenderer->OnRenderEnd([this](){
+		SDL_GL_SwapWindow(this->m_pWindow);
+	});
+	m_pRenderer = openGLRenderer;
+	m_pRenderer->SetViewPortDim({ m_width, m_height });
+#endif
+	return m_pRenderer;
+}
+
+Renderer2D* Window_SDL::CreateVulkanRenderer()
+{
+#ifdef SUPPORT_VULKAN
+#endif
+	return m_pRenderer;
+}
+
+Renderer2D* Window_SDL::CreateMetalRenderer()
+{
+#ifdef SUPPORT_METAL
+#endif
+	return m_pRenderer;
+}
+
+Renderer2D* Window_SDL::CreateDirectXRenderer()
+{
+#ifdef SUPPORT_DIRECTX
+#endif
+	return m_pRenderer;
+}
+
+void Window_SDL::FreeRenderer()
+{
+	delete m_pRenderer;
+}
+
 
 void Window_SDL::PollEvents()
 {
@@ -196,6 +284,11 @@ void Window_SDL::PollEvents()
 			default: break;
 		}
 	}
+	static uint32_t lastticks = SDL_GetTicks();
+	uint32_t ticks = SDL_GetTicks();
+  	if ( ((ticks*10-lastticks*10)) < 167 )  
+    	SDL_Delay( (167-((ticks*10-lastticks*10)))/10 );
+  	lastticks = SDL_GetTicks();
 }
 
 int Window_SDL::GetWidth() const

@@ -19,7 +19,10 @@
                 "${workspaceFolder}/src/Chess/Players/*.cpp",
                 "${workspaceFolder}/src/Core/*.cpp",
                 "${workspaceFolder}/src/Core/SDL/*.cpp",
+                "${workspaceFolder}/src/Core/3rd_party/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/SDL/*.cpp",
+                "${workspaceFolder}/src/Renderer2D/OpenGL/*.cpp",
+                "${workspaceFolder}/src/Renderer2D/OpenGL/*.c",
                 "-o",
                 "${workspaceFolder}/out",
                 "-F/Library/Frameworks",
@@ -28,7 +31,17 @@
                 "-framework",
                 "SDL2_ttf",
                 "-framework",
-                "SDL2_image"
+                "SDL2_image",
+                "-framework",
+                "OpenGL",
+                "-framework",
+                "Cocoa",
+                "-framework",
+                "IOKit",
+                "-framework",
+                "CoreVideo",
+                "-framework",
+                "CoreFoundation"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
