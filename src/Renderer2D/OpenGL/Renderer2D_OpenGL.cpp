@@ -6,6 +6,8 @@
 #include <glad/glad.h>
 #include <stb/stb_image.h>
 
+#define PRIMITIVE_RESTART_INDEX 0xFFFFFFFF
+
 // TODO
 // https://bcmpinc.wordpress.com/2015/08/18/creating-an-opengl-4-5-context-using-sdl2-and-glad/
 
@@ -38,19 +40,14 @@ static const char* vertexSource = R"(
 
 layout (location = 0) in vec2 inPosition;
 layout (location = 1) in vec4 inColor;
-layout (location = 2) in vec2 inOffset;
-layout (location = 3) in vec2 inScale;
-layout (location = 4) in vec2 inTextureCoord;
+layout (location = 2) in vec2 inTextureCoord;
 
 out vec4 color;
 out vec2 uv;
 
 void main()
 {
-
-	vec2 position = (inPosition * inScale) + inOffset;
-	// vec2 position = inPosition + inOffset;
-	gl_Position = vec4(position, 0.0, 1.0);
+	gl_Position = vec4(inPosition, 0.0, 1.0);
 	uv = inTextureCoord;
 	color = inColor;
 }
@@ -62,14 +59,12 @@ static const char* fragmentSource = R"(
 in vec4 color;
 in vec2 uv;
 
-uniform sampler2D textureId;
-
 out vec4 FragColor;
 
 void main()
 {
-	FragColor = texture(textureId, uv);
-	// FragColor = color;
+	// FragColor = texture(textureId, uv);
+	FragColor = color;
 }
 )";
 
@@ -117,11 +112,11 @@ static Renderable CreateRenderable(const std::vector<Vertex>& vertices, const st
 
 	glGenBuffers(1, &renderable.VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, renderable.VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, maxInstances * sizeof(Vertex) * 4, nullptr, GL_STREAM_DRAW);
 
 	glGenBuffers(1, &renderable.EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, maxInstances * sizeof(unsigned int) * 6, nullptr, GL_STREAM_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
@@ -129,24 +124,12 @@ static Renderable CreateRenderable(const std::vector<Vertex>& vertices, const st
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
 
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, textureCoords));
+
 	renderable.nElements = indices.size();
 
 	return renderable;
-}
-
-template <typename T>
-static unsigned int CreateInstanceVBO(int index, int nComponents, int maxSize)
-{
-	unsigned int instanceVBO;
-	glGenBuffers(1, &instanceVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(T) * maxSize, nullptr, GL_STREAM_DRAW);
-
-	glEnableVertexAttribArray(index);
-	glVertexAttribPointer(index, nComponents, GL_FLOAT, GL_FALSE, sizeof(T), (void*)0);
-	glVertexAttribDivisor(index, 1);
-
-	return instanceVBO;
 }
 
 static void DestroyRenderable(Renderable& renderable)
@@ -220,27 +203,18 @@ Renderer2D_OpenGL::Renderer2D_OpenGL()
 {
 	m_onRenderEnd = [](){};
 	m_shader = CreateShader(vertexSource, fragmentSource);
-	m_uniformTextureIdLoc = glGetUniformLocation(m_shader, "textureId");
-
-	if (m_uniformTextureIdLoc < 0)
-		LOG_ERROR("unable to find textureId uniform location");
 
 	m_quadRenderable = CreateRenderable(quadVertices, quadIndices);
-
-	// Create instance VBO
-	m_instanceVBO1 = CreateInstanceVBO<pt2df>(2, 2, maxInstances);
-	m_instanceVBO2 = CreateInstanceVBO<vec2df>(3, 2, maxInstances);
-	m_instanceVBO3 = CreateInstanceVBO<vec2df>(4, 2, maxInstances);
 
 	// glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
+	glEnable(GL_PRIMITIVE_RESTART);
+	glPrimitiveRestartIndex(PRIMITIVE_RESTART_INDEX);
 }
 
 Renderer2D_OpenGL::~Renderer2D_OpenGL()
 {
-	glDeleteBuffers(1, &m_instanceVBO2);
-	glDeleteBuffers(1, &m_instanceVBO1);
 	DestroyRenderable(m_quadRenderable);
 	for (const auto& texture : m_textures)
 	{
@@ -251,11 +225,8 @@ Renderer2D_OpenGL::~Renderer2D_OpenGL()
 
 void Renderer2D_OpenGL::Begin()
 {
-	m_nInstances = 0;
-	m_boundTexture = -1;
-	m_texturesBound.clear();
-	m_instanceScales.clear();
-	m_instanceOffsets.clear();
+	m_data.clear();
+	m_indices.clear();
 
 	glUseProgram(m_shader);
 	glBindVertexArray(m_quadRenderable.VAO);
@@ -269,23 +240,18 @@ void Renderer2D_OpenGL::End()
 
 void Renderer2D_OpenGL::Flush()
 {
-	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO1);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(pt2df) * m_instanceOffsets.size(), m_instanceOffsets.data());
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO2);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec2df) * m_instanceScales.size(), m_instanceScales.data());
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_instanceVBO3);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec2df) * m_instanceTextureCoords.size(), m_instanceTextureCoords.data());
 
 	glBindVertexArray(m_quadRenderable.VAO);
-	glDrawElementsInstanced(GL_TRIANGLES, m_quadRenderable.nElements, GL_UNSIGNED_INT, 0, m_nInstances);
+	glBindBuffer(GL_ARRAY_BUFFER, m_quadRenderable.VBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, m_data.size() * sizeof(Vertex), m_data.data());	
 
-	m_nInstances = 0;
-	m_boundTexture = -1;
-	m_texturesBound.clear();
-	m_instanceScales.clear();
-	m_instanceOffsets.clear();
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_quadRenderable.EBO);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, m_indices.size() * sizeof(unsigned int), m_indices.data());
+
+	glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, (GLvoid*)0);
+
+	m_data.clear();
+	m_indices.clear();
 }
 
 void Renderer2D_OpenGL::Clear(const Color& color) const
@@ -423,20 +389,48 @@ bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimension
 
 	Sprite sprite = m_sprites[spriteId];
 	Texture texture = m_textures[sprite.textureId];
+
 	pt2df normalizedPosition = normalizeCoords(topLeft, m_viewPortDim);
 	vec2df normalizedSize = normalizeSize(dimensions, m_viewPortDim);
-	if (!m_texturesBound.count(sprite.textureId) && m_boundTexture < maxTexturesBind)
+
+	unsigned int gl_textureID = GL_TEXTURE0;
+	glActiveTexture(gl_textureID);
+	glBindTexture(gl_textureID, sprite.textureId);
+
+	auto vertices = quadVertices;
+	std::vector<unsigned int> indices;
+
+	// { tl_x, tl_y, br_x, br_y }
+	float weights[4][4] = {
+		{ 1.0f, 1.0f, 0.0f, 0.0f },
+		{ 1.0f, 0.0f, 1.0f, 0.0f },
+		{ 0.0f, 1.0f, 0.0f, 1.0f },
+		{ 0.0f, 0.0f, 1.0f, 1.0f }
+	};
+
+	for (int i = 0; i < vertices.size(); ++i)
 	{
-		unsigned int gl_textureID = GL_TEXTURE0 + ++m_boundTexture;
-		glActiveTexture(gl_textureID);
-		glBindTexture(gl_textureID, sprite.textureId);
+		indices.push_back(m_data.size());
+		Vertex& vertex = vertices[i];
+
+		vertex.position = { vertex.position.x * normalizedSize.w + normalizedPosition.x, vertex.position.y * normalizedSize.h + normalizedPosition.y };
+		vertex.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+		vertex.textureCoords = { sprite.topLeft.x * weights[0][i] + sprite.bottomRight.x * weights[2][i],
+								 sprite.topLeft.y * weights[1][i] + sprite.bottomRight.y * weights[3][i] };
+
+		m_data.push_back(vertex);
 	}
-	glUniform1i(m_uniformTextureIdLoc, m_boundTexture);
 
-	m_instanceOffsets.push_back(normalizedPosition + vec2df{ -1.0f, 1.0f });
-	m_instanceScales.push_back(normalizedSize);
+	for (int i = 0; i < quadIndices.size(); ++i)
+	{
+		// we draw 2 triangles per quad
+		if (i == 3)
+			m_indices.push_back(PRIMITIVE_RESTART_INDEX);
+		// we need to refer to the original order of the quad vertices (quadIndices)
+		// then push back the indices of the newly created vertices in that same order (indices)
+		m_indices.push_back(indices[quadIndices[i]]);
+	}
 
-	++m_nInstances;
 	return true;
 }
 

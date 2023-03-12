@@ -12,6 +12,7 @@ struct Vertex
 {
 	pt2df position;
 	Color color;
+	pt2df textureCoords;
 };
 
 struct Renderable
@@ -85,19 +86,10 @@ private:
 	std::unordered_map<std::string, size_t> m_tagsMap;
 
 	Renderable m_quadRenderable;
-	unsigned int m_instanceVBO1 = -1;
-	unsigned int m_instanceVBO2 = -1;
-	unsigned int m_instanceVBO3 = -1;
-	mutable std::vector<pt2df> m_instanceOffsets;
-	mutable std::vector<vec2df> m_instanceScales;
-	mutable std::vector<pt2df> m_instanceTextureCoords;
+	mutable std::vector<Vertex> m_data;
+	mutable std::vector<unsigned int> m_indices;
 
 	int m_shader = -1;
-	int m_uniformTextureIdLoc = -1;
-
-	mutable int m_boundTexture;
-	mutable std::set<size_t> m_texturesBound;
-	mutable unsigned int m_nInstances;
 
 	vec2di m_windowDim{};
 	vec2di m_cellDim{};
