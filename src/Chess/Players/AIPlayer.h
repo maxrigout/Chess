@@ -45,7 +45,7 @@ private:
 	std::thread m_playThread;
 	std::chrono::time_point<std::chrono::high_resolution_clock> m_playBegin;
 	bool m_isPlaying = false;
-	bool m_shouldQuit = false;
+	bool m_shouldStopProcessing = false;
 
 	size_t m_stackSizeAtBeginningOfTurn = 0;
 
