@@ -8,6 +8,8 @@
 #include <vector>
 #include <unordered_map>
 
+#define N_QUAD_VERTICES 4
+
 struct Vertex
 {
 	pt2df position;
@@ -63,12 +65,15 @@ public:
 
 	struct Texture
 	{
+		// the opengl id
 		unsigned int id;
 		vec2di dim;
+		std::string path;
 	};
 
 	struct Sprite
 	{
+		// the internal texture id... (ie the index in the texture array)
 		size_t textureId;
 		pt2df topLeft;
 		pt2df bottomRight;
@@ -86,10 +91,12 @@ private:
 	std::unordered_map<std::string, size_t> m_tagsMap;
 
 	Renderable m_quadRenderable;
-	mutable std::vector<Vertex> m_data;
-	mutable std::vector<unsigned int> m_indices;
 
 	int m_shader = -1;
+	int m_uniformOffsetLoc = -1;
+	int m_uniformScaleLoc = -1;
+	int m_uniformTextureIdLoc = -1;
+	int m_uniformQuadTextureCoordsLoc[N_QUAD_VERTICES];
 
 	vec2di m_windowDim{};
 	vec2di m_cellDim{};

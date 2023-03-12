@@ -14,6 +14,7 @@ public:
 	static void Info(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Debug(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Error(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void ErrorOnce(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Fatal(const char* file, const char* function, int lineNumber, const std::string& msg);
 
 private:
@@ -26,6 +27,7 @@ private:
 #define LOG_INFO(msg) Logger::Info(__FILE__, __func__, __LINE__, msg)
 #define LOG_DEBUG(msg) Logger::Debug(__FILE__, __func__, __LINE__, msg)
 #define LOG_ERROR(msg) Logger::Error(__FILE__, __func__, __LINE__, msg)
+#define LOG_ERROR_ONCE(msg) Logger::ErrorOnce(__FILE__, __func__, __LINE__, msg)
 #define LOG_FATAL(msg) Logger::Fatal(__FILE__, __func__, __LINE__, msg)
 #else
 #define LOG_INFO(tag, msg)

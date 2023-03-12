@@ -10,6 +10,7 @@
 
 #include "Core/SDL/Window_SDL.h"
 
+#define DEBUG
 #include "Assets.h"
 #include "Core/Logger.h"
 

@@ -32,11 +32,17 @@ void Logger::Debug(const char* file, const char* function, int lineNumber, const
 
 void Logger::Error(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
+	// display the level in red
+	std::cout << "\x1B[31m" << "[ERROR]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
+}
+
+void Logger::ErrorOnce(const char* file, const char* function, int lineNumber, const std::string& msg)
+{
 	if (s_errorMessages.count(msg))
 		return;
 	s_errorMessages.insert(msg);
 	// display the level in red
-	std::cout << "\x1B[31m" << "[ERROR]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
+	std::cout << "\x1B[31m" << "[ERROR ONCE]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
 }
 
 void Logger::Fatal(const char* file, const char* function, int lineNumber, const std::string& msg)
