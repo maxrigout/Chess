@@ -212,7 +212,7 @@ void Game::Render()
 	m_pRenderer->Begin();
 	m_pRenderer->Clear(BLACK);
 
-	m_pBoard->DrawCells(m_pRenderer); // Draw the board
+	m_pBoard->DrawBoard(m_pRenderer); // Draw the board
 	m_pBoard->HighlightCell(m_pRenderer, m_hoveredCellPos); // highlight the cell under the mouse cursor
 	m_pBoard->DrawSelectedCell(m_pRenderer, m_selectedCellPos, 7, DARK_GREEN); // highlight the selected cell
 	// draw the selected piece's moves

@@ -25,7 +25,7 @@ project "Chess"
 	{
 		"src/**.h",
 		"src/**.cpp",
-		"deps/include/**.cpp",
+		"src/**.c"
 	}
 
 	removefiles
@@ -56,7 +56,7 @@ project "Chess"
 	filter "system:windows"
 		libdirs
 		{
-			"deps/libraries",
+			"deps/lib",
 		}    
 		links
 		{

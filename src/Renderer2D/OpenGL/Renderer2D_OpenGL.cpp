@@ -89,15 +89,15 @@ void main()
 }
 )";
 
-static Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
+Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
 {
 	int width, height, nComponents;
-	unsigned char* imageData = stbi_load(path, &width, &height, &nComponents, 0);
+	uint8_t* imageData = stbi_load(path, &width, &height, &nComponents, 0);
 	if (!imageData)
 	{
 		// cannot load image...
 		LOG_ERROR("unable to load image at: " + std::string(path));
-		stbi_image_free(imageData);
+		//stbi_image_free(imageData);
 
 		return {(unsigned int)-1, {-1, -1}};
 	}
@@ -110,10 +110,10 @@ static Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
 	else if (nComponents == 4)
 		format = GL_RGBA;
 
-	unsigned int texture = -1;
+	unsigned int tex = -1;
 
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glGenTextures(1, &tex);
+	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, imageData);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -122,17 +122,19 @@ static Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 	stbi_image_free(imageData);
 
 	const size_t maxMsgSz = 500;
 	char message[maxMsgSz] = { 0 };
-	snprintf(message, maxMsgSz, "loaded %s: %d", path, texture);
+	snprintf(message, maxMsgSz, "loaded %s: %d", path, tex);
 	LOG_INFO(message);
 
-	return { texture, { width, height }, std::string(path) };
+	return { tex, { width, height }, std::string(path) };
 }
 
-static Renderable CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+Renderable CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
 	Renderable renderable;
 	glGenVertexArrays(1, &renderable.VAO);
@@ -157,14 +159,14 @@ static Renderable CreateRenderable(const std::vector<Vertex>& vertices, const st
 	return renderable;
 }
 
-static void DestroyRenderable(Renderable& renderable)
+void DestroyRenderable(Renderable& renderable)
 {
 	glDeleteBuffers(1, &renderable.VBO);
 	glDeleteBuffers(1, &renderable.EBO);
 	glDeleteBuffers(1, &renderable.VAO);
 }
 
-static int CreateShader(const char* v_shader, const char* v_fragment)
+int CreateShader(const char* v_shader, const char* v_fragment)
 {
 	int id = -1;
 
@@ -256,12 +258,10 @@ Renderer2D_OpenGL::Renderer2D_OpenGL()
 
 	m_quadRenderable = CreateRenderable(quadVertices, quadIndices);
 
-	// glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glFrontFace(GL_CCW);
 	glEnable(GL_BLEND);
-	// glEnable(GL_PRIMITIVE_RESTART);
-	// glPrimitiveRestartIndex(PRIMITIVE_RESTART_INDEX);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 Renderer2D_OpenGL::~Renderer2D_OpenGL()
@@ -278,11 +278,11 @@ void Renderer2D_OpenGL::Begin()
 {
 	glUseProgram(m_shader);
 	glBindVertexArray(m_quadRenderable.VAO);
-	// for (int i = 0; i < m_textures.size() && i < maxTexturesBind; ++i)
-	// {
-	// 	glActiveTexture(GL_TEXTURE0 + i);
-	// 	glBindTexture(GL_TEXTURE0 + i, m_textures[i].id);
-	// }
+	for (int i = 0; i < m_textures.size() && i < maxTexturesBind; ++i)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
+	}
 }
 
 void Renderer2D_OpenGL::End()
@@ -351,7 +351,7 @@ void Renderer2D_OpenGL::DrawArrow(const pt2di& start, const pt2di& end, const Co
 
 Renderer2D::SpriteID Renderer2D_OpenGL::LoadTexture(const char* path, const std::string& tag)
 {
-	Texture texture = ::LoadTextureToGPU(path);
+	Texture texture = LoadTextureToGPU(path);
 	m_textures.push_back(texture);
 	size_t textureId = m_textures.size() - 1;
 	m_sprites.push_back({ textureId, { 0.0f, 0.0f }, { 1.0f, 1.0f } });
@@ -363,7 +363,7 @@ Renderer2D::SpriteID Renderer2D_OpenGL::LoadTexture(const char* path, const std:
 
 std::vector<Renderer2D::SpriteID> Renderer2D_OpenGL::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
 {
-	Texture texture = ::LoadTextureToGPU(path);
+	Texture texture = LoadTextureToGPU(path);
 	m_textures.push_back(texture);
 	size_t textureId = m_textures.size() - 1;
 	std::vector<SpriteID> sprites;
@@ -433,13 +433,9 @@ bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimension
 	pt2df normalizedPosition = normalizeCoords(topLeft, m_viewPortDim);
 	vec2df normalizedSize = normalizeSize(dimensions, m_viewPortDim);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE0, texture.id);
-
 	glUniform2f(m_uniformOffsetLoc, normalizedPosition.x, normalizedPosition.y);
 	glUniform2f(m_uniformScaleLoc, normalizedSize.w, normalizedSize.h);
-	// glUniform1i(m_uniformTextureIdLoc, sprite.textureId);
-	glUniform1i(m_uniformTextureIdLoc, 0);
+	glUniform1i(m_uniformTextureIdLoc, sprite.textureId);
 
 	for (int i = 0; i < N_QUAD_VERTICES; ++i)
 	{
@@ -453,9 +449,6 @@ bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimension
 
 	glDrawElements(GL_TRIANGLES, m_quadRenderable.nElements, GL_UNSIGNED_INT, (void*)0);
 
-	// send the texture as uniform
-	// send the texture coords as uniform
-
 	return true;
 }
 
@@ -468,7 +461,7 @@ bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimension
 	}
 	catch (const std::exception& e)
 	{
-		LOG_ERROR("an error has occured with tag: " + tag + " - " + e.what());
+		LOG_ERROR_ONCE("an error has occured with tag: " + tag + " - " + e.what());
 	}
 	return false;
 }
@@ -496,8 +489,6 @@ void Renderer2D_OpenGL::SetCellDim(const vec2di& dim)
 
 void Renderer2D_OpenGL::SetViewPortDim(const vec2di& dim)
 {
-	// TODO recalculate projection matrix
-	// TODO set the view port
 	m_viewPortDim = dim;
 	glViewport(0, 0, m_viewPortDim.w, m_viewPortDim.h);
 }

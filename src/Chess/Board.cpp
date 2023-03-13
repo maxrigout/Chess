@@ -151,13 +151,13 @@ void Board::ResetAttack()
 	}
 }
 
-void Board::DrawCells(const Renderer2D* renderer) const
+void Board::DrawBoard(const Renderer2D* renderer) const
 {
-	DrawCellsTextured(renderer);
-	//DrawCellsBasic(renderer);
+	DrawBoardTextured(renderer);
+	//DrawBoardBasic(renderer);
 }
 
-void Board::DrawCellsTextured(const Renderer2D* renderer) const
+void Board::DrawBoardTextured(const Renderer2D* renderer) const
 {
 	const vec2di& windowDim = renderer->GetViewPortDim();
 	int sz = std::min(windowDim.x, windowDim.y);
@@ -174,7 +174,7 @@ void Board::DrawCellsTextured(const Renderer2D* renderer) const
 #endif
 }
 
-void Board::DrawCellsBasic(const Renderer2D* renderer) const
+void Board::DrawBoardBasic(const Renderer2D* renderer) const
 {
 	vec2di screen = renderer->GetViewPortDim();
 	vec2di cell = renderer->GetCellDim();

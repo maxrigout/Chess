@@ -33,7 +33,7 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
       |-- SDL2_ttf
       |-- Contains the SDL2_tff header
       |
-   |-- libraries
+   |-- lib
       | Contains all the 3rd party libraries used for linking
       |
  |-- resources
