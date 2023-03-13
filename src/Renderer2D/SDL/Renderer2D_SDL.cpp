@@ -286,10 +286,6 @@ vec2di Renderer2D_SDL::GetSpriteSize(const std::string& spriteTag) const
 	return { -1, -1 };
 }
 
-// const vec2di& Renderer2D_SDL::GetWindowDim() const
-// {
-// 	return m_windowDim;
-// }
 const vec2di& Renderer2D_SDL::GetCellDim() const
 {
 	return m_cellDim;
@@ -298,10 +294,6 @@ const vec2di& Renderer2D_SDL::GetViewPortDim() const
 {
 	return m_viewPortDim;
 }
-// void Renderer2D_SDL::SetWindowDim(const vec2di& dim)
-// {
-// 	m_windowDim = dim;
-// }
 void Renderer2D_SDL::SetCellDim(const vec2di& dim)
 {
 	m_cellDim = dim;

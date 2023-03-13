@@ -479,11 +479,6 @@ vec2di Renderer2D_OpenGL::GetSpriteSize(const std::string& spriteTag) const
 	return {};
 }
 
-// const vec2di& Renderer2D_OpenGL::GetWindowDim() const
-// {
-// 	return m_windowDim;
-// }
-
 const vec2di& Renderer2D_OpenGL::GetCellDim() const
 {
 	return m_cellDim;
@@ -493,12 +488,6 @@ const vec2di& Renderer2D_OpenGL::GetViewPortDim() const
 {
 	return m_viewPortDim;
 }
-
-// void Renderer2D_OpenGL::SetWindowDim(const vec2di& dim)
-// {
-// 	m_windowDim = dim;
-// 	SetViewPortDim(m_windowDim);
-// }
 
 void Renderer2D_OpenGL::SetCellDim(const vec2di& dim)
 {

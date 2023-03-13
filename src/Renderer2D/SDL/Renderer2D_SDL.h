@@ -32,10 +32,8 @@ public:
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const;
 
 	virtual vec2di GetSpriteSize(const std::string& spriteTag) const;
-	// virtual const vec2di& GetWindowDim() const;
 	virtual const vec2di& GetCellDim() const;
 	virtual const vec2di& GetViewPortDim() const;
-	// virtual void SetWindowDim(const vec2di& dim);
 	virtual void SetCellDim(const vec2di& dim);
 	virtual void SetViewPortDim(const vec2di& dim);
 

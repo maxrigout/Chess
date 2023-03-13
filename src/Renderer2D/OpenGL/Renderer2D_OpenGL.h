@@ -50,10 +50,8 @@ public:
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const override;
 	
 	virtual vec2di GetSpriteSize(const std::string& spriteTag) const override;
-	// virtual const vec2di& GetWindowDim() const override;
 	virtual const vec2di& GetCellDim() const override;
 	virtual const vec2di& GetViewPortDim() const override;
-	// virtual void SetWindowDim(const vec2di& dim) override;
 	virtual void SetCellDim(const vec2di& dim) override;
 	virtual void SetViewPortDim(const vec2di& dim) override;
 
