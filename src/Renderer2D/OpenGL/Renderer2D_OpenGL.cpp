@@ -89,7 +89,7 @@ void main()
 }
 )";
 
-Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
+static Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
 {
 	int width, height, nComponents;
 	uint8_t* imageData = stbi_load(path, &width, &height, &nComponents, 0);
@@ -134,7 +134,7 @@ Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
 	return { tex, { width, height }, std::string(path) };
 }
 
-Renderable CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+static Renderable CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
 	Renderable renderable;
 	glGenVertexArrays(1, &renderable.VAO);
@@ -159,14 +159,14 @@ Renderable CreateRenderable(const std::vector<Vertex>& vertices, const std::vect
 	return renderable;
 }
 
-void DestroyRenderable(Renderable& renderable)
+static void DestroyRenderable(Renderable& renderable)
 {
 	glDeleteBuffers(1, &renderable.VBO);
 	glDeleteBuffers(1, &renderable.EBO);
 	glDeleteBuffers(1, &renderable.VAO);
 }
 
-int CreateShader(const char* v_shader, const char* v_fragment)
+static int CreateShader(const char* v_shader, const char* v_fragment)
 {
 	int id = -1;
 

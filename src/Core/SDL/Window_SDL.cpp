@@ -1,7 +1,15 @@
 #include "Window_SDL.h"
 
 #include "Renderer2D/SDL/Renderer2D_SDL.h"
+
+#ifdef SUPPORT_OPENGL
 #include "Renderer2D/OpenGL/Renderer2D_OpenGL.h"
+#endif
+
+#ifdef SUPPORT_METAL
+#include <SDL2/SDL_metal.h>
+#include "Renderer2D/Metal/Renderer2D_Metal.h"
+#endif
 
 #include "Core/Logger.h"
 
@@ -250,6 +258,11 @@ Renderer2D* Window_SDL::CreateVulkanRenderer()
 Renderer2D* Window_SDL::CreateMetalRenderer()
 {
 #ifdef SUPPORT_METAL
+	SDL_MetalView view = SDL_Metal_CreateView(m_pWindow);
+	// TODO: destroy the view...
+	Renderer2D_Metal* pRenderer = new Renderer2D_Metal(SDL_Metal_GetLayer(view));
+	m_pRenderer = pRenderer;
+	m_pRenderer->SetViewPortDim({ m_width, m_height });
 #endif
 	return m_pRenderer;
 }

@@ -13,6 +13,9 @@
 #include <sstream>
 
 // #define DRAW_DEBUG
+#define USE_BOARD_SPRITE
+#define USE_SELECTED_CELL_SPRITE
+#define USE_HOVERED_CELL_SPRITE
 
 bool isUpperCase(char c)
 {
@@ -153,8 +156,11 @@ void Board::ResetAttack()
 
 void Board::DrawBoard(const Renderer2D* renderer) const
 {
+#ifdef USE_BOARD_SPRITE
 	DrawBoardTextured(renderer);
-	//DrawBoardBasic(renderer);
+#else
+	DrawBoardBasic(renderer);
+#endif
 }
 
 void Board::DrawBoardTextured(const Renderer2D* renderer) const
@@ -205,10 +211,12 @@ void Board::DrawBoardBasic(const Renderer2D* renderer) const
 		{
 			Color color = ((i + j) % 2 == 0) ? EVEN_CELL_COLOR : ODD_CELL_COLOR;
 			renderer->FillRect({ i * cell.w, j * cell.h }, cell, color);
+#ifdef DRAW_DEBUG
 			// if we want to draw the cells that are attacked
 			if (m_cells[j * m_width + i].m_attackedBy != TEAM::NONE)
-				HighlightCell(renderer, {i, j}, {15, 15}, RED);
-			// 	DrawSelectedCell(renderer, {i, j}, 5, DARK_BLUE);
+				HighlightCell(renderer, { i, j }, { 15, 15 }, RED);
+			// 	DrawSelectedCell(renderer, { i, j }, 5, DARK_BLUE);
+#endif
 		}
 	}
 }
@@ -233,6 +241,12 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, i
 	if (!IsPositionValid(cellPos))
 		return;
 
+	vec2di cell = renderer->GetCellDim();
+
+#ifdef USE_SELECTED_CELL_SPRITE
+	renderer->DrawSprite({ cellPos.x * cell.w + m_margin.w, cellPos.y * cell.h + m_margin.h },
+						 { cell.w, cell.h }, "selectedCell");
+#else
 	// option 1
 	// draw 4 rects
 	/*
@@ -243,7 +257,6 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, i
 	|___Bot___|
 
 	*/
-	vec2di cell = renderer->GetCellDim();
 
 	float aspectRatio = (float)cell.h / (float)cell.w;
 	int height = width * aspectRatio;
@@ -276,6 +289,7 @@ void Board::DrawSelectedCell(const Renderer2D* renderer, const pt2di& cellPos, i
 	// 	SDL_Rect rect = {cellPos.x * renderer->cell.w + i, cellPos.y * renderer->cell.h + i, renderer->cell.w - 2 * i, renderer->cell.h - 2 * i};
 	// 	SDL_RenderDrawRect(renderer->renderer, &rect);
 	// }
+#endif
 }
 
 void Board::HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, const pt2di& padding, const Color& color) const
@@ -285,9 +299,14 @@ void Board::HighlightCell(const Renderer2D* renderer, const pt2di& cellPos, cons
 
 	vec2di cell = renderer->GetCellDim();
 
+#ifdef USE_HOVERED_CELL_SPRITE
+	renderer->DrawSprite({ cellPos.x * cell.w + padding.x + m_margin.w, cellPos.y * cell.h + padding.y + m_margin.h },
+						 { cell.w - 2 * padding.x, cell.h - 2 * padding.y }, "hoveredCell");
+#else
 	renderer->FillRect(	{ cellPos.x * cell.w + padding.x + m_margin.w, cellPos.y * cell.h + padding.y + m_margin.h },
 						{ cell.w - 2 * padding.x, cell.h - 2 * padding.y },
 						color);
+#endif
 }
 
 std::string Board::GetBoardCoordinates(const pt2di& position) const
@@ -596,6 +615,7 @@ Piece* Board::CopyPiece(Piece* piece)
 		case 'B': copiedPiece = new Bishop(this, piece->Team(), piece->Pos()); break;
 		case 'Q': copiedPiece = new Queen(this, piece->Team(), piece->Pos()); break;
 		case 'K': copiedPiece = new King(this, piece->Team(), piece->Pos()); break;
+		default: return nullptr;
 	}
 	copiedPiece->m_boardPosition = piece->m_boardPosition;
 	copiedPiece->m_moves = piece->m_moves;

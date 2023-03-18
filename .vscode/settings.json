@@ -77,6 +77,7 @@
 		"unordered_set": "cpp",
 		"variant": "cpp",
 		"algorithm": "cpp",
-		"codecvt": "cpp"
+		"codecvt": "cpp",
+		"any": "cpp"
 	},
 }

@@ -2,6 +2,8 @@
 
 #include <string>
 
+#define USE_AVAILABLE_MOVES_SPRITE
+
 int GenerateUniquePieceId()
 {
 	static int id = 0;
@@ -66,12 +68,18 @@ void Piece::DrawYourself(const Renderer2D* renderer) const
 
 void Piece::DrawMoves(const Renderer2D* renderer) const
 {
-	int padx = 2;
-	int pady = 2;
+	pt2di padding = { 2, 2 };
+	vec2di cell = renderer->GetCellDim();
+	vec2di margin = m_pBoard->GetMargin();
 
 	for (const auto& m : m_availableMoves)
 	{
-		m_pBoard->HighlightCell(renderer, m, { padx, pady }, DARK_GREEN);
+#ifdef USE_AVAILABLE_MOVES_SPRITE
+		renderer->DrawSprite({ m.x * cell.w + padding.x + margin.w, m.y * cell.h + padding.y + margin.h },
+						{ cell.w - 2 * padding.x, cell.h - 2 * padding.y }, "availableCell");
+#else
+		m_pBoard->HighlightCell(renderer, m, padding, DARK_GREEN);
+#endif
 	}
 }
 

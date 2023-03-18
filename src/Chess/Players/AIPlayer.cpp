@@ -32,6 +32,7 @@ void AIPlayer::Play(const PlayingContext& context)
 	// create a thread if it's not playing
 	if (!m_isPlaying)
 	{
+		m_isPlaying = true;
 		if (m_playThread.joinable())
 			m_playThread.join();
 		m_shouldStopProcessing = false;
@@ -54,7 +55,6 @@ void AIPlayer::Play(const PlayingContext& context)
 void AIPlayer::PlayThread()
 {
 	m_stackSizeAtBeginningOfTurn = m_pBoard->GetStackSize();
-	m_isPlaying = true;
 	CopyBoard();
 #if !defined MAKE_COPIES
 	m_boardCopy = std::make_unique<Board>(*m_pBoard);

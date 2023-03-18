@@ -40,7 +40,7 @@ void Game::InitWindow(int width, int height)
 	info.title = "Chess";
 	info.width = width;
 	info.height = height;
-	info.flags.rendererBackend = RendererBackendType::OpenGL;
+	info.flags.rendererBackend = RendererBackendType::SDL2;
 	m_pWindow = new Window_SDL();
 	m_pWindow->Create(info);
 	m_pRenderer = m_pWindow->CreateRenderer();
@@ -145,6 +145,10 @@ void Game::LoadGraphics()
 	m_piecesSprites = m_pRenderer->LoadSpriteSheet(PIECES_TEXTURE_PATH, sprites);
 
 	m_pRenderer->LoadTexture(BOARD_TEXTURE_PATH, "board");
+
+	m_pRenderer->LoadTexture(AVAILABLE_CELLS_PATH, "availableCell");
+	m_pRenderer->LoadTexture(HOVERED_CELLS_PATH, "hoveredCell");
+	m_pRenderer->LoadTexture(SELECTED_CELLS_PATH, "selectedCell");
 }
 
 void Game::Run()
