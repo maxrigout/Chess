@@ -40,7 +40,7 @@ void Game::InitWindow(int width, int height)
 	info.title = "Chess";
 	info.width = width;
 	info.height = height;
-	info.flags.rendererBackend = RendererBackendType::SDL2;
+	info.flags.rendererBackend = RendererBackendType::OpenGL;
 	m_pWindow = new Window_SDL();
 	m_pWindow->Create(info);
 	m_pRenderer = m_pWindow->CreateRenderer();
