@@ -1,9 +1,12 @@
+#pragma once
+
+#include "Core/Logger.h"
+
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <map>
 #include <exception>
-#include <iostream>
 
 // just simple key-value pair for now...
 class ConfigReader
@@ -12,8 +15,8 @@ private:
 	class Property
 	{
 	public:
-		Property(const std::string& value, const std::unordered_map<std::string, Property>& children = {})
-		: m_value(value), m_childProperties(children)
+		Property(const std::string& name, const std::string& value, const std::unordered_map<std::string, Property>& children = {})
+		: m_name(name), m_value(value), m_childProperties(children)
 		{}
 		bool HasValue() const { return !m_value.empty(); }
 		bool HasChildren() const { return !m_childProperties.empty(); }
@@ -30,10 +33,22 @@ private:
 			}
 			catch (...)
 			{
-				throw std::runtime_error("unable to locate property 1.: " + key);
+				throw std::runtime_error("unable to locate child property <" + key + "> of " + m_name);
 			}
 		}
+
+		std::string Dump() const
+		{
+			std::string out = m_name + (m_childProperties.empty()? "" : ": " + m_value);
+			for (const auto& [key, child] : m_childProperties)
+			{
+				out += child.Dump();
+				out += "\n";
+			}
+			return out;
+		}
 	private:
+		std::string m_name;
 		std::string m_value;
 		std::unordered_map<std::string, Property> m_childProperties;
 	};
@@ -41,19 +56,31 @@ private:
 	class File
 	{
 	public:
-		File(const std::unordered_map<std::string, Property>& props)
-		: m_properties{ props }
+		File(const std::string name, const std::unordered_map<std::string, Property>& props)
+		: m_name(name), m_properties(props)
 		{
-			std::cout << "File constructor\n";
-			std::cout << "props.size()        == " << props.size() << std::endl;
-			std::cout << "m_properties.size() == " << m_properties.size() << std::endl;
+			LOG_DEBUG("File constructor");
+			LOG_DEBUG("props.size()        == " + std::to_string(props.size()));
+			LOG_DEBUG("m_properties.size() == " + std::to_string(m_properties.size()));
 		}
 		File(const File& other)
-		: m_properties{ other.m_properties }
+		: m_name(other.m_name), m_properties(other.m_properties)
 		{
-			std::cout << "File copy contructor\n";
-			std::cout << "other.m_properties.size() == " << other.m_properties.size() << std::endl;
-			std::cout << "m_properties.size()       == " << m_properties.size() << std::endl;
+			LOG_DEBUG("File copy contructor");
+			LOG_DEBUG("other.m_properties.size() == " + std::to_string(other.m_properties.size()));
+			LOG_DEBUG("m_properties.size()       == " + std::to_string(m_properties.size()));
+		}
+
+		const std::string& GetName() const { return m_name; }
+		std::string DumpProperties() const
+		{
+			std::string out;
+			for (const auto& [key, prop] : m_properties)
+			{
+				out += prop.Dump();
+				out += "\n";
+			}
+			return out;
 		}
 
 		const Property& operator[](const std::string& key) const 
@@ -64,10 +91,11 @@ private:
 			}
 			catch (...)
 			{
-				throw std::runtime_error("unable to locate property 2.: " + key);
+				throw std::runtime_error("unable to locate property <" + key + "> of file " + m_name);
 			}
 		}
 	private:
+		std::string m_name;
 		std::unordered_map<std::string, Property> m_properties;
 	};
 
@@ -86,9 +114,25 @@ public:
 		{
 			// load the file
 			File file = ParseFile(fileName);
-			ite = s_files.emplace(fileName, file).first;
+			auto [existing_ite, insert_successful] = s_files.emplace(fileName, file);
+			if (!insert_successful)
+			{
+				LOG_ERROR("unable to cache the file: " + fileName);
+			}
+			ite = existing_ite;
 		}
 		return ite->second;
+	}
+
+	static void DumpConfig(const std::string& fileName)
+	{
+		auto ite = s_files.find(fileName);
+		if (ite == s_files.end())
+		{
+			return;
+		}
+		std::string msg = fileName + '\n' + ite->second.DumpProperties();
+		LOG_DEBUG(msg);
 	}
 
 
@@ -121,24 +165,51 @@ private:
 
 		int currentIndent = 0;
 		std::string line;
+		std::vector<std::string> nameHierarchy;
 		while (getline(f, line))
 		{
 			std::string key, value;
 			std::stringstream ss;
 			ss << line;
 
+			int indent = CountIndent(line);
+			while(indent < currentIndent)
+			{
+				nameHierarchy.pop_back();
+				--currentIndent;
+			}
+
 			ss >> key >> value;
 			key = key.substr(0, key.length() - 1);
-			std::cout << "key: " << key << " - value: -" << value << "-" << std::endl;
+			LOG_DEBUG("key: " + key + " - value: -" + value + "-" );
 			if (!value.empty())
 			{
-				Property property(value);
+				Property property(GetName(nameHierarchy) + key, value);
 				fileData.emplace(key, property);
 				continue;
 			}
+			// TODO: need a stack
+			nameHierarchy.push_back(key);
+			// this is the only time when we would have a new indentation
+			propertiesData = {};
 		}
 
-		return File(fileData);
+		return File(fileName, fileData);
+	}
+
+	static std::string GetName(const std::vector<std::string>& tree)
+	{
+		std::string out;
+		for (const auto& name : tree)
+		{
+			out += name + ".";
+		}
+		return out;
+	}
+
+	static int CountIndent(const std::string& line)
+	{
+		return line.find_first_not_of("\t");
 	}
 
 	// std::unordered_map<std::string, File> m_files;

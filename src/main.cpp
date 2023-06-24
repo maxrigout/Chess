@@ -5,13 +5,21 @@
 
 int main(int argc, char** argv)
 {
-	LOG_DEBUG("hello");
-	LOG_DEBUG(ConfigReader::GetFile("config.yml")["name"].GetStringValue());
-	LOG_DEBUG(argv[0]);
-	Game game;
-	game.Init(800, 600);
-	game.Run();
-	game.Cleanup();
+	try
+	{
+		ConfigReader::DumpConfig("config.yml");
+		LOG_DEBUG("hello");
+		LOG_DEBUG(ConfigReader::GetFile("config.yml")["name"].GetStringValue());
+		LOG_DEBUG(argv[0]);
+		Game game;
+		game.Init(800, 600);
+		game.Run();
+		game.Cleanup();
+	}
+	catch (std::exception e)
+	{
+		LOG_FATAL(e.what());
+	}
 
 	return 0;
 }
