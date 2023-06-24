@@ -3,6 +3,7 @@
 
 enum class RendererBackendType
 {
+	Unknown,
 	Unspec,
 	OpenGL,
 	Vulkan,
@@ -15,8 +16,8 @@ class RendererConfiguration
 public:
 	static RendererBackendType GetRendererBackendType()
 	{
-		return RendererBackendType::OpenGL;
+		return s_backendType;
 	}
 private:
-
+	static RendererBackendType s_backendType;
 };

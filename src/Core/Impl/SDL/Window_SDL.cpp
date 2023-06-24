@@ -213,6 +213,7 @@ Renderer2D* Window_SDL::CreateRenderer()
 	case RendererBackendType::Vulkan: return CreateVulkanRenderer();
 	case RendererBackendType::Metal: return CreateMetalRenderer();
 	// TODO: DirectX
+	case RendererBackendType::Unknown: return nullptr;
 	}
 }
 

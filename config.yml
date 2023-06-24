@@ -1,0 +1,11 @@
+name: hello2
+name: anotherHello
+ai-properties:
+  type: min-max
+  search-depth: 4
+window-system: sdl
+renderer-backend: OpenGL
+opengl-settings:
+  render-method: direct | batch | instance
+player1: human
+player2: human
