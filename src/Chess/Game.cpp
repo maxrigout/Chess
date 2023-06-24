@@ -8,7 +8,9 @@
 
 #include "Chess/Players/HumanPlayer.h"
 
-#include "Core/SDL/Window_SDL.h"
+// #include "Core/Impl/SDL/Window_SDL.h"
+#include "Core/Factories/WindowFactory.h"
+#include "Core/Config/SystemConfiguration.h"
 
 #define DEBUG
 #include "Assets.h"
@@ -40,8 +42,8 @@ void Game::InitWindow(int width, int height)
 	info.title = "Chess";
 	info.width = width;
 	info.height = height;
-	info.flags.rendererBackend = RendererBackendType::OpenGL;
-	m_pWindow = new Window_SDL();
+	info.flags.rendererBackend = RendererConfiguration::GetRendererBackendType();
+	m_pWindow = WindowFactory::CreateWindow();
 	m_pWindow->Create(info);
 	m_pRenderer = m_pWindow->CreateRenderer();
 
@@ -214,7 +216,7 @@ void Game::Render()
 {
 	// Draw
 	m_pRenderer->Begin();
-	m_pRenderer->Clear(BLACK);
+	m_pRenderer->Clear(BLUE);
 
 	m_pBoard->DrawBoard(m_pRenderer); // Draw the board
 	m_pBoard->HighlightCell(m_pRenderer, m_hoveredCellPos); // highlight the cell under the mouse cursor

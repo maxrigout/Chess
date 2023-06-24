@@ -213,10 +213,7 @@ Renderer2D* Window_SDL::CreateRenderer()
 	case RendererBackendType::Vulkan: return CreateVulkanRenderer();
 	case RendererBackendType::Metal: return CreateMetalRenderer();
 	// TODO: DirectX
-	default:
-		break;
 	}
-	return nullptr;
 }
 
 Renderer2D* Window_SDL::CreateSDLRenderer()
