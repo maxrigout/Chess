@@ -12,7 +12,7 @@ enum class PlayerType
 	Network
 };
 
-class PlayerFactor
+class PlayerFactory
 {
 public:
 	std::unique_ptr<Player> CreatePlayer(std::weak_ptr<Board> pBoard, TEAM playerTeam, PlayerType playerType);
