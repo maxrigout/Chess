@@ -42,3 +42,9 @@ private:
 	static RendererBackendType s_backendType;
 	static std::string s_openglRenderMode;
 };
+
+#ifdef RENDERER_CONFIG_IMPL
+#undef RENDERER_CONFIG_IMPL
+RendererBackendType RendererConfiguration::s_backendType;
+std::string RendererConfiguration::s_openglRenderMode;
+#endif

@@ -26,3 +26,8 @@ public:
 private:
 	static std::string s_windowingSystem;
 };
+
+#ifdef SYS_CONFIG_IMPL
+#undef SYS_CONFIG_IMPL
+std::string SystemConfiguration::s_windowingSystem;
+#endif

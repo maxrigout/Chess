@@ -22,3 +22,9 @@ private:
 	static std::string s_player1Type;
 	static std::string s_player2Type;
 };
+
+#ifdef CHESS_CONFIG_IMPL
+#undef CHESS_CONFIG_IMPL
+std::string ChessConfiguration::s_player1Type;
+std::string ChessConfiguration::s_player2Type;
+#endif

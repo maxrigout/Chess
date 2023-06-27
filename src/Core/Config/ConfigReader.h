@@ -109,7 +109,6 @@ public:
 
 	static const File& GetFile(const std::string& fileName) 
 	{ 
-		static std::unordered_map<std::string, File> s_files;
 		auto ite = s_files.find(fileName);
 		if (ite == s_files.end())
 		{
@@ -196,4 +195,11 @@ private:
 	{
 		return line.find_first_not_of("\t");
 	}
+
+	static std::unordered_map<std::string, File> s_files;
 };
+
+#ifdef CONFIG_READER_IMPL
+#undef CONFIG_READER_IMPL
+std::unordered_map<std::string, ConfigReader::File> ConfigReader::s_files;
+#endif

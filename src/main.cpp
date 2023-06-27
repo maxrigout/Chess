@@ -1,10 +1,14 @@
+#define CONFIG_READER_IMPL
+#include "Core/Config/ConfigReader.h"
+#define SYS_CONFIG_IMPL
+#include "Core/Config/SystemConfiguration.h"
 #define CHESS_CONFIG_IMPL
+#include "Chess/Config/ChessConfig.h"
+#define RENDERER_CONFIG_IMPL
+#include "Renderer2D/Config/RendererConfiguration.h"
+
 #include "Chess/Game.h"
 #include "Core/Logger.h"
-#include "Core/Config/ConfigReader.h"
-#include "Core/Config/SystemConfiguration.h"
-#include "Chess/Config/ChessConfig.h"
-#include "Renderer2D/Config/RendererConfiguration.h"
 
 int main(int argc, char** argv)
 {

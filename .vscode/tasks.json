@@ -27,7 +27,6 @@
                 "${workspaceFolder}/src/Renderer2D/Config/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/SDL/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/OpenGL/*.cpp",
-                // "${workspaceFolder}/src/Renderer2D/OpenGL/*.c",
                 "${workspaceFolder}/src/Renderer2D/OpenGL/Classic/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/OpenGL/Batch/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/OpenGL/Instance/*.cpp",
@@ -52,13 +51,13 @@
                 "-framework",
                 "CoreFoundation",
                 "-framework",
-				"Metal",
-				"-framework",
-				"QuartzCore",
-				"-framework",
-				"Foundation",
-				"-framework",
-				"MetalKit",
+                "Metal",
+                "-framework",
+                "QuartzCore",
+                "-framework",
+                "Foundation",
+                "-framework",
+                "MetalKit"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -68,7 +67,7 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "detail": "compiler: /usr/bin/clang++"
         },
@@ -80,10 +79,12 @@
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "dependsOn": ["compile test"],
+            "dependsOn": [
+                "compile test"
+            ],
             "group": {
                 "kind": "test",
-                "isDefault": true
+                "isDefault": false
             },
             "detail": "runs tests in the tests folder."
         },
@@ -122,6 +123,19 @@
                 "isDefault": false
             },
             "detail": "compiler: /usr/bin/clang++"
+        },
+        {
+            "type": "shell",
+            "label": "generate project",
+            "command": "./scripts/macos/generate_project.sh",
+            "args": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "isDefault": true
+            },
+            "problemMatcher": []
         }
     ]
 }
