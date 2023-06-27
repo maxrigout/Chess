@@ -1,16 +1,7 @@
 #pragma once
 #include "Core/Config/ConfigReader.h"
+#include "Renderer2D/RendererBackendType.h"
 #include <string>
-
-enum class RendererBackendType
-{
-	Unknown,
-	Unspec,
-	OpenGL,
-	Vulkan,
-	Metal,
-	SDL2,
-};
 
 class RendererConfiguration
 {

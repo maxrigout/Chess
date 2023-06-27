@@ -1,7 +1,8 @@
 #include "Game.h"
 #include "Core/Factories/WindowFactory.h"
-#include "Core/Config/SystemConfiguration.h"
 #include "Chess/Factory/PlayerFactory.h"
+#include "Core/Config/SystemConfiguration.h"
+#include "Renderer2D/Config/RendererConfiguration.h"
 
 #define DEBUG
 #include "Assets.h"

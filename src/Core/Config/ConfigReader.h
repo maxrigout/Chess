@@ -58,18 +58,7 @@ private:
 	public:
 		File(const std::string name, const std::unordered_map<std::string, Property>& props)
 		: m_name(name), m_properties(props)
-		{
-			LOG_DEBUG("File constructor");
-			LOG_DEBUG("props.size()        == " + std::to_string(props.size()));
-			LOG_DEBUG("m_properties.size() == " + std::to_string(m_properties.size()));
-		}
-		File(const File& other)
-		: m_name(other.m_name), m_properties(other.m_properties)
-		{
-			LOG_DEBUG("File copy contructor");
-			LOG_DEBUG("other.m_properties.size() == " + std::to_string(other.m_properties.size()));
-			LOG_DEBUG("m_properties.size()       == " + std::to_string(m_properties.size()));
-		}
+		{}
 
 		const std::string& GetName() const { return m_name; }
 		std::string DumpProperties() const
@@ -165,7 +154,7 @@ private:
 
 			ss >> key >> value;
 			key = key.substr(0, key.length() - 1);
-			LOG_DEBUG("key: " + key + " - value: -" + value + "-" );
+			// LOG_DEBUG("key: " + key + " - value: -" + value + "-" );
 			if (!value.empty())
 			{
 				Property property(GetName(nameHierarchy) + key, value);
