@@ -1,5 +1,4 @@
 #pragma once
-
 #include "Core/Logger.h"
 
 #include <fstream>
@@ -110,6 +109,7 @@ public:
 
 	static const File& GetFile(const std::string& fileName) 
 	{ 
+		static std::unordered_map<std::string, File> s_files;
 		auto ite = s_files.find(fileName);
 		if (ite == s_files.end())
 		{
@@ -136,18 +136,6 @@ public:
 private:
 
 	ConfigReader() {}
-
-	const File& GetFile_Impl(const std::string& fileName)
-	{
-		auto ite = s_files.find(fileName);
-		if (ite == s_files.end())
-		{
-			// load the file
-			File file = ParseFile(fileName);
-			ite = s_files.emplace(fileName, file).first;
-		}
-		return ite->second;
-	}
 
 	static File ParseFile(const std::string& fileName)
 	{
@@ -208,7 +196,4 @@ private:
 	{
 		return line.find_first_not_of("\t");
 	}
-
-	// std::unordered_map<std::string, File> m_files;
-	static std::unordered_map<std::string, File> s_files;
 };

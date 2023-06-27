@@ -5,6 +5,10 @@
 class SystemConfiguration
 {
 public:
+	static void Init()
+	{
+		s_windowingSystem = ConfigReader::GetFile("config.yml")["windowing-system"].GetStringValue();
+	}
 	static const char* GetPlatform()
 	{
 #ifdef __linux__
@@ -17,9 +21,8 @@ public:
 	}
 	static const std::string& GetWindowingSystem()
 	{
-		// return s_windowingSystem;
-		return ConfigReader::GetFile("config.yml")["windowing-system"].GetStringValue();
+		return s_windowingSystem;
 	}
 private:
-	// static std::string s_windowingSystem;
+	static std::string s_windowingSystem;
 };

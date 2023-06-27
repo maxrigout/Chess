@@ -10,7 +10,8 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		ConfigReader::DumpConfig("config.yml");
+		// ConfigReader::DumpConfig("config.yml");
+		SystemConfiguration::Init();
 		ChessConfiguration::Init();
 		RendererConfiguration::Init();
 		LOG_DEBUG("hello");
