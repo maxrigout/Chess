@@ -20,6 +20,8 @@ public:
 		return s_openglRenderMode;
 	}
 private:
+	RendererConfiguration() {}
+	
 	static RendererBackendType BackendTypeStringToEnum(const std::string& backendType)
 	{
 		if (backendType == "Unspec") return RendererBackendType::Unspec;

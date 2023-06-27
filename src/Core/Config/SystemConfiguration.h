@@ -24,6 +24,7 @@ public:
 		return s_windowingSystem;
 	}
 private:
+	SystemConfiguration() {}
 	static std::string s_windowingSystem;
 };
 

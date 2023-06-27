@@ -19,6 +19,7 @@ public:
 		return s_player2Type;
 	}
 private:
+	ChessConfiguration() {}
 	static std::string s_player1Type;
 	static std::string s_player2Type;
 };
