@@ -37,7 +37,9 @@ project "Chess"
 	{
 		"src",
 		"deps/include",
-		"deps/include/SDL2"
+		"deps/include/SDL2",
+		"deps/include/metal-cpp",
+		"deps/include/metal-cpp-extensions"
 	}
 
 	postbuildcommands
@@ -71,13 +73,24 @@ project "Chess"
 		{
 			"SDL2.framework",
 			"SDL2_ttf.framework",
-			"SDL2_image.framework"
+			"SDL2_image.framework",
+			"OpenGL.framework",
+			"Cocoa.framework",
+			"IOKit.framework",
+			"CoreVideo.framework",
+			"CoreFoundation.framework",
+			"Metal.framework",
+			"QuartzCore.framework",
+			"Foundation.framework",
+			"MetalKit.framework"
 		}
 		linkoptions {"-F/Library/Frameworks"}
 
 	filter "system:linux"
 		-- TODO
-project "Tests"
-	kind "ConsoleApp"
-	language "C++"
-	cppdialect "C++17"
+
+-- TODO tests projects
+-- project "Tests"
+-- 	kind "ConsoleApp"
+-- 	language "C++"
+-- 	cppdialect "C++17"

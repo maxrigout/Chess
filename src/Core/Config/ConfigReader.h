@@ -15,7 +15,8 @@ private:
 	class Property
 	{
 	public:
-		Property(const std::string& name, const std::string& value, const std::unordered_map<std::string, Property>& children = {})
+		Property(const std::string& name, const std::string& value,
+			const std::unordered_map<std::string, Property>& children = {})
 		: m_name(name), m_value(value), m_childProperties(children)
 		{}
 		bool HasValue() const { return !m_value.empty(); }

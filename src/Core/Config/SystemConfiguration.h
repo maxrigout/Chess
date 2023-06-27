@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/Config/ConfigReader.h"
 #include <string>
 
 class SystemConfiguration
@@ -14,10 +15,11 @@ public:
 		return "MacOS";
 #endif
 	}
-	static const char* GetWindowingSystem()
+	static const std::string& GetWindowingSystem()
 	{
-		return "SDL";
+		// return s_windowingSystem;
+		return ConfigReader::GetFile("config.yml")["windowing-system"].GetStringValue();
 	}
 private:
-
+	// static std::string s_windowingSystem;
 };

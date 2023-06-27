@@ -1,9 +1,12 @@
 name: hello2
 name: anotherHello
-ai-properties:
-  type: min-max
-  search-depth: 4
-window-system: sdl
+chess:
+  ai-properties:
+    type: min-max
+    search-depth: 4
+  player1-type: human
+  player2-type: human
+windowing-system: sdl
 renderer-backend: OpenGL
 opengl-settings:
   render-method: direct | batch | instance

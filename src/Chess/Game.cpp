@@ -1,16 +1,7 @@
 #include "Game.h"
-#include "Chess/Pieces/Pawn.h"
-#include "Chess/Pieces/Rook.h"
-#include "Chess/Pieces/Knight.h"
-#include "Chess/Pieces/Bishop.h"
-#include "Chess/Pieces/Queen.h"
-#include "Chess/Pieces/King.h"
-
-#include "Chess/Players/HumanPlayer.h"
-
-// #include "Core/Impl/SDL/Window_SDL.h"
 #include "Core/Factories/WindowFactory.h"
 #include "Core/Config/SystemConfiguration.h"
+#include "Chess/Factory/PlayerFactory.h"
 
 #define DEBUG
 #include "Assets.h"
@@ -106,8 +97,8 @@ void Game::InitBoard()
 
 	// Player set up
 	// the pieces set up should be done in the constructor
-	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE);
-	m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO);
+	m_pPlayer1 = PlayerFactory::CreatePlayer1(m_pBoard);
+	m_pPlayer2 = PlayerFactory::CreatePlayer2(m_pBoard);
 
 	m_pActivePlayer = m_pPlayer1;
 	m_pPlayer2->AttackCells();

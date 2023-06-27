@@ -8,7 +8,7 @@ class WindowFactory
 public:
 	static Window* CreateWindow(const std::string& type = SystemConfiguration::GetWindowingSystem())
 	{
-		if (type == "SDL") return new Window_SDL();
+		if (type == "sdl") return new Window_SDL();
 		return nullptr;
 	}
 
