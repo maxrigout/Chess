@@ -127,12 +127,8 @@ public:
 
 	static void DumpConfig(const std::string& fileName)
 	{
-		auto ite = s_files.find(fileName);
-		if (ite == s_files.end())
-		{
-			return;
-		}
-		std::string msg = fileName + '\n' + ite->second.DumpProperties();
+		File file = GetFile(fileName);
+		std::string msg = fileName + '\n' + file.DumpProperties();
 		LOG_DEBUG(msg);
 	}
 

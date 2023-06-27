@@ -2,7 +2,6 @@
 #include "Core/Config/ConfigReader.h"
 #include <string>
 
-
 enum class RendererBackendType
 {
 	Unknown,
@@ -16,10 +15,18 @@ enum class RendererBackendType
 class RendererConfiguration
 {
 public:
+	static void Init()
+	{
+		s_backendType = BackendTypeStringToEnum(ConfigReader::GetFile("config.yml")["renderer-backend"].GetStringValue());
+		s_openglRenderMode = ConfigReader::GetFile("config.yml")["opengl-render-mode"].GetStringValue();
+	}
 	static RendererBackendType GetRendererBackendType()
 	{
-		// return s_backendType;
-		return BackendTypeStringToEnum(ConfigReader::GetFile("config.yml")["renderer-backend"].GetStringValue());
+		return s_backendType;
+	}
+	static std::string GetOpenGLRenderMode()
+	{
+		return s_openglRenderMode;
 	}
 private:
 	static RendererBackendType BackendTypeStringToEnum(const std::string& backendType)
@@ -32,5 +39,6 @@ private:
 		return RendererBackendType::Unknown;
 	}
 
-	// static RendererBackendType s_backendType;
+	static RendererBackendType s_backendType;
+	static std::string s_openglRenderMode;
 };

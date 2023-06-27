@@ -1,4 +1,5 @@
 #include "RendererConfiguration.h"
 #include "Core/Config/ConfigReader.h"
 
-// RendererBackendType RendererConfiguration::s_backendType = BackendTypeStringToEnum(ConfigReader::GetFile("config.yml")["renderer-backend"].GetStringValue());
+RendererBackendType RendererConfiguration::s_backendType;
+std::string RendererConfiguration::s_openglRenderMode;
