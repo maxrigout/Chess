@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <stack>
 #include <vector>
 #include <exception>
@@ -18,9 +18,9 @@ private:
 	{
 	public:
 		Property() {}
-		Property(const std::string& name, const std::string& value,
+		Property(const std::string& cannonicalName, const std::string& name, const std::string& value,
 			const std::unordered_map<std::string, Property>& children = {})
-		: m_name(name), m_value(value), m_childProperties(children)
+		: m_cannonicalName(cannonicalName), m_name(name), m_value(value), m_childProperties(children)
 		{}
 		bool HasValue() const { return !m_value.empty(); }
 		bool HasChildren() const { return !m_childProperties.empty(); }
@@ -28,6 +28,8 @@ private:
 		const std::string& GetStringValue() const { return m_value; }
 		int GetIntValue() const { return atoi(m_value.c_str()); }
 		float GetFloatValue() const { return atof(m_value.c_str()); }
+
+		const std::string& GetName() const { return m_name; }
 
 		const Property& operator[](const std::string& key) const
 		{ 
@@ -52,9 +54,12 @@ private:
 			return out;
 		}
 	private:
+		std::string m_cannonicalName;
 		std::string m_name;
 		std::string m_value;
 		std::unordered_map<std::string, Property> m_childProperties;
+
+		friend class ConfigReader;
 	};
 
 	class File
@@ -134,10 +139,12 @@ private:
 
 		// read the entire file
 		std::vector<std::string> lines;
-		std::string l;
-		while (getline(f, l))
 		{
-			lines.push_back(l);
+			std::string l;
+			while (getline(f, l))
+			{
+				lines.push_back(l);
+			}
 		}
 
 		// add an empty line if the file doesn't contain one
@@ -146,127 +153,45 @@ private:
 			lines.emplace_back("");
 		}
 
-		PropertyMap fileData;
-		std::stack<std::pair<std::string, PropertyMap>> propertiesStack;
+		PropertyMap properties;
 
-		int currentIndent = 0;
-		for (int i = 0; i < lines.size() - 1; i++)
+		for (int i = 0; i < lines.size() - 1; ++i)
 		{
-			const std::string& line = lines[i];
-			int indent = CountIndent(line);
-			auto [key, value] = ExtractPropertyInfo(line);
-
-			// if we find a parent... (ie value.empty() and next line is indented by 1 more)
-			if (IsPropertyGroup(value, indent, lines[i + 1]))
-			{
-				std::string parentName;
-				if (!propertiesStack.empty())
-					parentName = propertiesStack.top().first + ".";
-				propertiesStack.emplace();
-				propertiesStack.top().first = parentName + key;
-				// prematurely set the new indent...
-				currentIndent = indent;
-				continue;
-			}
-
-			// if the indent is 0, we can add the property
-			if (indent == 0)
-			{
-				fileData.emplace(key, Property(key, value));
-			}
-			// if the indent is the same as currentIndent, we can add the property to the child properties
-			else if (indent == currentIndent)
-			{
-				std::string name = propertiesStack.top().first + "." + key;
-				propertiesStack.top().second.emplace(key, Property(name, value));
-				continue;
-			}
-			else if (indent < currentIndent)
-			{
-				// if the indent decreases, we create the parent
-				fileData.emplace(propertiesStack.top().first, Property(propertiesStack.top().first, "", propertiesStack.top().second));
-				propertiesStack.pop();
-			}
+			Property p = ParseProperty("", lines, i);
+			properties.emplace(p.GetName(), p);
 		}
 
-		return File(fileName, fileData);
+		return File(fileName, properties);
 	}
-/*
-	static File ParseFile2(const std::string& fileName)
+
+	// need to include the '.' in the parent name
+	static Property ParseProperty(const std::string& parentName, const std::vector<std::string>& lines, int& startIndex)
 	{
-		std::ifstream f(fileName);
-		if (!f.is_open())
+		const std::string& line = lines[startIndex];
+		auto [key, value] = ExtractPropertyInfo(line);
+
+		if (!value.empty())
 		{
-			throw std::runtime_error("cannot open file: " + fileName);
+			return Property(parentName + key, key, value);
 		}
 
-		PropertyMap fileData;
+		int indent = CountIndent(line);
 
-		int currentIndent = 0;
-		std::vector<std::string> nameHierarchy;
-
-		// read the entire file
-		std::vector<std::string> lines;
-		std::string l;
-		while (getline(f, l))
+		if (IsPropertyGroup(value, indent, lines[startIndex + 1]))
 		{
-			lines.push_back(l);
+			int currentIndent = CountIndent(lines[startIndex + 1]);
+			PropertyMap children;
+			while (currentIndent - indent == 1 && startIndex < lines.size() - 1)
+			{
+				Property childProperty = ParseProperty(parentName + key + '.', lines, ++startIndex);
+				children.emplace(childProperty.GetName(), childProperty);
+				currentIndent = CountIndent(lines[startIndex + 1]);
+			}
+			return Property(parentName + key, key, "", children);
 		}
-
-
-		for (const auto& line : lines)
-		{
-			std::string key, value;
-			std::stringstream ss;
-			ss << line;
-
-			ss >> key >> value;
-			key = key.substr(0, key.length() - 1);
-			LOG_DEBUG("key: " + key + " - value: -" + value + "-" );
-			
-			Property property(GetName(nameHierarchy) + key, value);
-			fileData.emplace(key, property);
-		}
-
-		return File(fileName, fileData);
+		throw "bad yml file!";
 	}
 
-	static Property ParseLine2(std::vector<std::string>::iterator& linesIte, std::vector<std::string>::iterator& end, int indent, const std::string& parentName, PropertyMap& children)
-	{
-		if (linesIte == end)
-			return;
-		std::string line = *linesIte, key, value;
-		int currentIndent = CountIndent(line);
-		
-		// extract the key and the value from the line
-		std::stringstream ss;
-		ss << line;
-
-		ss >> key >> value;
-		key = key.substr(0, key.length() - 1);
-		// if there's no value, then we have a new "group"
-		//    create a new parent
-		//    call ParseLine with that parent
-		if (currentIndent > indent)
-		{
-			// we found a new parent
-			++linesIte;
-			ParseLine2(linesIte, end, currentIndent, parentName + "." + key, children);
-			return Property(key, "", children);
-		}
-		if (currentIndent < indent)
-		{
-			// 
-		}
-
-		// if there is a value
-		//    add the value to the parent
-		// if the indent has changed
-		//    create a new parent (indent greater)
-		//    return (indent less)
-		return Property();
-	}
-*/
 	static std::string GetName(const std::vector<std::string>& tree)
 	{
 		if (tree.size() == 0) 
@@ -298,7 +223,8 @@ private:
 
 	static int CountIndent(const std::string& line)
 	{
-		return line.find_first_not_of("\t");
+		std::string sep = "  ";
+		return line.find_first_not_of(sep) / sep.length();
 	}
 
 	static std::unordered_map<std::string, File> s_files;

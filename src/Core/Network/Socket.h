@@ -14,7 +14,10 @@
 #define SOCKET_ERROR (-1)
 #define INVALID_SOCKET (~0)
 
-#elif define _WIN32 || _WIN64
+float htonf(float f);
+double htond(double d);
+
+#elif defined _WIN32 || _WIN64
 
 #define WIN32_LEAN_AND_MEAN
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
@@ -28,9 +31,6 @@
 #endif
 
 #include <stdint.h>
-
-float htonf(float f);
-double htond(double d);
 
 enum class MessageStatus
 {
@@ -117,7 +117,7 @@ public:
 		while (totalBytesReceived < sizeof(T))
 		{
 			message.header.status = MessageStatus::RECEIVING;
-			int bytes = recv(m_socket, buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
+			int bytes = recv(m_socket, (char*)buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
 			if (bytes == 0)
 			{
 				message.header.status = MessageStatus::INCOMPLETE;
@@ -138,7 +138,7 @@ public:
 		size_t bytesSent = 0;
 		while (bytesSent < sizeof(T))
 		{
-			int sent = send(m_socket, data + bytesSent, sizeof(T) - bytesSent, 0);
+			int sent = send(m_socket, (char*)data + bytesSent, sizeof(T) - bytesSent, 0);
 			if (sent == 0)
 			{
 				// disconnected...
@@ -179,7 +179,7 @@ public:
 		size_t totalBytesReceived = 0;
 		while (totalBytesReceived < sizeof(T))
 		{
-			int bytesReceived = recv(m_socket, buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
+			int bytesReceived = recv(m_socket, (char*)buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
 			if (bytesReceived == 0)
 			{
 				// only for TCP sockets

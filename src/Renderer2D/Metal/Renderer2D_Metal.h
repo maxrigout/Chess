@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef SUPPORT_METAL
 #include "Renderer2D/Renderer2D.h"
 
 #include <string>
@@ -116,3 +116,4 @@ private:
 	vec2di m_cellDim{};
 	vec2di m_viewPortDim{};
 };
+#endif

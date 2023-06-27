@@ -1,5 +1,6 @@
 #include "Socket.h"
 
+#if defined __linux__ || __APPLE__
 float htonf(float f) {
     uint32_t i;
     std::memcpy(&i, &f, sizeof(float));
@@ -15,3 +16,4 @@ double htond(double d) {
     std::memcpy(&d, &i, sizeof(double));
     return d;
 }
+#endif

@@ -13,4 +13,7 @@
 #define BOARD_TEXTURE_PATH "resources/graphics/board3.png"
 #define PIECES_TEXTURE_PATH "resources/graphics/pieces4.png"
 #define FONT_PATH "resources/fonts/FatBrush.ttf"
+#define AVAILABLE_CELLS_PATH "resources/graphics/Green.png"
+#define HOVERED_CELLS_PATH "resources/graphics/Highlightedcell.png"
+#define SELECTED_CELLS_PATH "resources/graphics/Activecell.png"
 #endif

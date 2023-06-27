@@ -1,5 +1,4 @@
 name: hello2
-name: anotherHello
 chess:
   ai-properties:
     type: min-max

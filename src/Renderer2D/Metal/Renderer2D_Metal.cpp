@@ -1,5 +1,5 @@
+#ifdef SUPPORT_METAL
 #include "Renderer2D_Metal.h"
-
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
 #include <QuartzCore/QuartzCore.hpp>
@@ -464,3 +464,4 @@ void Renderer2D_Metal::SetViewPortDim(const vec2di& dim)
 	m_viewPort = (CGRect){ { 0.0, 0.0 }, { (double)dim.w, (double)dim.h } };
 	// TODO
 }
+#endif
