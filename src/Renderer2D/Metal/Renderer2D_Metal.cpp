@@ -1,3 +1,4 @@
+#include "Core/PlatformSupport.h"
 #ifdef SUPPORT_METAL
 #include "Renderer2D_Metal.h"
 #include <Metal/Metal.hpp>

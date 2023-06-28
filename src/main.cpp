@@ -19,14 +19,14 @@ int main(int argc, char** argv)
 		ChessConfiguration::Init();
 		RendererConfiguration::Init();
 		LOG_DEBUG("hello");
-		LOG_DEBUG(ConfigReader::GetFile("config.yml")["name"].GetStringValue());
+		// LOG_DEBUG(ConfigReader::GetFile("config.yml")["name"].GetStringValue());
 		LOG_DEBUG(argv[0]);
 		Game game;
 		game.Init(800, 600);
 		game.Run();
 		game.Cleanup();
 	}
-	catch (std::exception e)
+	catch (std::runtime_error& e)
 	{
 		LOG_FATAL(e.what());
 	}

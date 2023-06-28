@@ -6,11 +6,19 @@
 	"configurations": [
 		{
 			"name": "(lldb) Launch",
+			"type": "lldb",
+			"request": "launch",
+			"program": "${workspaceFolder}/bin/Debug_x86_64/Chess",
+			"args": [],
+			"cwd": "${fileDirname}"
+		},
+		{
+			"name": "(lldb) Launch 2",
 			"type": "cppdbg",
 			"request": "launch",
 			"program": "${workspaceFolder}/bin/Debug_x86_64/Chess",
 			"args": [],
-			"stopAtEntry": false,
+			"stopAtEntry": true,
 			"cwd": "${fileDirname}",
 			"environment": [],
 			"externalConsole": false,

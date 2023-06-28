@@ -7,8 +7,8 @@ class ChessConfiguration
 public:
 	static void Init()
 	{
-		s_player1Type = ConfigReader::GetFile("config.yml")["player1"].GetStringValue();
-		s_player2Type = ConfigReader::GetFile("config.yml")["player2"].GetStringValue();
+		s_player1Type = ConfigReader::GetFile("config.yml")["chess"]["player1"].GetStringValue();
+		s_player2Type = ConfigReader::GetFile("config.yml")["chess"]["player2"].GetStringValue();
 	}
 	static const std::string& GetPlayerOneType()
 	{

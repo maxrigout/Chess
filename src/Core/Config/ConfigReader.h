@@ -39,6 +39,7 @@ private:
 			}
 			catch (...)
 			{
+				LOG_FATAL("unable to locate child property <" + key + "> of " + m_name);
 				throw std::runtime_error("unable to locate child property <" + key + "> of " + m_name);
 			}
 		}
@@ -89,6 +90,7 @@ private:
 			}
 			catch (...)
 			{
+				LOG_FATAL("unable to locate property <" + key + "> of file " + m_name);
 				throw std::runtime_error("unable to locate property <" + key + "> of file " + m_name);
 			}
 		}
@@ -189,7 +191,7 @@ private:
 			}
 			return Property(parentName + key, key, "", children);
 		}
-		throw "bad yml file!";
+		throw std::runtime_error("bad yml file!");
 	}
 
 	static std::string GetName(const std::vector<std::string>& tree)

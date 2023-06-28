@@ -7,7 +7,7 @@ class SystemConfiguration
 public:
 	static void Init()
 	{
-		s_windowingSystem = ConfigReader::GetFile("config.yml")["windowing-system"].GetStringValue();
+		s_windowingSystem = ConfigReader::GetFile("config.yml")["system"]["windowing-system"].GetStringValue();
 	}
 	static const char* GetPlatform()
 	{

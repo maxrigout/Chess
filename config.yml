@@ -1,14 +1,12 @@
-name: hello2
 chess:
   ai-properties:
     type: min-max
     search-depth: 4
-  player1-type: human
-  player2-type: human
-windowing-system: sdl
-renderer-backend: OpenGL
-opengl-render-mode: direct
-opengl-settings:
-  render-method: direct | batch | instance
-player1: human
-player2: ai
+  player1: human
+  player2: ai
+system:
+  windowing-system: sdl
+renderer:
+  renderer-backend: opengl
+  opengl-settings:
+    opengl-render-mode: direct
