@@ -7,6 +7,6 @@ chess:
 system:
   windowing-system: sdl
 renderer:
-  renderer-backend: opengl
+  renderer-backend: vulkan
   opengl-settings:
     opengl-render-mode: direct

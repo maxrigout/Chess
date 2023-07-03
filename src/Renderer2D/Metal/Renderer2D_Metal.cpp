@@ -1,6 +1,5 @@
-#include "Core/PlatformSupport.h"
-#ifdef SUPPORT_METAL
 #include "Renderer2D_Metal.h"
+#ifdef SUPPORT_METAL
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
 #include <QuartzCore/QuartzCore.hpp>

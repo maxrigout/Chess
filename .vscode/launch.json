@@ -10,7 +10,7 @@
 			"request": "launch",
 			"program": "${workspaceFolder}/bin/Debug_x86_64/Chess",
 			"args": [],
-			"cwd": "${fileDirname}"
+			"cwd": "${workspaceFolder}"
 		},
 		{
 			"name": "(lldb) Launch 2",
@@ -19,7 +19,7 @@
 			"program": "${workspaceFolder}/bin/Debug_x86_64/Chess",
 			"args": [],
 			"stopAtEntry": true,
-			"cwd": "${fileDirname}",
+			"cwd": "${workspaceFolder}",
 			"environment": [],
 			"externalConsole": false,
 			"MIMode": "lldb"

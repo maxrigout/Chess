@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Core/PlatformSupport.h"
 #include "Math/point2d.h"
 #include "Math/vector2d.h"
 

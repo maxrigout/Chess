@@ -56,7 +56,7 @@ public:
 	virtual void SetViewPortDim(const vec2di& dim) override;
 
 	template <typename Fn>
-	void OnRenderEnd(Fn&& fn)
+	void OnRenderEnd(Fn fn)
 	{
 		m_onRenderEnd = std::move(fn);
 	}

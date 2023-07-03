@@ -1,6 +1,6 @@
 #pragma once
-#ifdef SUPPORT_METAL
 #include "Renderer2D/Renderer2D.h"
+#ifdef SUPPORT_METAL
 
 #include <string>
 #include <functional>

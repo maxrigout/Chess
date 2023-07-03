@@ -1,5 +1,4 @@
 #pragma once
-#include "PlatformSupport.h"
 #include "Input.h"
 #include "Renderer2D/Renderer2D.h"
 
