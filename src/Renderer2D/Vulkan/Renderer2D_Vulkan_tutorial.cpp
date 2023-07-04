@@ -168,12 +168,6 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	return VK_FALSE;
 }
 
-static void FreeMemoryAndDestroyBuffer(VkDevice device, BufferAndMemory bufferAndMemory)
-{
-	vkFreeMemory(device, bufferAndMemory.memory, nullptr);
-	vkDestroyBuffer(device, bufferAndMemory.buffer, nullptr);
-}
-
 Renderer2D_Vulkan::Renderer2D_Vulkan()
 {
 }
@@ -370,9 +364,8 @@ void Renderer2D_Vulkan::initVulkan()
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
-	quad1 = createVertexBuffer(vertices_topleft, ARRAY_LEN(vertices_topleft));
-	quad2 = createVertexBuffer(vertices_bottom_right, ARRAY_LEN(vertices_bottom_right));
-	quadIndices = createIndexBuffer(indices, ARRAY_LEN(indices));
+	createVertexBuffer();
+	createIndexBuffer();
 	createCommandBuffer();
 	createSyncObjects();
 }
@@ -409,13 +402,10 @@ void Renderer2D_Vulkan::cleanup()
 	delete m_pCallbacks;
 #elif defined CLEANUP_V2
 	cleanupSwapChain();
-	// vkFreeMemory(m_device, m_indexBufferMemory, nullptr);
-	// vkDestroyBuffer(m_device, m_indexBuffer, nullptr);
-	// vkFreeMemory(m_device, m_vertexBufferMemory, nullptr);
-	// vkDestroyBuffer(m_device, m_vertexBuffer, nullptr);
-	FreeMemoryAndDestroyBuffer(m_device, quadIndices);
-	FreeMemoryAndDestroyBuffer(m_device, quad2);
-	FreeMemoryAndDestroyBuffer(m_device, quad1);
+	vkFreeMemory(m_device, m_indexBufferMemory, nullptr);
+	vkDestroyBuffer(m_device, m_indexBuffer, nullptr);
+	vkFreeMemory(m_device, m_vertexBufferMemory, nullptr);
+	vkDestroyBuffer(m_device, m_vertexBuffer, nullptr);
 	vkDestroySemaphore(m_device, m_imageAvailableSemaphore, nullptr);
 	vkDestroySemaphore(m_device, m_renderFinishedSemaphore, nullptr);
 	vkDestroyFence(m_device, m_inFlightFence, nullptr);
@@ -1379,29 +1369,13 @@ void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 
-	{
-		VkBuffer vertexBuffers[] = { quad1.buffer };
-		VkDeviceSize offsets[] = { 0 };
+	VkBuffer vertexBuffers[] = { m_vertexBuffer };
+	VkDeviceSize offsets[] = { 0 };
 
-		vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
-		vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
-	}
-	{
-		VkBuffer vertexBuffers[] = { quad2.buffer };
-		VkDeviceSize offsets[] = { 0 };
+	vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
+	vkCmdBindIndexBuffer(m_commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-		vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
-		vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
-	}
-
-	// VkBuffer vertexBuffers[] = { m_vertexBuffer };
-	// VkDeviceSize offsets[] = { 0 };
-
-	// vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
-	// vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
-
+	vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
 
 
 	vkCmdEndRenderPass(commandBuffer);
@@ -1464,7 +1438,7 @@ void Renderer2D_Vulkan::recreateSwapChain()
 	//createGraphicsPipeline();
 }
 
-void Renderer2D_Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer& buffer, VkDeviceMemory& memory)
+void Renderer2D_Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer& buffer, VkDeviceMemory &memory)
 {
 	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1495,12 +1469,9 @@ void Renderer2D_Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage
 	vkBindBufferMemory(m_device, buffer, memory, 0);
 }
 
-BufferAndMemory Renderer2D_Vulkan::createVertexBuffer(const Vertex* vertices, size_t count)
+void Renderer2D_Vulkan::createVertexBuffer()
 {
-	if (vertices == nullptr)
-		return {};
-
-	VkDeviceSize bufferSize = count * sizeof(Vertex);
+	VkDeviceSize bufferSize = sizeof(vertices) * sizeof(Vertex);
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
 
@@ -1513,27 +1484,19 @@ BufferAndMemory Renderer2D_Vulkan::createVertexBuffer(const Vertex* vertices, si
 	memcpy(data, vertices, bufferSize);
 	vkUnmapMemory(m_device, stagingBufferMemory);
 
-	BufferAndMemory bufferAndMemory{};
-
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		bufferAndMemory.buffer, bufferAndMemory.memory);
+		m_vertexBuffer, m_vertexBufferMemory);
 
-	copyBuffer(stagingBuffer, bufferAndMemory.buffer, bufferSize);
+	copyBuffer(stagingBuffer, m_vertexBuffer, bufferSize);
 
 	vkDestroyBuffer(m_device, stagingBuffer, nullptr);
 	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
-
-	return bufferAndMemory;
-
 }
 
-BufferAndMemory Renderer2D_Vulkan::createIndexBuffer(const uint16_t* indices, size_t count)
+void Renderer2D_Vulkan::createIndexBuffer()
 {
-	if (indices == nullptr)
-		return {};
-	
-	VkDeviceSize bufferSize = count * sizeof(uint16_t);
+	VkDeviceSize bufferSize = ARRAY_LEN(indices) * sizeof(indices[0]);
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
@@ -1545,18 +1508,14 @@ BufferAndMemory Renderer2D_Vulkan::createIndexBuffer(const uint16_t* indices, si
 	memcpy(data, indices, bufferSize);
 	vkUnmapMemory(m_device, stagingBufferMemory);
 
-	BufferAndMemory bufferAndMemory{};
-
 	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
 	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-	bufferAndMemory.buffer, bufferAndMemory.memory);
+	m_indexBuffer, m_indexBufferMemory);
 
-	copyBuffer(stagingBuffer, bufferAndMemory.buffer, bufferSize);
+	copyBuffer(stagingBuffer, m_indexBuffer, bufferSize);
 
 	vkDestroyBuffer(m_device, stagingBuffer, nullptr);
 	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
-
-	return bufferAndMemory;
 }
 
 uint32_t Renderer2D_Vulkan::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)

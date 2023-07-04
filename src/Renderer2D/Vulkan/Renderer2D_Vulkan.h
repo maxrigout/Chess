@@ -36,6 +36,12 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
+struct BufferAndMemory
+{
+	VkBuffer buffer;
+	VkDeviceMemory memory;
+};
+
 class Renderer2D_Vulkan : public Renderer2D
 {
 public:
@@ -105,8 +111,8 @@ private:
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
-	void createVertexBuffer();
-	void createIndexBuffer();
+	BufferAndMemory createVertexBuffer(const Vertex* vertices, size_t count);
+	BufferAndMemory createIndexBuffer(const uint16_t* indices, size_t count);
 	void createCommandBuffer();
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void createSyncObjects();
@@ -195,6 +201,10 @@ private:
 
 	VkBuffer m_indexBuffer;
 	VkDeviceMemory m_indexBufferMemory;
+
+	BufferAndMemory quadIndices;
+	BufferAndMemory quad1;
+	BufferAndMemory quad2;
 };
 
 #endif
