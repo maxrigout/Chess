@@ -1,3 +1,4 @@
+#if 0
 #pragma once
 #include "Renderer2D/Renderer2D.h"
 #ifdef SUPPORT_VULKAN
@@ -34,6 +35,12 @@ struct SwapChainSupportDetails
 	VkSurfaceCapabilitiesKHR capabilities;
 	std::vector<VkSurfaceFormatKHR> formats;
 	std::vector<VkPresentModeKHR> presentModes;
+};
+
+struct BufferAndMemory
+{
+	VkBuffer buffer;
+	VkDeviceMemory memory;
 };
 
 class Renderer2D_Vulkan : public Renderer2D
@@ -105,8 +112,8 @@ private:
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
-	void createVertexBuffer();
-	void createIndexBuffer();
+	BufferAndMemory createVertexBuffer(const Vertex* vertices, size_t count);
+	BufferAndMemory createIndexBuffer(const uint16_t* indices, size_t count);
 	void createCommandBuffer();
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 	void createSyncObjects();
@@ -195,6 +202,11 @@ private:
 
 	VkBuffer m_indexBuffer;
 	VkDeviceMemory m_indexBufferMemory;
+
+	BufferAndMemory quadIndices;
+	BufferAndMemory quad1;
+	BufferAndMemory quad2;
 };
 
+#endif
 #endif
