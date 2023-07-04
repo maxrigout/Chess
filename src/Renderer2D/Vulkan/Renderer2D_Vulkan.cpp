@@ -1395,14 +1395,6 @@ void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 		vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
 	}
 
-	// VkBuffer vertexBuffers[] = { m_vertexBuffer };
-	// VkDeviceSize offsets[] = { 0 };
-
-	// vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
-	// vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
-
-
-
 	vkCmdEndRenderPass(commandBuffer);
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 	{
