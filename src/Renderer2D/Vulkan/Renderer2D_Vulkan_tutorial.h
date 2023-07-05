@@ -1,4 +1,3 @@
-#if 0
 #pragma once
 #include "Renderer2D/Renderer2D.h"
 #ifdef SUPPORT_VULKAN
@@ -103,13 +102,18 @@ private:
 	void createSwapChain();
 	void createImageViews();
 	void createRenderPass();
+	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
 	void createVertexBuffer();
 	void createIndexBuffer();
+	void createUniformBuffers();
+	void createDescriptorPool();
+	void createDescriptorSets();
 	void createCommandBuffer();
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	void updateUniformBuffer(uint32_t currentImage);
 	void createSyncObjects();
 
 	void cleanupSwapChain();
@@ -177,6 +181,7 @@ private:
 	std::vector<VkImageView> m_swapChainImageViews;
 	
 	VkRenderPass m_renderPass;
+	VkDescriptorSetLayout m_descriptorSetLayout;
 	VkPipelineLayout m_pipelineLayout;
 	VkPipeline m_graphicsPipeline;
 
@@ -196,7 +201,15 @@ private:
 
 	VkBuffer m_indexBuffer;
 	VkDeviceMemory m_indexBufferMemory;
+
+	std::vector<VkBuffer> m_uniformBuffers;
+	std::vector<VkDeviceMemory> m_uniformBuffersMemory;
+	std::vector<void*> m_uniformBuffersMapped;
+
+	VkDescriptorPool m_descriptorPool;
+	std::vector<VkDescriptorSet> m_descriptorSets;
+
+	size_t MAX_FRAMES_IN_FLIGHT;
 };
 
-#endif
 #endif

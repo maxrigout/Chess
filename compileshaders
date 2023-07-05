@@ -1,0 +1,7 @@
+SHADER_COMPILER=~/dev/VulkanSDK/1.3.231.1/macOS/bin/glslc
+COMPILED_DIR=Tutorial_vulkan/shaders/compiled
+
+echo "compiling shaders..."
+${SHADER_COMPILER} Tutorial_vulkan/shaders/shader.vert -o ${COMPILED_DIR}/vert.spv
+${SHADER_COMPILER} Tutorial_vulkan/shaders/shader.frag -o ${COMPILED_DIR}/frag.spv
+echo "done compiling!"

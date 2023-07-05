@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 		game.Run();
 		game.Cleanup();
 	}
-	catch (std::runtime_error& e)
+	catch (std::exception& e)
 	{
 		LOG_FATAL(e.what());
 	}

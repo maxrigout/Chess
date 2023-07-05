@@ -1,4 +1,5 @@
-#if 0
+#include "VulkanConfig.h"
+#if USE_TUTORIAL
 #include "Renderer2D_Vulkan.h"
 #ifdef SUPPORT_VULKAN
 // following tutorial https://vulkan-tutorial.com/en/
@@ -16,7 +17,9 @@
 #define VK_KHR_PORTABILITY_SUBSET_NAME "VK_KHR_portability_subset"
 #endif
 
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -54,6 +57,11 @@ static const bool enableValidationLayers = false;
 static const bool enableValidationLayers = true;
 #endif // NDEBUG
 
+/*
+* x- x+
+* y-
+* y+
+*/
 struct Vertex
 {
 	glm::vec2 pos;
@@ -92,11 +100,12 @@ struct Vertex
 	}
 };
 
-/*
-* x- x+
-* y-
-* y+
-*/
+struct UniformBufferObject
+{
+    alignas(16) glm::mat4 model;
+    alignas(16) glm::mat4 view;
+    alignas(16) glm::mat4 proj;
+};
 
 static const Vertex vertices[] =
 {
@@ -104,22 +113,6 @@ static const Vertex vertices[] =
 	{ {  0.5f, -0.5f }, { 0.0f, 1.0f, 1.0f } },
 	{ {  0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
 	{ { -0.5f,  0.5f }, { 1.0f, 1.0f, 0.0f } },
-};
-
-static const Vertex vertices_topleft[] =
-{
-	{ { -0.5f - 0.5f, -0.5f - 0.5f }, { 1.0f, 0.0f, 0.0f } },
-	{ {  0.5f - 0.5f, -0.5f - 0.5f }, { 0.0f, 1.0f, 1.0f } },
-	{ {  0.5f - 0.5f,  0.5f - 0.5f }, { 1.0f, 0.0f, 1.0f } },
-	{ { -0.5f - 0.5f,  0.5f - 0.5f }, { 1.0f, 1.0f, 0.0f } },
-};
-
-static const Vertex vertices_bottom_right[] =
-{
-	{ { -0.5f + 0.5f, -0.5f + 0.5f }, { 1.0f, 0.0f, 0.0f } },
-	{ {  0.5f + 0.5f, -0.5f + 0.5f }, { 0.0f, 1.0f, 1.0f } },
-	{ {  0.5f + 0.5f,  0.5f + 0.5f }, { 1.0f, 0.0f, 1.0f } },
-	{ { -0.5f + 0.5f,  0.5f + 0.5f }, { 1.0f, 1.0f, 0.0f } },
 };
 
 static const uint16_t indices[] = { 0, 1, 2, 2, 3, 0 };
@@ -168,6 +161,24 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	return VK_FALSE;
 }
 
+static std::vector<char> readFile(const std::string& fileName)
+{
+	std::ifstream file(fileName, std::ios::ate | std::ios::binary);
+
+	if (!file.is_open())
+	{
+		throw std::runtime_error("failed to open file: " + fileName);
+	}
+
+	size_t fileSize = (size_t)file.tellg();
+	std::vector<char> buffer(fileSize);
+	file.seekg(0);
+	file.read(buffer.data(), fileSize);
+	file.close();
+	return buffer;
+
+}
+
 Renderer2D_Vulkan::Renderer2D_Vulkan()
 {
 }
@@ -203,6 +214,7 @@ void Renderer2D_Vulkan::Begin()
 
 void Renderer2D_Vulkan::End()
 {
+	updateUniformBuffer(m_currentImageIndex);
 	recordCommandBuffer(m_commandBuffer, m_currentImageIndex);
 
 	VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphore };
@@ -361,11 +373,15 @@ void Renderer2D_Vulkan::initVulkan()
 	createSwapChain();
 	createImageViews();
 	createRenderPass();
+	createDescriptorSetLayout();
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
 	createVertexBuffer();
 	createIndexBuffer();
+	createUniformBuffers();
+	createDescriptorPool();
+	createDescriptorSets();
 	createCommandBuffer();
 	createSyncObjects();
 }
@@ -402,6 +418,12 @@ void Renderer2D_Vulkan::cleanup()
 	delete m_pCallbacks;
 #elif defined CLEANUP_V2
 	cleanupSwapChain();
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		vkDestroyBuffer(m_device, m_uniformBuffers[i], nullptr);
+		vkFreeMemory(m_device, m_uniformBuffersMemory[i], nullptr);
+	}
+	vkDestroyDescriptorPool(m_device, m_descriptorPool, nullptr);
+	vkDestroyDescriptorSetLayout(m_device, m_descriptorSetLayout, nullptr);
 	vkFreeMemory(m_device, m_indexBufferMemory, nullptr);
 	vkDestroyBuffer(m_device, m_indexBuffer, nullptr);
 	vkFreeMemory(m_device, m_vertexBufferMemory, nullptr);
@@ -1029,24 +1051,6 @@ void Renderer2D_Vulkan::createImageViews()
 	}
 }
 
-static std::vector<char> readFile(const std::string& fileName)
-{
-	std::ifstream file(fileName, std::ios::ate | std::ios::binary);
-
-	if (!file.is_open())
-	{
-		throw std::runtime_error("failed to open file: " + fileName);
-	}
-
-	size_t fileSize = (size_t)file.tellg();
-	std::vector<char> buffer(fileSize);
-	file.seekg(0);
-	file.read(buffer.data(), fileSize);
-	file.close();
-	return buffer;
-
-}
-
 VkShaderModule Renderer2D_Vulkan::createShaderModule(const std::vector<char>& code)
 {
 	VkShaderModuleCreateInfo createInfo{};
@@ -1106,10 +1110,30 @@ void Renderer2D_Vulkan::createRenderPass()
 	}
 }
 
+void Renderer2D_Vulkan::createDescriptorSetLayout()
+{
+	VkDescriptorSetLayoutBinding uboLayoutBinding {};
+	uboLayoutBinding.binding = 0;
+	uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	uboLayoutBinding.descriptorCount = 1;
+	uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+	uboLayoutBinding.pImmutableSamplers = nullptr;
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = 1;
+	layoutInfo.pBindings = &uboLayoutBinding;
+
+	if (vkCreateDescriptorSetLayout(m_device, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create descriptor set layout!");
+	}
+}
+
 void Renderer2D_Vulkan::createGraphicsPipeline()
 {
-	auto vertShaderCode = readFile("shaders/glsl/byt/vert.spv");
-	auto fragShaderCode = readFile("shaders/glsl/byt/frag.spv");
+	auto vertShaderCode = readFile("shaders/glsl/compiled/vert.spv");
+	auto fragShaderCode = readFile("shaders/glsl/compiled/frag.spv");
 
 	std::cout << "vertex shader code size: " << vertShaderCode.size() << std::endl; 
 	std::cout << "fragment shader code size: " << fragShaderCode.size() << std::endl;
@@ -1171,7 +1195,7 @@ void Renderer2D_Vulkan::createGraphicsPipeline()
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f; // anything other than 1.0f requires wideLines GPU feature.
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	// sometimes used in shadow mapping
 	rasterizer.depthBiasEnable = VK_FALSE;
 	rasterizer.depthBiasConstantFactor = 0.0f;
@@ -1253,8 +1277,8 @@ void Renderer2D_Vulkan::createGraphicsPipeline()
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-	pipelineLayoutInfo.setLayoutCount = 0;
-	pipelineLayoutInfo.pSetLayouts = nullptr;
+	pipelineLayoutInfo.setLayoutCount = 1;
+	pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
 	pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
@@ -1375,6 +1399,8 @@ void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 	vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
 	vkCmdBindIndexBuffer(m_commandBuffer, m_indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
+	vkCmdBindDescriptorSets(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSets[imageIndex], 0, nullptr);
+
 	vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
 
 
@@ -1384,6 +1410,22 @@ void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 		throw std::runtime_error("failed to record command buffer!");
 	}
 }
+
+void Renderer2D_Vulkan::updateUniformBuffer(uint32_t currentImage)
+{
+	static auto startTime = std::chrono::high_resolution_clock::now();
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+	UniformBufferObject ubo{};
+	ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	ubo.proj = glm::perspective(glm::radians(45.0f), m_swapChainExtent.width / (float) m_swapChainExtent.height, 0.1f, 10.0f);
+	ubo.proj[1][1] *= -1;
+
+	memcpy(m_uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+}
+
 
 void Renderer2D_Vulkan::createSyncObjects()
 {
@@ -1469,55 +1511,6 @@ void Renderer2D_Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage
 	vkBindBufferMemory(m_device, buffer, memory, 0);
 }
 
-void Renderer2D_Vulkan::createVertexBuffer()
-{
-	VkDeviceSize bufferSize = sizeof(vertices) * sizeof(Vertex);
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-		stagingBuffer, stagingBufferMemory);
-
-	void* data;
-	vkMapMemory(m_device, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, vertices, bufferSize);
-	vkUnmapMemory(m_device, stagingBufferMemory);
-
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		m_vertexBuffer, m_vertexBufferMemory);
-
-	copyBuffer(stagingBuffer, m_vertexBuffer, bufferSize);
-
-	vkDestroyBuffer(m_device, stagingBuffer, nullptr);
-	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
-}
-
-void Renderer2D_Vulkan::createIndexBuffer()
-{
-	VkDeviceSize bufferSize = ARRAY_LEN(indices) * sizeof(indices[0]);
-	VkBuffer stagingBuffer;
-	VkDeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-	stagingBuffer, stagingBufferMemory);
-
-	void* data;
-	vkMapMemory(m_device, stagingBufferMemory, 0, bufferSize, 0, &data);
-	memcpy(data, indices, bufferSize);
-	vkUnmapMemory(m_device, stagingBufferMemory);
-
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-	m_indexBuffer, m_indexBufferMemory);
-
-	copyBuffer(stagingBuffer, m_indexBuffer, bufferSize);
-
-	vkDestroyBuffer(m_device, stagingBuffer, nullptr);
-	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
-}
-
 uint32_t Renderer2D_Vulkan::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
 	VkPhysicalDeviceMemoryProperties memProperties;
@@ -1567,6 +1560,130 @@ void Renderer2D_Vulkan::copyBuffer(VkBuffer src, VkBuffer dest, VkDeviceSize siz
 	vkQueueWaitIdle(m_graphicsQueue);
 
 	vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
+}
+
+void Renderer2D_Vulkan::createVertexBuffer()
+{
+	VkDeviceSize bufferSize = sizeof(vertices) * sizeof(Vertex);
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+		stagingBuffer, stagingBufferMemory);
+
+	void* data;
+	vkMapMemory(m_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, vertices, bufferSize);
+	vkUnmapMemory(m_device, stagingBufferMemory);
+
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		m_vertexBuffer, m_vertexBufferMemory);
+
+	copyBuffer(stagingBuffer, m_vertexBuffer, bufferSize);
+
+	vkDestroyBuffer(m_device, stagingBuffer, nullptr);
+	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
+}
+
+void Renderer2D_Vulkan::createIndexBuffer()
+{
+	VkDeviceSize bufferSize = ARRAY_LEN(indices) * sizeof(indices[0]);
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+	stagingBuffer, stagingBufferMemory);
+
+	void* data;
+	vkMapMemory(m_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+	memcpy(data, indices, bufferSize);
+	vkUnmapMemory(m_device, stagingBufferMemory);
+
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+	VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+	m_indexBuffer, m_indexBufferMemory);
+
+	copyBuffer(stagingBuffer, m_indexBuffer, bufferSize);
+
+	vkDestroyBuffer(m_device, stagingBuffer, nullptr);
+	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
+}
+
+void Renderer2D_Vulkan::createUniformBuffers()
+{
+	MAX_FRAMES_IN_FLIGHT = m_swapChainFramebuffers.size();
+
+	VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+	m_uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+	m_uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+	m_uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+		createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, m_uniformBuffers[i], m_uniformBuffersMemory[i]);
+		// we map it immediately. This is known as persistent mapping.
+		vkMapMemory(m_device, m_uniformBuffersMemory[i], 0, bufferSize, 0, &m_uniformBuffersMapped[i]);
+	}
+}
+
+void Renderer2D_Vulkan::createDescriptorPool()
+{
+	VkDescriptorPoolSize poolSize{};
+	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+	poolSize.descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+	VkDescriptorPoolCreateInfo poolInfo{};
+	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = 1;
+	poolInfo.pPoolSizes = &poolSize;
+	poolInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+	if (vkCreateDescriptorPool(m_device, &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS)
+	{
+		throw std::runtime_error("unable to create descriptor pool!");
+	}
+}
+
+void Renderer2D_Vulkan::createDescriptorSets()
+{
+	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_descriptorSetLayout);
+
+	VkDescriptorSetAllocateInfo allocInfo{};
+	allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+	allocInfo.descriptorPool = m_descriptorPool;
+	allocInfo.descriptorSetCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+	allocInfo.pSetLayouts = layouts.data();
+
+	m_descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+	if (vkAllocateDescriptorSets(m_device, &allocInfo, m_descriptorSets.data()) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to allocate descriptor sets!");
+	}
+
+	// need to configure the descriptor sets now...
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; ++i)
+	{
+		VkDescriptorBufferInfo bufferInfo{};
+		bufferInfo.buffer = m_uniformBuffers[i];
+		bufferInfo.offset = 0;
+		bufferInfo.range = sizeof(UniformBufferObject); // can also use VK_WHOLE_SIZE
+
+		VkWriteDescriptorSet writeSet{};
+		writeSet.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		writeSet.dstSet = m_descriptorSets[i];
+		writeSet.dstBinding = 0;
+		writeSet.dstArrayElement = 0;
+		writeSet.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		writeSet.descriptorCount = 1;
+		writeSet.pBufferInfo = &bufferInfo;
+		writeSet.pImageInfo = nullptr;
+		writeSet.pTexelBufferView = nullptr;
+
+		// the VkCopyDescriptorSet is used to copy a descriptor set to another
+
+		vkUpdateDescriptorSets(m_device, 1, &writeSet, 0, nullptr);
+	}
 }
 
 #endif

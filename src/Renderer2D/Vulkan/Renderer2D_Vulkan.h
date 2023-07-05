@@ -1,3 +1,7 @@
+#include "VulkanConfig.h"
+#if USE_TUTORIAL
+#include "Renderer2D_Vulkan_tutorial.h"
+#else
 #pragma once
 #include "Renderer2D/Renderer2D.h"
 #ifdef SUPPORT_VULKAN
@@ -108,13 +112,18 @@ private:
 	void createSwapChain();
 	void createImageViews();
 	void createRenderPass();
+	void createDescriptorSetLayout();
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
 	BufferAndMemory createVertexBuffer(const Vertex* vertices, size_t count);
 	BufferAndMemory createIndexBuffer(const uint16_t* indices, size_t count);
+	void createUniformBuffers();
+	void createDescriptorPool();
+	void createDescriptorSets();
 	void createCommandBuffer();
 	void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+	void updateUniformBuffer(uint32_t currentImage);
 	void createSyncObjects();
 
 	void cleanupSwapChain();
@@ -182,6 +191,7 @@ private:
 	std::vector<VkImageView> m_swapChainImageViews;
 	
 	VkRenderPass m_renderPass;
+	VkDescriptorSetLayout m_descriptorSetLayout;
 	VkPipelineLayout m_pipelineLayout;
 	VkPipeline m_graphicsPipeline;
 
@@ -205,6 +215,16 @@ private:
 	BufferAndMemory quadIndices;
 	BufferAndMemory quad1;
 	BufferAndMemory quad2;
+
+	std::vector<VkBuffer> m_uniformBuffers;
+	std::vector<VkDeviceMemory> m_uniformBuffersMemory;
+	std::vector<void*> m_uniformBuffersMapped;
+
+	VkDescriptorPool m_descriptorPool;
+	std::vector<VkDescriptorSet> m_descriptorSets;
+
+	size_t MAX_FRAMES_IN_FLIGHT;
 };
 
+#endif
 #endif
