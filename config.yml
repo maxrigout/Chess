@@ -3,7 +3,7 @@ chess:
     type: min-max
     search-depth: 4
   player1: human
-  player2: ai
+  player2: human
 system:
   windowing-system: sdl
 renderer:

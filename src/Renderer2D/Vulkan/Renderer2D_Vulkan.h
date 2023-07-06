@@ -42,8 +42,8 @@ struct SwapChainSupportDetails
 
 struct BufferAndMemory
 {
-	VkBuffer buffer;
-	VkDeviceMemory memory;
+	VkBuffer buffer = VK_NULL_HANDLE;
+	VkDeviceMemory memory = VK_NULL_HANDLE;
 };
 
 class Renderer2D_Vulkan : public Renderer2D
@@ -116,6 +116,8 @@ private:
 	void createGraphicsPipeline();
 	void createFramebuffers();
 	void createCommandPool();
+	void createVertexBuffer();
+	void createIndexBuffer();
 	BufferAndMemory createVertexBuffer(const Vertex* vertices, size_t count);
 	BufferAndMemory createIndexBuffer(const uint16_t* indices, size_t count);
 	void createUniformBuffers();
@@ -206,15 +208,15 @@ private:
 
 	bool frameBufferResized = false;
 
-	VkBuffer m_vertexBuffer;
-	VkDeviceMemory m_vertexBufferMemory;
+	VkBuffer m_vertexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory m_vertexBufferMemory = VK_NULL_HANDLE;
 
-	VkBuffer m_indexBuffer;
-	VkDeviceMemory m_indexBufferMemory;
+	VkBuffer m_indexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory m_indexBufferMemory = VK_NULL_HANDLE;
 
-	BufferAndMemory quadIndices;
-	BufferAndMemory quad1;
-	BufferAndMemory quad2;
+	BufferAndMemory quadIndices{};
+	BufferAndMemory quad1{};
+	BufferAndMemory quad2{};
 
 	std::vector<VkBuffer> m_uniformBuffers;
 	std::vector<VkDeviceMemory> m_uniformBuffersMemory;
