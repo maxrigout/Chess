@@ -128,12 +128,19 @@ struct UniformBufferObject
 * y+
 */
 
-static const Vertex vertices[] =
-{
-	{ { -0.5f, -0.5f }, { 1.0f, 0.0f, 0.0f } },
-	{ {  0.5f, -0.5f }, { 0.0f, 1.0f, 1.0f } },
-	{ {  0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
-	{ { -0.5f,  0.5f }, { 1.0f, 1.0f, 0.0f } },
+// static const Vertex vertices[] =
+// {
+// 	{ { -0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+// 	{ {  0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f } },
+// 	{ {  0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
+// 	{ { -0.5f,  0.5f }, { 1.0f, 0.0f, 0.0f } },
+// };
+
+static const Vertex vertices[] = {
+	{ {  0.0f,  0.0f }, { 0.0f, 1.0f, 0.0f } },
+	{ {  1.0f,  0.0f }, { 0.0f, 0.0f, 1.0f } },
+	{ {  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f } },
+	{ {  0.0f,  1.0f }, { 1.0f, 0.0f, 0.0f } },
 };
 
 static const Vertex vertices_topleft[] =
@@ -256,12 +263,42 @@ void Renderer2D_Vulkan::Begin()
 	}
 
 	vkResetCommandBuffer(m_commandBuffer, 0);
+
+	// BEGIN RECORD COMMAND BUFFER
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.flags = 0;
+	beginInfo.pInheritanceInfo = nullptr;
+
+	if (vkBeginCommandBuffer(m_commandBuffer, &beginInfo) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to begin recording command buffer!");
+	}
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = m_renderPass;
+	renderPassInfo.framebuffer = m_swapChainFramebuffers[m_currentImageIndex];
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = m_swapChainExtent;
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(m_commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 }
 
 void Renderer2D_Vulkan::End()
 {
-	updateUniformBuffer(m_currentImageIndex);
-	recordCommandBuffer(m_commandBuffer, m_currentImageIndex);
+	vkCmdEndRenderPass(m_commandBuffer);
+	if (vkEndCommandBuffer(m_commandBuffer) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to record command buffer!");
+	}
+	// updateUniformBuffer(m_currentImageIndex);	
+	// recordCommandBuffer(m_commandBuffer, m_currentImageIndex);
+
+	// END RECORD COMMAND BUFFER
 
 	VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphore };
 	VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphore };
@@ -375,12 +412,41 @@ std::vector<Renderer2D::SpriteID> Renderer2D_Vulkan::LoadSpriteSheet(const char*
 
 bool Renderer2D_Vulkan::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const
 {
-	return false;
+	// topLeft: (0,0) to (sz, sz);
+	// (0,0) -> (-1, -1);
+	// (sz, sz) -> (1, 1);
+	const auto normalizeCoords = [] (const pt2di& coord, const vec2di& viewPortSize) -> glm::vec2
+	{
+		return glm::vec2{ 2.0f * (float)coord.x / (float)viewPortSize.w - 1.0f, 2.0f * (float)coord.y / (float)viewPortSize.h - 1.0f };
+		// return glm::vec2{ (float)coord.x / (float)viewPortSize.w, (float)coord.y / (float)viewPortSize.h };
+	};
+
+	const auto normalizeSize = [] (const vec2di& sz, const vec2di& viewPortSize) -> glm::vec2
+	{
+		return { 2.0f * (float)sz.w / (float)viewPortSize.w, 2.0f * (float)sz.h / (float)viewPortSize.h };
+	};
+
+	auto drawQuad = [this](VkBuffer vertexBuffer, VkBuffer indexBuffer, uint32_t vertexCount, const PushConstant& data)
+	{
+		VkBuffer vertexBuffers[] = { vertexBuffer };
+		VkDeviceSize offsets[] = { 0 };
+
+		vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(m_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdPushConstants(m_commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstant), &data);
+		vkCmdDrawIndexed(m_commandBuffer, vertexCount, 1, 0, 0, 0);
+	};
+
+	PushConstant pc;
+	pc.scale = normalizeSize(dimensions, m_viewPortDim);
+	pc.offset = normalizeCoords(topLeft, m_viewPortDim);
+	drawQuad(m_vertexBuffer, m_indexBuffer, ARRAY_LEN(indices), pc);
+	return true;
 }
 
 bool Renderer2D_Vulkan::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
 {
-	return false;
+	return DrawSprite(topLeft, dimensions, 0);
 }
 
 vec2di Renderer2D_Vulkan::GetSpriteSize(const std::string& spriteTag) const
@@ -860,7 +926,7 @@ QueueFamilyIndices Renderer2D_Vulkan::findQueueFamilies(VkPhysicalDevice device)
 	return indices;
 }
 
-void Renderer2D_Vulkan::createLogicalDevice() 
+void Renderer2D_Vulkan::createLogicalDevice()
 {
 	QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 

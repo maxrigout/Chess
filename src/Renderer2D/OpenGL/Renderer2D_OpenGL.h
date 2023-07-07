@@ -101,8 +101,8 @@
 // 	vec2di m_viewPortDim{};
 // };
 
-#define CLASSIC
-// #define BATCH
+// #define CLASSIC
+#define BATCH
 // #define INSTANCE
 
 #ifdef CLASSIC
