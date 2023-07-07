@@ -10,6 +10,8 @@
 // #define CLEANUP_V1
 #define CLEANUP_V2
 
+#define USE_PUSH_CONSTANT 1
+
 #ifdef _WIN32
 #endif
 
@@ -34,6 +36,8 @@
 #include <cstdlib>
 #include <optional>
 #include <array>
+
+#include "VulkanTypeDump.h"
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
@@ -95,6 +99,20 @@ struct Vertex
 	}
 };
 
+/*
+Note on alignment on macos at least...:
+{ vec2 vec2 } will successfully map to { vec2 vec2 } in shader
+{ alignas(16) vec2 alignas(16) vec2 } will map to { vec4 vec 4 } in shader
+this is because the alignas(16) will add extra padding (ie 0s) between the vec2 effectively making them vec4s
+so { alignas(16) vec2 alignas(16) vec2 } is the same as { vec4 vec4 }
+*/
+struct PushConstant
+{
+	glm::vec2 offset;
+	glm::vec2 scale;
+	// alignas(16) glm::mat4 projectionViewModel;
+};
+
 struct UniformBufferObject
 {
     alignas(16) glm::mat4 model;
@@ -133,7 +151,10 @@ static const Vertex vertices_bottom_right[] =
 	{ { -0.5f + 0.5f,  0.5f + 0.5f }, { 1.0f, 1.0f, 0.0f } },
 };
 
-static const uint16_t indices[] = { 0, 1, 2, 2, 3, 0 };
+static const uint16_t indices[] = {
+	0, 1, 2,
+	2, 3, 0
+};
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -404,6 +425,8 @@ void Renderer2D_Vulkan::initVulkan()
 	quad1 = createVertexBuffer(vertices_topleft, ARRAY_LEN(vertices_topleft));
 	quad2 = createVertexBuffer(vertices_bottom_right, ARRAY_LEN(vertices_bottom_right));
 	quadIndices = createIndexBuffer(indices, ARRAY_LEN(indices));
+	createVertexBuffer();
+	createIndexBuffer();
 	createUniformBuffers();
 	createDescriptorPool();
 	createDescriptorSets();
@@ -452,10 +475,10 @@ void Renderer2D_Vulkan::cleanup()
 	FreeMemoryAndDestroyBuffer(m_device, quadIndices);
 	FreeMemoryAndDestroyBuffer(m_device, quad2);
 	FreeMemoryAndDestroyBuffer(m_device, quad1);
-	// vkFreeMemory(m_device, m_indexBufferMemory, nullptr);
-	// vkDestroyBuffer(m_device, m_indexBuffer, nullptr);
-	// vkFreeMemory(m_device, m_vertexBufferMemory, nullptr);
-	// vkDestroyBuffer(m_device, m_vertexBuffer, nullptr);
+	vkFreeMemory(m_device, m_indexBufferMemory, nullptr);
+	vkDestroyBuffer(m_device, m_indexBuffer, nullptr);
+	vkFreeMemory(m_device, m_vertexBufferMemory, nullptr);
+	vkDestroyBuffer(m_device, m_vertexBuffer, nullptr);
 	vkDestroySemaphore(m_device, m_imageAvailableSemaphore, nullptr);
 	vkDestroySemaphore(m_device, m_renderFinishedSemaphore, nullptr);
 	vkDestroyFence(m_device, m_inFlightFence, nullptr);
@@ -673,36 +696,10 @@ void Renderer2D_Vulkan::DestroyDebugUtilsMessengerEXT(
 
 void Renderer2D_Vulkan::createSurface()
 {
-#ifdef MANUALLY_CREATE_SURFACE
-#ifdef _WIN32
-	// win32 surface creation
-	HWND hwin = glfwGetWin32Window(m_window);
-	VkWin32SurfaceCreateInfoKHR createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
-	createInfo.hwnd = hwin;
-	createInfo.hinstance = GetModuleHandle(nullptr);
-
-	if (vkCreateWin32SurfaceKHR(m_instance, &createInfo, nullptr, &m_surface) != VK_SUCCESS)
-	{
-		throw std::runtime_error("failed to create window surface!");
-	}
-#endif
-
-#ifdef __APPLE__
-	// CGDirectDisplayID glfwGetCocoaMonitor(GLFWmonitor* monitor);
-	// id glfwGetCocoaWindow(GLFWwindow* window);
-	// if (glfwCreateWindowSurface(m_instance, m_window, nullptr, &m_surface) != VK_SUCCESS)
-	// {
-	// 	throw std::runtime_error("failed to create window surface!");
-	// }
-#endif
-
-#else // or let glfw handle it for us
 	if (!VulkanCreateSurface(m_instance, &m_surface))
 	{
 		throw std::runtime_error("failed to create window surface!");
 	}
-#endif
 }
 
 void Renderer2D_Vulkan::pickPhysicalDevice()
@@ -1160,8 +1157,13 @@ void Renderer2D_Vulkan::createDescriptorSetLayout()
 
 void Renderer2D_Vulkan::createGraphicsPipeline()
 {
+#if USE_PUSH_CONSTANT
+	auto vertShaderCode = readFile("shaders/glsl/compiled/shader.vert.spv");
+	auto fragShaderCode = readFile("shaders/glsl/compiled/shader.frag.spv");
+#else
 	auto vertShaderCode = readFile("shaders/glsl/compiled/vert.spv");
 	auto fragShaderCode = readFile("shaders/glsl/compiled/frag.spv");
+#endif
 
 	std::cout << "vertex shader code size: " << vertShaderCode.size() << std::endl; 
 	std::cout << "fragment shader code size: " << fragShaderCode.size() << std::endl;
@@ -1223,7 +1225,7 @@ void Renderer2D_Vulkan::createGraphicsPipeline()
 	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizer.lineWidth = 1.0f; // anything other than 1.0f requires wideLines GPU feature.
 	rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+	rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
 	// sometimes used in shadow mapping
 	rasterizer.depthBiasEnable = VK_FALSE;
 	rasterizer.depthBiasConstantFactor = 0.0f;
@@ -1303,12 +1305,24 @@ void Renderer2D_Vulkan::createGraphicsPipeline()
 	dynamicState.dynamicStateCount = static_cast<uint32_t>(ARRAY_LEN(dynamicStates));
 	dynamicState.pDynamicStates = dynamicStates;
 
+	VkPushConstantRange pushConstantRanges{};
+	pushConstantRanges.offset = 0;
+	pushConstantRanges.size = sizeof(PushConstant);
+	pushConstantRanges.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+#if USE_PUSH_CONSTANT
+	pipelineLayoutInfo.setLayoutCount = 0;
+	pipelineLayoutInfo.pSetLayouts = nullptr;
+	pipelineLayoutInfo.pushConstantRangeCount = 1;
+	pipelineLayoutInfo.pPushConstantRanges = &pushConstantRanges;
+#else
 	pipelineLayoutInfo.setLayoutCount = 1;
 	pipelineLayoutInfo.pSetLayouts = &m_descriptorSetLayout;
 	pipelineLayoutInfo.pushConstantRangeCount = 0;
 	pipelineLayoutInfo.pPushConstantRanges = nullptr;
+#endif
 
 	if (vkCreatePipelineLayout(m_device, &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)
 	{
@@ -1421,23 +1435,62 @@ void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 
+#if !USE_PUSH_CONSTANT
 	vkCmdBindDescriptorSets(m_commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipelineLayout, 0, 1, &m_descriptorSets[imageIndex], 0, nullptr);
+#endif
+	auto drawQuad = [this](VkBuffer vertexBuffer, VkBuffer indexBuffer, uint32_t vertexCount, const PushConstant& data)
 	{
-		VkBuffer vertexBuffers[] = { quad1.buffer };
+		VkBuffer vertexBuffers[] = { vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
-		vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
-	}
-	{
-		VkBuffer vertexBuffers[] = { quad2.buffer };
-		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindIndexBuffer(m_commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+#if USE_PUSH_CONSTANT
+		vkCmdPushConstants(m_commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstant), &data);
+#endif
+		vkCmdDrawIndexed(m_commandBuffer, vertexCount, 1, 0, 0, 0);
+	};
 
-		vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
-		vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
-	}
+	// static auto startTime = std::chrono::high_resolution_clock::now();
+	// auto currentTime = std::chrono::high_resolution_clock::now();
+	// float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+	// auto rot = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// auto model = rot;
+	// auto view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+	// auto proj = glm::perspective(glm::radians(45.0f), m_swapChainExtent.width / (float) m_swapChainExtent.height, 0.1f, 10.0f);
+	// proj[1][1] *= -1;
+	
+	// PushConstant pc = { proj * view * model };
+
+	PushConstant pc;
+	pc.scale = {1.0f, 1.0f};
+	pc.offset = {-0.5f, -0.5f};
+	drawQuad(m_vertexBuffer, m_indexBuffer, ARRAY_LEN(indices), pc);
+
+	// model = glm::translate(glm::mat4(1.0f), glm::vec3(-0.5f, -0.5f, 0.0f));
+	// pc = { proj * view * model * rot };
+	pc.scale = {1.0f, 1.0f};
+	pc.offset = {0.5f, 0.5f};
+	drawQuad(m_vertexBuffer, quadIndices.buffer, ARRAY_LEN(indices), pc);
+	
+	// {
+	// 	VkBuffer vertexBuffers[] = { m_vertexBuffer };
+	// 	VkDeviceSize offsets[] = { 0 };
+
+	// 	vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
+	// 	vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
+	// 	vkCmdPushConstants(m_commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstant), &pushConstant);
+	// 	vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
+	// }
+	// {
+	// 	VkBuffer vertexBuffers[] = { quad2.buffer };
+	// 	VkDeviceSize offsets[] = { 0 };
+
+	// 	vkCmdBindVertexBuffers(m_commandBuffer, 0, 1, vertexBuffers, offsets);
+	// 	vkCmdBindIndexBuffer(m_commandBuffer, quadIndices.buffer, 0, VK_INDEX_TYPE_UINT16);
+	// 	vkCmdPushConstants(m_commandBuffer, m_pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstant), &pushConstant);
+	// 	vkCmdDrawIndexed(m_commandBuffer, ARRAY_LEN(indices), 1, 0, 0, 0);
+	// }
 
 	vkCmdEndRenderPass(commandBuffer);
 	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
@@ -1446,7 +1499,7 @@ void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 	}
 }
 
-void Renderer2D_Vulkan::updateUniformBuffer(uint32_t currentImage)
+void Renderer2D_Vulkan::updateUniformBuffer(uint32_t imageIndex)
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -1458,7 +1511,7 @@ void Renderer2D_Vulkan::updateUniformBuffer(uint32_t currentImage)
 	ubo.proj = glm::perspective(glm::radians(45.0f), m_swapChainExtent.width / (float) m_swapChainExtent.height, 0.1f, 10.0f);
 	ubo.proj[1][1] *= -1;
 
-	memcpy(m_uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+	memcpy(m_uniformBuffersMapped[imageIndex], &ubo, sizeof(ubo));
 }
 
 void Renderer2D_Vulkan::createSyncObjects()
@@ -1530,6 +1583,10 @@ void Renderer2D_Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage
 
 	VkMemoryRequirements memoryRequirements{};
 	vkGetBufferMemoryRequirements(m_device, buffer, &memoryRequirements);
+
+	std::cout << "[createBuffer]\n\t"
+	<< "bufferSize = " << bufferInfo.size << "\n\t"
+	<< "memory requirements size = " << memoryRequirements.size << std::endl;
 
 	VkMemoryAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;

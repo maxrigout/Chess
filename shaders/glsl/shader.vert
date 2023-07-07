@@ -6,13 +6,16 @@ layout (location = 1) in vec3 inColor;
 
 layout (location = 0) out vec3 fragColor;
 
-layout (set = 0, binding = 0) uniform UniformBufferObject {
-    mat4 model;
-    mat4 view;
-    mat4 proj;
-} ubo;
+layout( push_constant ) uniform constants
+{
+    vec2 offset;
+    vec2 scale;
+    // mat4 projViewModel;
+} pc;
 
 void main() {
-    gl_Position = ubo.proj * ubo.view * ubo.model * vec4(inPosition, 0.0, 1.0);
+    // gl_Position = pc.projViewModel * vec4(inPosition, 0.0, 1.0);
+    vec2 position = inPosition * pc.scale + pc.offset;
+	gl_Position = vec4(position, 0.0, 1.0);
     fragColor = inColor;
 }
