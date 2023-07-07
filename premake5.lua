@@ -12,12 +12,6 @@ workspace "Chess"
 	baseDir = ""
 	intdir = "obj/%{cfg.buildcfg}_%{cfg.architecture}"
 	outputdir = "bin/%{cfg.buildcfg}_%{cfg.architecture}"
-	IncludeDirs = {}
-	IncludeDirs["VulkanSDK"] = "~/dev/VulkanSDK/1.3.231.1/macOS/include"
-	LibDirs = {}
-	LibDirs["VulkanSDK"] = "~/dev/VulkanSDK/1.3.231.1/macOS/lib"
-	Library = {}
-	Library["Vulkan"] = "libvulkan.1.dylib"
 
 project "Chess"
 	kind "ConsoleApp"
@@ -44,7 +38,6 @@ project "Chess"
 		"src",
 		"deps/include",
 		"deps/include/SDL2",
-		"%{IncludeDirs.VulkanSDK}"
 	}
 
 	postbuildcommands
@@ -61,23 +54,30 @@ project "Chess"
 		optimize "On"
 
 	filter "system:windows"
+		includedirs
+		{
+			"C:/VulkanSDK/1.3.250.1/Include"
+		}
 		libdirs
 		{
 			"deps/lib",
+			"C:/VulkanSDK/1.3.250.1/Lib"
 		}
 		links
 		{
 			"SDL2.lib",
 			"SDL2main.lib",
 			"SDL2_ttf.lib",
-			"SDL2_image.lib"
+			"SDL2_image.lib",
+			"vulkan-1.lib"
 		}
 
 	filter "system:macosx"
 		includedirs
 		{
 			"deps/include/metal-cpp",
-			"deps/include/metal-cpp-extensions"
+			"deps/include/metal-cpp-extensions",
+			"~/dev/VulkanSDK/1.3.250.1/macOS/include"
 		}
 		links
 		{

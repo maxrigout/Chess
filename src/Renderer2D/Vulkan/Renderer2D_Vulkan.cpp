@@ -36,6 +36,7 @@
 #include <cstdlib>
 #include <optional>
 #include <array>
+#include <chrono>
 
 #include "VulkanTypeDump.h"
 
@@ -102,7 +103,7 @@ struct Vertex
 /*
 Note on alignment on macos at least...:
 { vec2 vec2 } will successfully map to { vec2 vec2 } in shader
-{ alignas(16) vec2 alignas(16) vec2 } will map to { vec4 vec 4 } in shader
+{ alignas(16) vec2 alignas(16) vec2 } will map to { vec4 vec4 } in shader
 this is because the alignas(16) will add extra padding (ie 0s) between the vec2 effectively making them vec4s
 so { alignas(16) vec2 alignas(16) vec2 } is the same as { vec4 vec4 }
 */

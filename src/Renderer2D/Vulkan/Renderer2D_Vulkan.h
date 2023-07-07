@@ -8,6 +8,7 @@
 
 #include <vulkan/vulkan.h>
 #include <functional>
+#include <optional>
 
 //#define MANUALLY_CREATE_SURFACE
 #define NON_LINEAR_RGB
