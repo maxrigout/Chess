@@ -11,6 +11,7 @@
 #define CLEANUP_V2
 
 #define USE_PUSH_CONSTANT 1
+#define USE_CENTERED_QUAD 0
 
 #ifdef _WIN32
 #endif
@@ -128,20 +129,20 @@ struct UniformBufferObject
 * y+
 */
 
-// static const Vertex vertices[] =
-// {
-// 	{ { -0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
-// 	{ {  0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f } },
-// 	{ {  0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
-// 	{ { -0.5f,  0.5f }, { 1.0f, 0.0f, 0.0f } },
-// };
-
 static const Vertex vertices[] = {
+#if USE_CENTERED_QUAD
+	{ { -0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
+	{ {  0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f } },
+	{ {  0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
+	{ { -0.5f,  0.5f }, { 1.0f, 0.0f, 0.0f } },
+};
+#else
 	{ {  0.0f,  0.0f }, { 0.0f, 1.0f, 0.0f } },
 	{ {  1.0f,  0.0f }, { 0.0f, 0.0f, 1.0f } },
 	{ {  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f } },
 	{ {  0.0f,  1.0f }, { 1.0f, 0.0f, 0.0f } },
 };
+#endif
 
 static const Vertex vertices_topleft[] =
 {
@@ -412,19 +413,32 @@ std::vector<Renderer2D::SpriteID> Renderer2D_Vulkan::LoadSpriteSheet(const char*
 
 bool Renderer2D_Vulkan::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const
 {
-	// topLeft: (0,0) to (sz, sz);
-	// (0,0) -> (-1, -1);
-	// (sz, sz) -> (1, 1);
-	const auto normalizeCoords = [] (const pt2di& coord, const vec2di& viewPortSize) -> glm::vec2
-	{
-		return glm::vec2{ 2.0f * (float)coord.x / (float)viewPortSize.w - 1.0f, 2.0f * (float)coord.y / (float)viewPortSize.h - 1.0f };
-		// return glm::vec2{ (float)coord.x / (float)viewPortSize.w, (float)coord.y / (float)viewPortSize.h };
-	};
-
-	const auto normalizeSize = [] (const vec2di& sz, const vec2di& viewPortSize) -> glm::vec2
+	const auto normalizeSize = [&] (const vec2di& sz, const vec2di& viewPortSize) -> glm::vec2
+#if USE_CENTERED_QUAD
 	{
 		return { 2.0f * (float)sz.w / (float)viewPortSize.w, 2.0f * (float)sz.h / (float)viewPortSize.h };
 	};
+#else
+	{
+		return { 2.0f * (float)sz.w / (float)viewPortSize.w, 2.0f * (float)sz.h / (float)viewPortSize.h };
+	};
+#endif
+
+	const auto normalizeCoords = [&] (const pt2di& coord, const vec2di& viewPortSize) -> glm::vec2
+#if USE_CENTERED_QUAD
+	{
+		glm::vec2 normalizedSz = normalizeSize(dimensions, m_viewPortDim) / 2.0f;
+		return glm::vec2{ 2.0f * (float)coord.x / (float)viewPortSize.w - normalizedSz.x, 2.0f * (float)coord.y / (float)viewPortSize.h - normalizedSz.y};
+	};
+#else
+	{
+		// topLeft: (0,0) to (sz, sz);
+		// (0,0) -> (-1, -1);
+		// (sz, sz) -> (1, 1);
+		return glm::vec2{ 2.0f * (float)coord.x / (float)viewPortSize.w - 1.0f, 2.0f * (float)coord.y / (float)viewPortSize.h - 1.0f };
+	};
+#endif
+
 
 	auto drawQuad = [this](VkBuffer vertexBuffer, VkBuffer indexBuffer, uint32_t vertexCount, const PushConstant& data)
 	{
