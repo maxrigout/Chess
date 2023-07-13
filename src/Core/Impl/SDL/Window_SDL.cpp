@@ -151,7 +151,10 @@ Window_SDL::Window_SDL()
 Window_SDL::~Window_SDL()
 {
 	if (m_pRenderer != nullptr)
+	{
 		SDL_DestroyRenderer(m_pSDLRenderer);
+	}
+	
 	SDL_DestroyWindow(m_pWindow);
 
 	numInstances--;
@@ -319,8 +322,10 @@ Renderer2D* Window_SDL::CreateMetalRenderer()
 {
 #ifdef SUPPORT_METAL
 	SDL_MetalView view = SDL_Metal_CreateView(m_pWindow);
-	// TODO: destroy the view...
-	Renderer2D_Metal* pRenderer = new Renderer2D_Metal(SDL_Metal_GetLayer(view));
+	m_onDeleteRenderer = [=]() {
+		SDL_Metal_DestroyView(view);
+	};
+	Renderer2D_Metal* pRenderer = new Renderer2D_Metal(SDL_Metal_GetLayer(view), m_width, m_height);
 	m_pRenderer = pRenderer;
 	m_pRenderer->SetViewPortDim({ m_width, m_height });
 #else
@@ -341,6 +346,7 @@ Renderer2D* Window_SDL::CreateDirectXRenderer()
 void Window_SDL::FreeRenderer()
 {
 	delete m_pRenderer;
+	m_onDeleteRenderer();
 }
 
 

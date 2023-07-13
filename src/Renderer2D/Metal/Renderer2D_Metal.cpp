@@ -23,7 +23,6 @@ struct VertexOut
 	float4 position [[position]];
 	half4 color;
 };
-
 struct VertexIn
 {
 	float2 position [[attribute(0)]];
@@ -113,17 +112,15 @@ static Renderer2D_Metal::Texture LoadTextureToGPU(const char* path)
 	return { texture, { width, height }, std::string(path) };
 }
 
-Renderer2D_Metal::Renderer2D_Metal(void* sp)
+Renderer2D_Metal::Renderer2D_Metal(void* sp, int width, int height)
 {
-	m_onRenderEnd = [](){};
-
 	m_pDevice = MTL::CreateSystemDefaultDevice()->retain();
 
 	m_pSwapchain = (CA::MetalLayer*)sp;
 	m_pSwapchain->setDevice(m_pDevice);
 	m_pDrawable = m_pSwapchain->nextDrawable();
 
-	CGSize sz = { 800.0, 800.0 };
+	CGSize sz = { (float)width, (float)height };
 	m_pSwapchain->setPixelFormat(MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB);
 	m_pSwapchain->setDrawableSize(sz);
 
@@ -133,8 +130,10 @@ Renderer2D_Metal::Renderer2D_Metal(void* sp)
 	BuildShaders();
 	BuildBuffers();
 
-	// m_pView = MTK::View::alloc()->init(m_viewPort, m_pDevice);
-	// m_pView->setColorPixelFormat( MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB );
+	m_pRenderPassDescriptor = MTL::RenderPassDescriptor::alloc()->init();
+	m_pColorAttachment = m_pRenderPassDescriptor->colorAttachments()->object(0);
+	m_pColorAttachment->setLoadAction(MTL::LoadAction::LoadActionClear);
+	m_pColorAttachment->setStoreAction(MTL::StoreAction::StoreActionStore);
 }
 
 Renderer2D_Metal::~Renderer2D_Metal()
@@ -215,67 +214,29 @@ void Renderer2D_Metal::BuildBuffers()
 
 void Renderer2D_Metal::Begin()
 {
-	// LOG_DEBUG("allocating MTK::VIEW");
-	m_pView = MTK::View::alloc()->init(m_viewPort, m_pDevice);
-	m_pView->setColorPixelFormat( MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB );
-	// m_pView->autorelease();
-
-	MTL::RenderPassDescriptor* pRpd = m_pView->currentRenderPassDescriptor();
-	MTL::RenderPassAttachmentDescriptor* color_attachment = pRpd->colorAttachments()->object(0);
-
 	m_pDrawable = m_pSwapchain->nextDrawable();
-	m_pDrawable->autorelease();
 
-	color_attachment->setLoadAction(MTL::LoadAction::LoadActionClear);
-	color_attachment->setStoreAction(MTL::StoreAction::StoreActionStore);
-	color_attachment->setTexture(m_pDrawable->texture());
+	m_pColorAttachment->setTexture(m_pDrawable->texture());
 
-	// NS::AutoreleasePool* pPool = NS::AutoreleasePool::alloc()->init();
+	// m_pAutoReleasePool = NS::AutoreleasePool::alloc()->init();
 
 	m_pCmd = m_pCommandQueue->commandBuffer();
-	m_pEnc = m_pCmd->renderCommandEncoder(pRpd);
-	
+	m_pEnc = m_pCmd->renderCommandEncoder(m_pRenderPassDescriptor);
 	m_pEnc->setRenderPipelineState(m_pRenderPipelineState);
-
-	// Draw
-	m_pEnc->setVertexBuffer(m_pVertexBuffer, 0, 0);
-	// m_pEnc->drawPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, NS::UInteger(0), NS::UInteger(4));
-	m_pEnc->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, 6, MTL::IndexType::IndexTypeUInt32, m_pIndexBuffer, NS::Integer(0));
 }
 
 void Renderer2D_Metal::End()
 {
-	Flush();
-
-	// m_pCmd->release();
-	// m_pCmd = nullptr;
-	// m_pEnc->release();
-	// m_pEnc = nullptr;
-	// m_pDrawable->release();
-	// m_pDrawable = nullptr;
-
-	// m_pView->releaseDrawables();
-	// m_pView->release();
-	// m_pView = nullptr;
-
-	m_onRenderEnd();
-}
-
-void Renderer2D_Metal::Flush()
-{
 	m_pEnc->endEncoding();
-	m_pCmd->presentDrawable(m_pView->currentDrawable());
+	m_pCmd->presentDrawable(m_pDrawable);
 	m_pCmd->commit();
-	// pPool->release();
-	m_pDrawable->present();
 }
 
 void Renderer2D_Metal::Clear(const Color& color) const
 {
-	m_pView->setClearColor( MTL::ClearColor::Make(color.r, color.g, color.b, color.a));
+	m_pColorAttachment->setClearColor( MTL::ClearColor::Make(color.r, color.g, color.b, color.a));
 }
 
-/*
 void Renderer2D_Metal::DrawDisk(const pt2di& center, int radius, const Color& color) const
 {
 
@@ -320,7 +281,6 @@ void Renderer2D_Metal::DrawArrow(const pt2di& start, const pt2di& end, const Col
 {
 
 }
-*/
 
 
 Renderer2D::SpriteID Renderer2D_Metal::LoadTexture(const char* path, const std::string& tag)

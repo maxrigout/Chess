@@ -49,4 +49,6 @@ private:
 	MouseWheelCallback m_onMouseWheel;
 	KeyboardDownCallback m_onKeyboardDown;
 	KeyboardUpCallback m_onKeyboardUp;
+
+	std::function<void(void)> m_onDeleteRenderer = [](){};
 };

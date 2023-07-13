@@ -12,6 +12,7 @@
 
 int main(int argc, char** argv)
 {
+	SDL_MetalView view;
 	try
 	{
 		ConfigReader::DumpConfig("config.yml");
@@ -25,6 +26,10 @@ int main(int argc, char** argv)
 		game.Init(800, 600);
 		game.Run();
 		game.Cleanup();
+
+		// https://github.com/gzorin/sdl-metal-cpp-example/blob/main/main.cpp
+		// https://gist.github.com/gcatlin/b89e0efed78dd91364609ca4095da346
+		// https://schneide.blog/2022/03/28/metal-in-c-with-sdl2/
 	}
 	catch (std::exception& e)
 	{

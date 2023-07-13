@@ -18,7 +18,7 @@
 class Renderer2D_Metal : public Renderer2D
 {
 public:
-	Renderer2D_Metal(void* swapchain);
+	Renderer2D_Metal(void* swapchain, int width, int height);
 	virtual ~Renderer2D_Metal();
 
 	virtual void Begin() override;
@@ -44,12 +44,6 @@ public:
 	virtual const vec2di& GetViewPortDim() const override;
 	virtual void SetCellDim(const vec2di& dim) override;
 	virtual void SetViewPortDim(const vec2di& dim) override;
-
-	template <typename Fn>
-	void OnRenderEnd(Fn&& fn)
-	{
-		m_onRenderEnd = std::move(fn);
-	}
 
 	struct Vertex
 	{
@@ -88,21 +82,22 @@ private:
 	void BuildBuffers();
 
 	bool IsValidSpriteId(SpriteID spriteId) const { return m_sprites.size() > spriteId; }
-	void Flush();
-
-	std::function<void(void)> m_onRenderEnd;
 
 	std::vector<Texture> m_textures;
 	std::vector<Sprite> m_sprites;
 	std::unordered_map<std::string, size_t> m_tagsMap;
 
-	MTK::View* m_pView = nullptr;
+	// MTK::View* m_pView = nullptr;
 	CA::MetalLayer* m_pSwapchain = nullptr;
 	MTL::Device* m_pDevice = nullptr;
+	// NS::AutoreleasePool* m_pAutoReleasePool = nullptr;
 	MTL::CommandQueue* m_pCommandQueue = nullptr;
 	MTL::RenderPipelineState* m_pRenderPipelineState = nullptr;
 	MTL::Buffer* m_pVertexBuffer = nullptr;
 	MTL::Buffer* m_pIndexBuffer = nullptr;
+
+	MTL::RenderPassDescriptor* m_pRenderPassDescriptor = nullptr;
+	MTL::RenderPassColorAttachmentDescriptor* m_pColorAttachment = nullptr;
 
 	CA::MetalDrawable* m_pDrawable = nullptr;
 	MTL::CommandBuffer* m_pCmd = nullptr;
