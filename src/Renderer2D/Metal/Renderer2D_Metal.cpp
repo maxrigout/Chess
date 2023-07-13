@@ -28,11 +28,17 @@ struct VertexIn
 	float2 position [[attribute(0)]];
 	float4 color [[attribute(1)]];
 };
-
-VertexOut vertex vertexMain(VertexIn v [[stage_in]] )
+struct UniformBuffer
 {
+	float2 offset;
+	float2 scale;
+};
+
+VertexOut vertex vertexMain(VertexIn v [[stage_in]], constant UniformBuffer& ub [[buffer(1)]] )
+{
+	float2 pos = v.position * ub.scale + ub.offset;
 	VertexOut out;
-	out.position = float4(v.position, 1.0, 1.0);
+	out.position = float4(pos, 1.0, 1.0);
 	out.color = half4(v.color);
 	return out;
 }
@@ -52,6 +58,9 @@ half4 fragment fragmentMain( VertexOut in [[stage_in]] )
 	1 ------ 2
 */
 
+// https://metalbyexample.com/modern-metal-1/
+// https://metalbyexample.com/modern-metal-2/
+
 static const std::vector<Renderer2D_Metal::Vertex> quadVertices = {
 	{ { 0.0f,  0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
 	{ { 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
@@ -59,7 +68,7 @@ static const std::vector<Renderer2D_Metal::Vertex> quadVertices = {
 	{ { 1.0f,  0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f } }
 };
 
-static const std::vector<unsigned int> quadIndices {
+static const std::vector<uint16_t> quadIndices {
 	0, 1, 2,
 	0, 2, 3
 };
@@ -70,6 +79,12 @@ static const float quadWeights[N_QUAD_VERTICES][4] = {
 	{ 1, 0, 0, 1 },
 	{ 0, 0, 1, 1 },
 	{ 0, 1, 1, 0 },
+};
+
+struct UniformBuffer
+{
+	pt2df offset;
+	vec2df scale;
 };
 
 Renderer2D_Metal::Renderable Renderer2D_Metal::CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
@@ -197,7 +212,7 @@ void Renderer2D_Metal::BuildBuffers()
 		{ { 1.0f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
 	};
 
-	const unsigned int indicies[] = {
+	const uint16_t indices[] = {
 		0, 1, 2,
 		0, 2, 3
 	};
@@ -206,10 +221,11 @@ void Renderer2D_Metal::BuildBuffers()
 	memcpy(m_pVertexBuffer->contents(), vertices, sizeof(vertices));
 	m_pVertexBuffer->didModifyRange(NS::Range::Make(0, m_pVertexBuffer->length()));
 
-	m_pIndexBuffer = m_pDevice->newBuffer(sizeof(indicies), MTL::ResourceStorageModeManaged);
-	memcpy(m_pIndexBuffer->contents(), indicies, sizeof(indicies));
+	m_pIndexBuffer = m_pDevice->newBuffer(sizeof(indices), MTL::ResourceStorageModeManaged);
+	memcpy(m_pIndexBuffer->contents(), indices, sizeof(indices));
 	m_pIndexBuffer->didModifyRange(NS::Range::Make(0, m_pIndexBuffer->length()));
 
+	// m_pUniformBuffer = m_pDevice->newBuffer(sizeof(UniformBuffer), MTL::ResourceStorageModeManaged);
 }
 
 void Renderer2D_Metal::Begin()
@@ -218,7 +234,7 @@ void Renderer2D_Metal::Begin()
 
 	m_pColorAttachment->setTexture(m_pDrawable->texture());
 
-	// m_pAutoReleasePool = NS::AutoreleasePool::alloc()->init();
+	m_pAutoReleasePool = NS::AutoreleasePool::alloc()->init();
 
 	m_pCmd = m_pCommandQueue->commandBuffer();
 	m_pEnc = m_pCmd->renderCommandEncoder(m_pRenderPassDescriptor);
@@ -230,11 +246,14 @@ void Renderer2D_Metal::End()
 	m_pEnc->endEncoding();
 	m_pCmd->presentDrawable(m_pDrawable);
 	m_pCmd->commit();
+
+	m_pAutoReleasePool->release();
+
 }
 
 void Renderer2D_Metal::Clear(const Color& color) const
 {
-	m_pColorAttachment->setClearColor( MTL::ClearColor::Make(color.r, color.g, color.b, color.a));
+	m_pColorAttachment->setClearColor(MTL::ClearColor::Make(color.r, color.g, color.b, color.a));
 }
 
 void Renderer2D_Metal::DrawDisk(const pt2di& center, int radius, const Color& color) const
@@ -351,15 +370,15 @@ bool Renderer2D_Metal::DrawSprite(const pt2di& topLeft, const vec2di& dimensions
 	if (!IsValidSpriteId(spriteId))
 		return false;
 
-	// const auto normalizeCoords = [] (const pt2di& coord, const vec2di& viewPortSize) -> pt2df
-	// {
-	// 	return { 2.0f * (float)coord.x / (float)viewPortSize.w - 1.0f, -2.0f * (float)coord.y / (float)viewPortSize.h + 1.0f };
-	// };
+	const auto normalizeCoords = [] (const pt2di& coord, const vec2di& viewPortSize) -> pt2df
+	{
+		return { 2.0f * (float)coord.x / (float)viewPortSize.w - 1.0f, -2.0f * (float)coord.y / (float)viewPortSize.h + 1.0f };
+	};
 
-	// const auto normalizeSize = [] (const vec2di& sz, const vec2di& viewPortSize) -> vec2df
-	// {
-	// 	return { 2.0f * (float)sz.w / (float)viewPortSize.w, 2.0f * (float)sz.h / (float)viewPortSize.h };
-	// };
+	const auto normalizeSize = [] (const vec2di& sz, const vec2di& viewPortSize) -> vec2df
+	{
+		return { 2.0f * (float)sz.w / (float)viewPortSize.w, 2.0f * (float)sz.h / (float)viewPortSize.h };
+	};
 
 	Sprite sprite = m_sprites[spriteId];
 	Texture texture = m_textures[sprite.textureId];
@@ -377,6 +396,18 @@ bool Renderer2D_Metal::DrawSprite(const pt2di& topLeft, const vec2di& dimensions
 
 	// send the texture as uniform
 	// send the texture coords as uniform
+	UniformBuffer uniform;
+	uniform.offset = normalizeCoords(topLeft, m_viewPortDim);
+	uniform.scale = normalizeSize(dimensions, m_viewPortDim);
+
+	// memcpy(m_pUniformBuffer->contents(), &uniform, sizeof(UniformBuffer));
+	// m_pUniformBuffer->didModifyRange(NS::Range::Make(0, m_pUniformBuffer->length()));
+
+	// Draw
+	m_pEnc->setVertexBuffer(m_pVertexBuffer, 0, 0);
+	// m_pEnc->setVertexBuffer(m_pUniformBuffer, 0, 1);
+	m_pEnc->setVertexBytes(&uniform, sizeof(UniformBuffer), 1);
+	m_pEnc->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, 6, MTL::IndexType::IndexTypeUInt16, m_pIndexBuffer, NS::Integer(0));
 
 	return true;
 }
@@ -422,6 +453,7 @@ void Renderer2D_Metal::SetViewPortDim(const vec2di& dim)
 	// TODO set the view port
 	m_viewPortDim = dim;
 	m_viewPort = (CGRect){ { 0.0, 0.0 }, { (double)dim.w, (double)dim.h } };
-	// TODO
+	CGSize sz = { (float)dim.w, (float)dim.h };
+	m_pSwapchain->setDrawableSize(sz);
 }
 #endif

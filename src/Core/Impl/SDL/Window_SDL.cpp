@@ -323,7 +323,7 @@ Renderer2D* Window_SDL::CreateMetalRenderer()
 #ifdef SUPPORT_METAL
 	SDL_MetalView view = SDL_Metal_CreateView(m_pWindow);
 	m_onDeleteRenderer = [=]() {
-		SDL_Metal_DestroyView(view);
+		// SDL_Metal_DestroyView(view);
 	};
 	Renderer2D_Metal* pRenderer = new Renderer2D_Metal(SDL_Metal_GetLayer(view), m_width, m_height);
 	m_pRenderer = pRenderer;

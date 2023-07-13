@@ -24,15 +24,15 @@ public:
 	virtual void Begin() override;
 	virtual void End() override;
 	virtual void Clear(const Color& color) const override;
-	virtual void DrawDisk(const pt2di& center, int radius, const Color& color) const override {}
-	virtual void DrawCircle(const pt2di& center, int radius, const Color& color) const override {}
-	virtual void FillCircle(const pt2di& center, int radius, const Color& color) const override {}
-	virtual void DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const override {}
-	virtual void FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const override {}
-	virtual void DrawLine(const pt2di& start, const pt2di& end, const Color& color) const override {}
-	virtual void DrawText(const pt2di& position, const std::string& text, const Color& color) const override {}
-	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const override {}
-	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const override {}
+	virtual void DrawDisk(const pt2di& center, int radius, const Color& color) const override;
+	virtual void DrawCircle(const pt2di& center, int radius, const Color& color) const override;
+	virtual void FillCircle(const pt2di& center, int radius, const Color& color) const override;
+	virtual void DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const override;
+	virtual void FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const override;
+	virtual void DrawLine(const pt2di& start, const pt2di& end, const Color& color) const override;
+	virtual void DrawText(const pt2di& position, const std::string& text, const Color& color) const override;
+	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const override;
+	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const override;
 	
 	virtual SpriteID LoadTexture(const char* path, const std::string& tag) override;
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors) override;
@@ -90,11 +90,12 @@ private:
 	// MTK::View* m_pView = nullptr;
 	CA::MetalLayer* m_pSwapchain = nullptr;
 	MTL::Device* m_pDevice = nullptr;
-	// NS::AutoreleasePool* m_pAutoReleasePool = nullptr;
+	NS::AutoreleasePool* m_pAutoReleasePool = nullptr;
 	MTL::CommandQueue* m_pCommandQueue = nullptr;
 	MTL::RenderPipelineState* m_pRenderPipelineState = nullptr;
 	MTL::Buffer* m_pVertexBuffer = nullptr;
 	MTL::Buffer* m_pIndexBuffer = nullptr;
+	MTL::Buffer* m_pUniformBuffer = nullptr;
 
 	MTL::RenderPassDescriptor* m_pRenderPassDescriptor = nullptr;
 	MTL::RenderPassColorAttachmentDescriptor* m_pColorAttachment = nullptr;
