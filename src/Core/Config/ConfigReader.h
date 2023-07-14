@@ -13,7 +13,7 @@
 // just simple key-value pair for now...
 class ConfigReader
 {
-private:
+public:
 	class Property
 	{
 	public:
@@ -46,7 +46,7 @@ private:
 
 		std::string Dump() const
 		{
-			std::string out = m_name + (m_childProperties.empty()? "" : ": " + m_value);
+			std::string out = m_name + (m_childProperties.empty()? ": " + m_value : "\n");
 			for (const auto& [key, child] : m_childProperties)
 			{
 				out += child.Dump();
@@ -54,6 +54,7 @@ private:
 			}
 			return out;
 		}
+
 	private:
 		std::string m_cannonicalName;
 		std::string m_name;
@@ -62,52 +63,16 @@ private:
 
 		friend class ConfigReader;
 	};
-
-	class File
-	{
-	public:
-		File(const std::string name, const std::unordered_map<std::string, Property>& props)
-		: m_name(name), m_properties(props)
-		{}
-
-		const std::string& GetName() const { return m_name; }
-		std::string DumpProperties() const
-		{
-			std::string out;
-			for (const auto& [key, prop] : m_properties)
-			{
-				out += prop.Dump();
-				out += "\n";
-			}
-			return out;
-		}
-
-		const Property& operator[](const std::string& key) const 
-		{
-			try 
-			{
-				return m_properties.at(key);
-			}
-			catch (...)
-			{
-				LOG_FATAL("unable to locate property <" + key + "> of file " + m_name);
-				throw std::runtime_error("unable to locate property <" + key + "> of file " + m_name);
-			}
-		}
-	private:
-		std::string m_name;
-		std::unordered_map<std::string, Property> m_properties;
-	};
-
+	
 public:
 
-	static const File& GetFile(const std::string& fileName) 
+	static const Property& GetFile(const std::string& fileName) 
 	{ 
 		auto ite = s_files.find(fileName);
 		if (ite == s_files.end())
 		{
 			// load the file
-			File file = ParseFile(fileName);
+			Property file = ParseFile(fileName);
 			auto [existing_ite, insert_successful] = s_files.emplace(fileName, file);
 			if (!insert_successful)
 			{
@@ -120,8 +85,8 @@ public:
 
 	static void DumpConfig(const std::string& fileName)
 	{
-		File file = GetFile(fileName);
-		std::string msg = fileName + '\n' + file.DumpProperties();
+		Property file = GetFile(fileName);
+		std::string msg = fileName + '\n' + file.Dump();
 		LOG_DEBUG(msg);
 	}
 
@@ -131,7 +96,7 @@ private:
 
 	ConfigReader() {}
 
-	static File ParseFile(const std::string& fileName)
+	static Property ParseFile(const std::string& fileName)
 	{
 		std::fstream f(fileName);
 		if (!f.is_open())
@@ -163,7 +128,7 @@ private:
 			properties.emplace(p.GetName(), p);
 		}
 
-		return File(fileName, properties);
+		return Property(fileName, "", "" , properties);
 	}
 
 	// need to include the '.' in the parent name
@@ -229,10 +194,10 @@ private:
 		return line.find_first_not_of(sep) / sep.length();
 	}
 
-	static std::unordered_map<std::string, File> s_files;
+	static std::unordered_map<std::string, Property> s_files;
 };
 
 #ifdef CONFIG_READER_IMPL
 #undef CONFIG_READER_IMPL
-std::unordered_map<std::string, ConfigReader::File> ConfigReader::s_files;
+std::unordered_map<std::string, ConfigReader::Property> ConfigReader::s_files;
 #endif

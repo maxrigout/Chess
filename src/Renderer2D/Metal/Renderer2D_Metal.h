@@ -55,8 +55,7 @@ public:
 
 	struct Texture
 	{
-		// the opengl id
-		unsigned int id;
+		NS::SharedPtr<MTL::Texture> texture;
 		vec2di dim;
 		std::string path;
 	};
@@ -98,7 +97,7 @@ private:
 	MTL::RenderPipelineState* m_pRenderPipelineState = nullptr;
 	MTL::Buffer* m_pVertexBuffer = nullptr;
 	MTL::Buffer* m_pIndexBuffer = nullptr;
-	MTL::Buffer* m_pUniformBuffer = nullptr;
+	// MTL::Buffer* m_pUniformBuffer = nullptr;
 
 	MTL::RenderPassDescriptor* m_pRenderPassDescriptor = nullptr;
 	MTL::RenderPassColorAttachmentDescriptor* m_pColorAttachment = nullptr;

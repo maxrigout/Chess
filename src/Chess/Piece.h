@@ -59,7 +59,7 @@ protected:
 
 	pt2df m_screenPosition;
 	pt2df m_targetScreenPosition;
-	float m_speed = 3.0f;
+	float m_speed = 15.0f;
 
 	friend class Board;
 };

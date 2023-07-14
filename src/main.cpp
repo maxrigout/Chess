@@ -15,9 +15,9 @@ int main(int argc, char** argv)
 	try
 	{
 		ConfigReader::DumpConfig("config.yml");
-		SystemConfiguration::Init();
-		ChessConfiguration::Init();
-		RendererConfiguration::Init();
+		SystemConfiguration::Init(ConfigReader::GetFile("config.yml")["system"]);
+		ChessConfiguration::Init(ConfigReader::GetFile("config.yml")["chess"]);
+		RendererConfiguration::Init(ConfigReader::GetFile("config.yml")["renderer"]);
 		LOG_DEBUG("hello");
 		// LOG_DEBUG(ConfigReader::GetFile("config.yml")["name"].GetStringValue());
 		LOG_DEBUG(argv[0]);
@@ -25,10 +25,6 @@ int main(int argc, char** argv)
 		game.Init(800, 600);
 		game.Run();
 		game.Cleanup();
-
-		// https://github.com/gzorin/sdl-metal-cpp-example/blob/main/main.cpp
-		// https://gist.github.com/gcatlin/b89e0efed78dd91364609ca4095da346
-		// https://schneide.blog/2022/03/28/metal-in-c-with-sdl2/
 	}
 	catch (std::exception& e)
 	{

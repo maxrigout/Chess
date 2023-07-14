@@ -14,7 +14,7 @@ class TestClass;
 class AIPlayer : public Player
 {
 public:
-	AIPlayer(Board* pBoard, TEAM team);
+	AIPlayer(Board* pBoard, TEAM team, int searchDepth);
 	virtual ~AIPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
@@ -78,6 +78,8 @@ private:
 	std::unique_ptr<Board> m_boardCopy;
 	std::unique_ptr<MaximizingPlayer> m_copyOfThis;
 	std::unique_ptr<MinimizingPlayer> m_copyOfOpponent;
+
+	int m_searchDepth;
 
 	friend class TestClass;
 

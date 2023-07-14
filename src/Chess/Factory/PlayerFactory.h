@@ -33,7 +33,7 @@ private:
 		if (playerType == "human")
 			return new HumanPlayer(pBoard, team);
 		else if (playerType == "ai")
-			return new AIPlayer(pBoard, team);
+			return new AIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth());
 		return nullptr;
 	}
 };

@@ -27,30 +27,38 @@ struct VertexOut
 {
 	float4 position [[position]];
 	half4 color;
+	float2 texCoord;
 };
 struct VertexIn
 {
 	float2 position [[attribute(0)]];
 	float4 color [[attribute(1)]];
+	float2 textureCoords [[attribute(2)]];
 };
 struct UniformBuffer
 {
 	float2 offset;
 	float2 scale;
+	float2 textureCoords[4];
 };
 
-VertexOut vertex vertexMain(VertexIn v [[stage_in]], constant UniformBuffer& ub [[buffer(1)]] )
+VertexOut vertex vertexMain(VertexIn v [[stage_in]],
+							uint vertexId [[vertex_id]],
+							uint instanceId [[instance_id]],
+							constant UniformBuffer& ub [[buffer(1)]])
 {
 	float2 pos = v.position * ub.scale + ub.offset;
 	VertexOut out;
 	out.position = float4(pos, 1.0, 1.0);
 	out.color = half4(v.color);
+	out.texCoord = ub.textureCoords[vertexId];
 	return out;
 }
 
-half4 fragment fragmentMain( VertexOut in [[stage_in]] )
+half4 fragment fragmentMain(VertexOut in [[stage_in]], texture2d<half, access::sample> tex [[texture(0)]])
 {
-	return in.color;
+	constexpr sampler s(address::repeat, filter::linear);
+	return tex.sample(s, in.texCoord);
 }
 )";
 
@@ -66,11 +74,20 @@ half4 fragment fragmentMain( VertexOut in [[stage_in]] )
 // https://metalbyexample.com/modern-metal-1/
 // https://metalbyexample.com/modern-metal-2/
 
+// https://github.com/gzorin/sdl-metal-cpp-example/blob/main/main.cpp
+// https://gist.github.com/gcatlin/b89e0efed78dd91364609ca4095da346
+// https://schneide.blog/2022/03/28/metal-in-c-with-sdl2/
+
+/* TO DEBUG METAL
+	export NSZombieEnabled=YES
+	export OBJC_DEBUG_MISSING_POOLS=YES
+*/
+
 static const std::vector<Renderer2D_Metal::Vertex> quadVertices = {
-	{ { 0.0f,  0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, {} },
-	{ { 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {} },
-	{ { 1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {} },
-	{ { 1.0f,  0.0f }, { 1.0f, 1.0f, 0.0f, 1.0f }, {} }
+	{ { 0.0f,  0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } },
+	{ { 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+	{ { 1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 0.0f } },
+	{ { 1.0f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, { 1.0f, 1.0f } },
 };
 
 static const std::vector<uint16_t> quadIndices {
@@ -90,6 +107,7 @@ struct UniformBuffer
 {
 	simd::float2 offset;
 	simd::float2 scale;
+	simd::float2 textureCoords[N_QUAD_VERTICES];
 };
 
 Renderer2D_Metal::Renderable Renderer2D_Metal::CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
@@ -106,30 +124,43 @@ Renderer2D_Metal::Renderable Renderer2D_Metal::CreateRenderable(const std::vecto
 	return renderable;
 }
 
-static Renderer2D_Metal::Texture LoadTextureToGPU(const char* path)
+static Renderer2D_Metal::Texture LoadTextureToGPU(MTL::Device* pDevice, const char* path)
 {
 	int width, height, nComponents;
-	unsigned char* imageData = stbi_load(path, &width, &height, &nComponents, 0);
+	unsigned char* imageData = stbi_load(path, &width, &height, &nComponents, STBI_rgb_alpha);
 	if (!imageData)
 	{
 		// cannot load image...
 		stbi_image_free(imageData);
-
-		return {(unsigned int)-1, {-1, -1}};
+		return {{}, {-1, -1}, path};
 	}
 
-	unsigned int texture = -1;
+	MTL::TextureDescriptor* pTexDesc = MTL::TextureDescriptor::alloc()->init();
+	pTexDesc->setWidth(width);
+	pTexDesc->setHeight(height);
+	pTexDesc->setPixelFormat(MTL::PixelFormatRGBA8Unorm);
+	pTexDesc->setTextureType(MTL::TextureType2D);
+	pTexDesc->setStorageMode(MTL::StorageModeManaged);
+	pTexDesc->setUsage(MTL::ResourceUsageSample | MTL::ResourceUsageRead);
 
-	// TODO: LoadTextureToGPU metal
+	auto pTexture = NS::TransferPtr(pDevice->newTexture(pTexDesc));
+	pTexture->replaceRegion(MTL::Region(0, 0, 0, width, height, 1), 0, imageData, width * 4);
 
 	stbi_image_free(imageData);
+
+	Renderer2D_Metal::Texture texture;
+	texture.texture = pTexture;
+	texture.dim = { width, height };
+	texture.path = path;
 
 	const size_t maxMsgSz = 500;
 	char message[maxMsgSz] = { 0 };
 
+	snprintf(message, maxMsgSz, "loaded %s", path);
+
 	LOG_DEBUG(message);
 
-	return { texture, { width, height }, std::string(path) };
+	return texture;
 }
 
 Renderer2D_Metal::Renderer2D_Metal(void* sp, int width, int height)
@@ -147,7 +178,7 @@ Renderer2D_Metal::Renderer2D_Metal(void* sp, int width, int height)
 	m_pSwapchain = (CA::MetalLayer*)sp;
 	m_pSwapchain->setDevice(m_pDevice);
 	m_pSwapchain->setDisplaySyncEnabled(true);
-	m_pSwapchain->setPixelFormat(MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB);
+	m_pSwapchain->setPixelFormat(MTL::PixelFormat::PixelFormatRGBA8Unorm);
 	m_pSwapchain->setDrawableSize(sz);
 
 	LOG_INFO(std::string(m_pDevice->name()->cString(NS::ASCIIStringEncoding)));
@@ -195,6 +226,10 @@ void Renderer2D_Metal::BuildShaders()
 	pDescriptor->attributes()->object(1)->setBufferIndex(0);
 	pDescriptor->attributes()->object(1)->setOffset(offsetof(Vertex, color));
 
+	pDescriptor->attributes()->object(2)->setFormat(MTL::VertexFormat::VertexFormatFloat2);
+	pDescriptor->attributes()->object(2)->setBufferIndex(0);
+	pDescriptor->attributes()->object(2)->setOffset(offsetof(Vertex, textureCoords));
+
 	pDescriptor->layouts()->object(0)->setStride(sizeof(Vertex));
 
 	MTL::RenderPipelineDescriptor* pDesc = MTL::RenderPipelineDescriptor::alloc()->init();
@@ -202,7 +237,14 @@ void Renderer2D_Metal::BuildShaders()
 	pDesc->setVertexFunction(pVertexFn);
 	pDesc->setFragmentFunction(pFragmentFn);
 
-	pDesc->colorAttachments()->object(0)->setPixelFormat(MTL::PixelFormat::PixelFormatBGRA8Unorm_sRGB);
+	pDesc->colorAttachments()->object(0)->setPixelFormat(MTL::PixelFormatRGBA8Unorm);
+	pDesc->colorAttachments()->object(0)->setBlendingEnabled(true);
+	pDesc->colorAttachments()->object(0)->setAlphaBlendOperation(MTL::BlendOperationAdd);
+	pDesc->colorAttachments()->object(0)->setSourceAlphaBlendFactor(MTL::BlendFactorOne);
+	pDesc->colorAttachments()->object(0)->setDestinationAlphaBlendFactor(MTL::BlendFactorZero);
+	pDesc->colorAttachments()->object(0)->setRgbBlendOperation(MTL::BlendOperationAdd);
+	pDesc->colorAttachments()->object(0)->setSourceRGBBlendFactor(MTL::BlendFactorSourceAlpha);
+	pDesc->colorAttachments()->object(0)->setDestinationRGBBlendFactor(MTL::BlendFactorOneMinusSourceAlpha);
 
 	m_pRenderPipelineState = m_pDevice->newRenderPipelineState(pDesc, &pError);
 	if (!m_pRenderPipelineState)
@@ -220,24 +262,12 @@ void Renderer2D_Metal::BuildShaders()
 
 void Renderer2D_Metal::BuildBuffers()
 {
-	const Vertex vertices[] = {
-		{ { 0.0f,  0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f }, {} },
-		{ { 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f }, {} },
-		{ { 1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {} },
-		{ { 1.0f,  0.0f }, { 0.0f, 0.0f, 1.0f, 1.0f }, {} },
-	};
-
-	const uint16_t indices[] = {
-		0, 1, 2,
-		0, 2, 3
-	};
-
-	m_pVertexBuffer = m_pDevice->newBuffer(sizeof(vertices), MTL::ResourceStorageModeManaged);
-	memcpy(m_pVertexBuffer->contents(), vertices, sizeof(vertices));
+	m_pVertexBuffer = m_pDevice->newBuffer(sizeof(quadVertices), MTL::ResourceStorageModeManaged);
+	memcpy(m_pVertexBuffer->contents(), quadVertices.data(), quadVertices.size() * sizeof(Vertex));
 	m_pVertexBuffer->didModifyRange(NS::Range::Make(0, m_pVertexBuffer->length()));
 
-	m_pIndexBuffer = m_pDevice->newBuffer(sizeof(indices), MTL::ResourceStorageModeManaged);
-	memcpy(m_pIndexBuffer->contents(), indices, sizeof(indices));
+	m_pIndexBuffer = m_pDevice->newBuffer(sizeof(quadIndices), MTL::ResourceStorageModeManaged);
+	memcpy(m_pIndexBuffer->contents(), quadIndices.data(), quadIndices.size() * sizeof(uint16_t));
 	m_pIndexBuffer->didModifyRange(NS::Range::Make(0, m_pIndexBuffer->length()));
 
 	// m_pUniformBuffer = m_pDevice->newBuffer(sizeof(UniformBuffer), MTL::ResourceStorageModeManaged);
@@ -326,7 +356,7 @@ void Renderer2D_Metal::DrawArrow(const pt2di& start, const pt2di& end, const Col
 
 Renderer2D::SpriteID Renderer2D_Metal::LoadTexture(const char* path, const std::string& tag)
 {
-	Texture texture = ::LoadTextureToGPU(path);
+	Texture texture = ::LoadTextureToGPU(m_pDevice, path);
 	m_textures.push_back(texture);
 	size_t textureId = m_textures.size() - 1;
 	m_sprites.push_back({ textureId, { 0.0f, 0.0f }, { 1.0f, 1.0f } });
@@ -338,7 +368,7 @@ Renderer2D::SpriteID Renderer2D_Metal::LoadTexture(const char* path, const std::
 
 std::vector<Renderer2D::SpriteID> Renderer2D_Metal::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
 {
-	Texture texture = ::LoadTextureToGPU(path);
+	Texture texture = ::LoadTextureToGPU(m_pDevice, path);
 	m_textures.push_back(texture);
 	size_t textureId = m_textures.size() - 1;
 	std::vector<SpriteID> sprites;
@@ -405,17 +435,13 @@ bool Renderer2D_Metal::DrawSprite(const pt2di& topLeft, const vec2di& dimensions
 	Sprite sprite = m_sprites[spriteId];
 	Texture texture = m_textures[sprite.textureId];
 
-	// TODO
-
-	// for (int i = 0; i < N_QUAD_VERTICES; ++i)
-	// {
-	// 	pt2df textureCoord = {  sprite.topLeft.x * quadWeights[i][0] + sprite.bottomRight.x * quadWeights[i][2],
-	// 							sprite.topLeft.y * quadWeights[i][1] + sprite.bottomRight.y * quadWeights[i][3] };
-	// }
-
-	// send the texture as uniform
-	// send the texture coords as uniform
 	UniformBuffer uniform;
+
+	for (int i = 0; i < N_QUAD_VERTICES; ++i)
+	{
+		uniform.textureCoords[i] = {  sprite.topLeft.x * quadWeights[i][0] + sprite.bottomRight.x * quadWeights[i][2],
+								sprite.topLeft.y * quadWeights[i][1] + sprite.bottomRight.y * quadWeights[i][3] };
+	}
 	uniform.offset = normalizeCoords(topLeft, m_viewPortDim);
 	uniform.scale = normalizeSize(dimensions, m_viewPortDim);
 
@@ -423,6 +449,7 @@ bool Renderer2D_Metal::DrawSprite(const pt2di& topLeft, const vec2di& dimensions
 	m_pEnc->setVertexBuffer(m_pVertexBuffer, 0, 0);
 	// m_pEnc->setVertexBuffer(m_pUniformBuffer, 0, 1);
 	m_pEnc->setVertexBytes(&uniform, sizeof(UniformBuffer), 1);
+	m_pEnc->setFragmentTexture(texture.texture.get(), 0);
 	m_pEnc->drawIndexedPrimitives(MTL::PrimitiveType::PrimitiveTypeTriangle, 6, MTL::IndexType::IndexTypeUInt16, m_pIndexBuffer, NS::Integer(0));
 
 	return true;
@@ -468,8 +495,8 @@ void Renderer2D_Metal::SetViewPortDim(const vec2di& dim)
 	// TODO recalculate projection matrix
 	// TODO set the view port
 	m_viewPortDim = dim;
-	m_viewPort = (CGRect){ { 0.0, 0.0 }, { (double)dim.w, (double)dim.h } };
 	CGSize sz = { (float)dim.w, (float)dim.h };
+	m_viewPort = CGRect{ { 0.0, 0.0 }, sz };
 	m_pSwapchain->setDrawableSize(sz);
 }
 #endif

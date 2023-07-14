@@ -3,21 +3,38 @@
 #include "Renderer2D/RendererBackendType.h"
 #include <string>
 
+class OpenGLSettings
+{
+public:
+	static void Init(const ConfigReader::Property& props)
+	{
+		s_renderMode = props["opengl-render-mode"].GetStringValue();
+	}
+
+	static const std::string& getRenderMode()
+	{
+		return s_renderMode;
+	}
+
+private:
+	static std::string s_renderMode;
+};
+
 class RendererConfiguration
 {
 public:
-	static void Init()
+	static void Init(const ConfigReader::Property& props)
 	{
-		s_backendType = BackendTypeStringToEnum(ConfigReader::GetFile("config.yml")["renderer"]["renderer-backend"].GetStringValue());
-		s_openglRenderMode = ConfigReader::GetFile("config.yml")["renderer"]["opengl-settings"]["opengl-render-mode"].GetStringValue();
+		s_backendType = BackendTypeStringToEnum(props["renderer-backend"].GetStringValue());
+		s_openGLSettings.Init(props["opengl-settings"]);
 	}
 	static RendererBackendType GetRendererBackendType()
 	{
 		return s_backendType;
 	}
-	static std::string GetOpenGLRenderMode()
+	static const OpenGLSettings& GetOpenGLSettings()
 	{
-		return s_openglRenderMode;
+		return s_openGLSettings;
 	}
 private:
 	RendererConfiguration() {}
@@ -33,11 +50,12 @@ private:
 	}
 
 	static RendererBackendType s_backendType;
-	static std::string s_openglRenderMode;
+	static OpenGLSettings s_openGLSettings;
 };
 
 #ifdef RENDERER_CONFIG_IMPL
 #undef RENDERER_CONFIG_IMPL
 RendererBackendType RendererConfiguration::s_backendType;
-std::string RendererConfiguration::s_openglRenderMode;
+OpenGLSettings RendererConfiguration::s_openGLSettings;
+std::string OpenGLSettings::s_renderMode;
 #endif

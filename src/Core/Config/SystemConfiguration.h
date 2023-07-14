@@ -5,9 +5,9 @@
 class SystemConfiguration
 {
 public:
-	static void Init()
+	static void Init(const ConfigReader::Property& props)
 	{
-		s_windowingSystem = ConfigReader::GetFile("config.yml")["system"]["windowing-system"].GetStringValue();
+		s_windowingSystem = props["windowing-system"].GetStringValue();
 	}
 	static const char* GetPlatform()
 	{
