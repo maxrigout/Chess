@@ -6,7 +6,7 @@
 #include "Renderer2D/SDL/Renderer2D_SDL.h"
 
 #ifdef SUPPORT_OPENGL
-#include "Renderer2D/OpenGL/Renderer2D_OpenGL.h"
+#include "Renderer2D/OpenGL/Renderer2D_OpenGLFactory.h"
 #endif
 
 #ifdef SUPPORT_METAL
@@ -269,7 +269,7 @@ Renderer2D* Window_SDL::CreateOpenGLRenderer()
 	if (context == NULL)
 		LOG_ERROR("Failed to create OpenGL Context");
 	Renderer2D_OpenGL::LoadOpenGLLibrary(SDL_GL_GetProcAddress);
-	Renderer2D_OpenGL* openGLRenderer = new Renderer2D_OpenGL();
+	Renderer2D_OpenGL* openGLRenderer = Renderer2D_OpenGLFactory::CreateOpenGLRenderer();
 	openGLRenderer->OnRenderEnd(
 		[this]()
 		{

@@ -13,8 +13,6 @@
 // TODO
 // https://bcmpinc.wordpress.com/2015/08/18/creating-an-opengl-4-5-context-using-sdl2-and-glad/
 
-static bool areGLProcsLoaded = false;
-
 /*
 	0 ------ 3
 	|        |
@@ -22,7 +20,7 @@ static bool areGLProcsLoaded = false;
 	1 ------ 2
 */
 
-static const std::vector<Vertex> quadVertices = {
+static const std::vector<Renderer2D_OpenGL_Classic::Vertex> quadVertices = {
 	{ { 0.0f,  0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
 	{ { 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
 	{ { 1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
@@ -88,7 +86,7 @@ void main()
 }
 )";
 
-static Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
+static Renderer2D_OpenGL_Classic::Texture LoadTextureToGPU(const char* path)
 {
 	int width, height, nComponents;
 	uint8_t* imageData = stbi_load(path, &width, &height, &nComponents, 0);
@@ -133,32 +131,32 @@ static Renderer2D_OpenGL::Texture LoadTextureToGPU(const char* path)
 	return { tex, { width, height }, std::string(path) };
 }
 
-static Renderable CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+static Renderer2D_OpenGL_Classic::Renderable CreateRenderable(const std::vector<Renderer2D_OpenGL_Classic::Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
-	Renderable renderable;
+	Renderer2D_OpenGL_Classic::Renderable renderable;
 	glGenVertexArrays(1, &renderable.VAO);
 	glBindVertexArray(renderable.VAO);
 
 	glGenBuffers(1, &renderable.VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, renderable.VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Renderer2D_OpenGL_Classic::Vertex), vertices.data(), GL_STREAM_DRAW);
 
 	glGenBuffers(1, &renderable.EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STREAM_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Renderer2D_OpenGL_Classic::Vertex), (void*)offsetof(Renderer2D_OpenGL_Classic::Vertex, position));
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Renderer2D_OpenGL_Classic::Vertex), (void*)offsetof(Renderer2D_OpenGL_Classic::Vertex, color));
 
 	renderable.nElements = indices.size();
 
 	return renderable;
 }
 
-static void DestroyRenderable(Renderable& renderable)
+static void DestroyRenderable(Renderer2D_OpenGL_Classic::Renderable& renderable)
 {
 	glDeleteBuffers(1, &renderable.VBO);
 	glDeleteBuffers(1, &renderable.EBO);
@@ -212,17 +210,7 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	return id;
 }
 
-void Renderer2D_OpenGL::LoadOpenGLLibrary(void*(procAddr)(const char*))
-{
-	if (!areGLProcsLoaded)
-	{
-		gladLoadGLLoader(procAddr);
-		areGLProcsLoaded = true;
-	}
-}
-
-
-Renderer2D_OpenGL::Renderer2D_OpenGL()
+Renderer2D_OpenGL_Classic::Renderer2D_OpenGL_Classic()
 {
 	m_onRenderEnd = [](){};
 	m_shader = CreateShader(vertexSource, fragmentSource);
@@ -260,7 +248,7 @@ Renderer2D_OpenGL::Renderer2D_OpenGL()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
-Renderer2D_OpenGL::~Renderer2D_OpenGL()
+Renderer2D_OpenGL_Classic::~Renderer2D_OpenGL_Classic()
 {
 	DestroyRenderable(m_quadRenderable);
 	for (auto& texture : m_textures)
@@ -270,7 +258,7 @@ Renderer2D_OpenGL::~Renderer2D_OpenGL()
 	glDeleteProgram(m_shader);
 }
 
-void Renderer2D_OpenGL::Begin()
+void Renderer2D_OpenGL_Classic::Begin()
 {
 	glUseProgram(m_shader);
 	glBindVertexArray(m_quadRenderable.VAO);
@@ -283,72 +271,72 @@ void Renderer2D_OpenGL::Begin()
 #endif
 }
 
-void Renderer2D_OpenGL::End()
+void Renderer2D_OpenGL_Classic::End()
 {
 	Flush();
 	m_onRenderEnd();
 }
 
-void Renderer2D_OpenGL::Flush()
+void Renderer2D_OpenGL_Classic::Flush()
 {
 	
 }
 
-void Renderer2D_OpenGL::Clear(const Color& color) const
+void Renderer2D_OpenGL_Classic::Clear(const Color& color) const
 {
 	glClearColor(color.r, color.g, color.b, color.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 /*
-void Renderer2D_OpenGL::DrawDisk(const pt2di& center, int radius, const Color& color) const
+void Renderer2D_OpenGL_Classic::DrawDisk(const pt2di& center, int radius, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::DrawCircle(const pt2di& center, int radius, const Color& color) const
+void Renderer2D_OpenGL_Classic::DrawCircle(const pt2di& center, int radius, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::FillCircle(const pt2di& center, int radius, const Color& color) const
+void Renderer2D_OpenGL_Classic::FillCircle(const pt2di& center, int radius, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
+void Renderer2D_OpenGL_Classic::DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
+void Renderer2D_OpenGL_Classic::FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::DrawLine(const pt2di& start, const pt2di& end, const Color& color) const
+void Renderer2D_OpenGL_Classic::DrawLine(const pt2di& start, const pt2di& end, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::DrawText(const pt2di& position, const std::string& text, const Color& color) const
+void Renderer2D_OpenGL_Classic::DrawText(const pt2di& position, const std::string& text, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const
+void Renderer2D_OpenGL_Classic::DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const
 {
 
 }
 
-void Renderer2D_OpenGL::DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const
+void Renderer2D_OpenGL_Classic::DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const
 {
 
 }
 */
 
 
-Renderer2D::SpriteID Renderer2D_OpenGL::LoadTexture(const char* path, const std::string& tag)
+Renderer2D::SpriteID Renderer2D_OpenGL_Classic::LoadTexture(const char* path, const std::string& tag)
 {
 	Texture texture = LoadTextureToGPU(path);
 	m_textures.push_back(texture);
@@ -360,7 +348,7 @@ Renderer2D::SpriteID Renderer2D_OpenGL::LoadTexture(const char* path, const std:
 	return spriteId;
 }
 
-std::vector<Renderer2D::SpriteID> Renderer2D_OpenGL::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
+std::vector<Renderer2D::SpriteID> Renderer2D_OpenGL_Classic::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
 {
 	Texture texture = LoadTextureToGPU(path);
 	m_textures.push_back(texture);
@@ -411,7 +399,7 @@ std::vector<Renderer2D::SpriteID> Renderer2D_OpenGL::LoadSpriteSheet(const char*
 	return sprites;
 }
 
-bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const
+bool Renderer2D_OpenGL_Classic::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const
 {
 	if (!IsValidSpriteId(spriteId))
 		return false;
@@ -457,7 +445,7 @@ bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimension
 	return true;
 }
 
-bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
+bool Renderer2D_OpenGL_Classic::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
 {
 	try
 	{
@@ -472,27 +460,27 @@ bool Renderer2D_OpenGL::DrawSprite(const pt2di& topLeft, const vec2di& dimension
 }
 
 
-vec2di Renderer2D_OpenGL::GetSpriteSize(const std::string& spriteTag) const
+vec2di Renderer2D_OpenGL_Classic::GetSpriteSize(const std::string& spriteTag) const
 {
 	return {};
 }
 
-const vec2di& Renderer2D_OpenGL::GetCellDim() const
+const vec2di& Renderer2D_OpenGL_Classic::GetCellDim() const
 {
 	return m_cellDim;
 }
 
-const vec2di& Renderer2D_OpenGL::GetViewPortDim() const
+const vec2di& Renderer2D_OpenGL_Classic::GetViewPortDim() const
 {
 	return m_viewPortDim;
 }
 
-void Renderer2D_OpenGL::SetCellDim(const vec2di& dim)
+void Renderer2D_OpenGL_Classic::SetCellDim(const vec2di& dim)
 {
 	m_cellDim = dim;
 }
 
-void Renderer2D_OpenGL::SetViewPortDim(const vec2di& dim)
+void Renderer2D_OpenGL_Classic::SetViewPortDim(const vec2di& dim)
 {
 	m_viewPortDim = dim;
 	glViewport(0, 0, m_viewPortDim.w, m_viewPortDim.h);

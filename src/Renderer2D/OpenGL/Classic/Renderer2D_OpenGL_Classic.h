@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer2D/Renderer2D.h"
+#include "Renderer2D/OpenGL/Renderer2D_OpenGL.h"
 
 #include <string>
 #include <functional>
@@ -10,26 +10,11 @@
 
 #define N_QUAD_VERTICES 4
 
-struct Vertex
-{
-	pt2df position;
-	Color color;
-	pt2df textureCoords;
-};
-
-struct Renderable
-{
-	unsigned int VAO = -1, VBO = -1, EBO = -1;
-	size_t nElements = 0;
-};
-
-class Renderer2D_OpenGL : public Renderer2D
+class Renderer2D_OpenGL_Classic : public Renderer2D_OpenGL
 {
 public:
-	static void LoadOpenGLLibrary(void*(procAddr)(const char*));
-
-	Renderer2D_OpenGL();
-	virtual ~Renderer2D_OpenGL();
+	Renderer2D_OpenGL_Classic();
+	virtual ~Renderer2D_OpenGL_Classic();
 
 	virtual void Begin() override;
 	virtual void End() override;
@@ -55,11 +40,23 @@ public:
 	virtual void SetCellDim(const vec2di& dim) override;
 	virtual void SetViewPortDim(const vec2di& dim) override;
 
-	template <typename Fn>
-	void OnRenderEnd(Fn fn)
+	virtual void OnRenderEnd(std::function<void(void)>&& fn) override
 	{
 		m_onRenderEnd = std::move(fn);
 	}
+
+	struct Vertex
+	{
+		pt2df position;
+		Color color;
+		pt2df textureCoords;
+	};
+
+	struct Renderable
+	{
+		unsigned int VAO = -1, VBO = -1, EBO = -1;
+		size_t nElements = 0;
+	};
 
 	struct Texture
 	{

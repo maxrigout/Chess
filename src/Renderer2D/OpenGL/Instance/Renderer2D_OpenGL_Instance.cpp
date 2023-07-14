@@ -9,11 +9,10 @@
 // TODO
 // https://bcmpinc.wordpress.com/2015/08/18/creating-an-opengl-4-5-context-using-sdl2-and-glad/
 
-static bool areGLProcsLoaded = false;
 static const size_t maxInstances = 1000;
 static const int maxTexturesBind = 4;
 
-static const std::vector<Vertex> quadVertices = {
+static const std::vector<Renderer2D_OpenGL_Instance::Vertex> quadVertices = {
 	{ { 0.0f,  0.0f }, { 1.0f, 0.0f, 0.0f, 1.0f } },
 	{ { 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f, 1.0f } },
 	{ { 1.0f, -1.0f }, { 0.0f, 0.0f, 1.0f, 1.0f } },
@@ -107,25 +106,25 @@ static Renderer2D_OpenGL_Instance::Texture LoadTextureToGPU(const char* path)
 	return { texture, { width, height } };
 }
 
-static Renderable CreateRenderable(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+static Renderer2D_OpenGL_Instance::Renderable CreateRenderable(const std::vector<Renderer2D_OpenGL_Instance::Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
-	Renderable renderable;
+	Renderer2D_OpenGL_Instance::Renderable renderable;
 	glGenVertexArrays(1, &renderable.VAO);
 	glBindVertexArray(renderable.VAO);
 
 	glGenBuffers(1, &renderable.VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, renderable.VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Renderer2D_OpenGL_Instance::Vertex), vertices.data(), GL_STATIC_DRAW);
 
 	glGenBuffers(1, &renderable.EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Renderer2D_OpenGL_Instance::Vertex), (void*)offsetof(Renderer2D_OpenGL_Instance::Vertex, position));
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Renderer2D_OpenGL_Instance::Vertex), (void*)offsetof(Renderer2D_OpenGL_Instance::Vertex, color));
 
 	renderable.nElements = indices.size();
 
@@ -147,7 +146,7 @@ static unsigned int CreateInstanceVBO(int index, int nComponents, int maxSize)
 	return instanceVBO;
 }
 
-static void DestroyRenderable(Renderable& renderable)
+static void DestroyRenderable(Renderer2D_OpenGL_Instance::Renderable& renderable)
 {
 	glDeleteBuffers(1, &renderable.VBO);
 	glDeleteBuffers(1, &renderable.EBO);
@@ -241,16 +240,6 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	glDeleteShader(shaderFragment);
 	return id;
 }
-
-void Renderer2D_OpenGL_Instance::LoadOpenGLLibrary(void*(procAddr)(const char*))
-{
-	if (!areGLProcsLoaded)
-	{
-		gladLoadGLLoader(procAddr);
-		areGLProcsLoaded = true;
-	}
-}
-
 
 Renderer2D_OpenGL_Instance::Renderer2D_OpenGL_Instance()
 {

@@ -11,7 +11,7 @@ public:
 		s_renderMode = props["opengl-render-mode"].GetStringValue();
 	}
 
-	static const std::string& getRenderMode()
+	static const std::string& GetRenderMode()
 	{
 		return s_renderMode;
 	}

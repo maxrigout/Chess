@@ -1,12 +1,12 @@
 chess:
   ai-properties:
     type: min-max
-    search-depth: 4
+    search-depth: 3
   player1: human
   player2: ai
 system:
   windowing-system: sdl
 renderer:
-  renderer-backend: metal
+  renderer-backend: opengl
   opengl-settings:
-    opengl-render-mode: direct
+    opengl-render-mode: instance
