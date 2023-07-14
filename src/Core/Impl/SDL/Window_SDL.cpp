@@ -298,16 +298,8 @@ Renderer2D* Window_SDL::CreateVulkanRenderer()
 	Renderer2D_Vulkan* vulkanRenderer = new Renderer2D_Vulkan();
 	vulkanRenderer->SetInstanceExtensionProvider(/* TODO */);
 	vulkanRenderer->SetSurfaceProvider(/* TODO */);
-	vulkanRenderer->SetInstanceExtensionGetter(
-		[this](unsigned int* extCount, const char** exts)
-		{
-			return SDL_Vulkan_GetInstanceExtensions(this->m_pWindow, extCount, exts) == SDL_TRUE;
-		});
-	vulkanRenderer->SetSurfaceCreator(
-		[this](VkInstance instance, VkSurfaceKHR* surface)
-		{
-			return SDL_Vulkan_CreateSurface(this->m_pWindow, instance, surface) == SDL_TRUE;
-		});
+	vulkanRenderer->SetInstanceExtensionGetter(instanceExtensionGetter);
+	vulkanRenderer->SetSurfaceCreator(surfaceCreator);
 	vulkanRenderer->SetViewPortDim({ m_width, m_height });
 	vulkanRenderer->Init();
 	

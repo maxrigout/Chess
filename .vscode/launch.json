@@ -20,7 +20,10 @@
 			"args": [],
 			"stopAtEntry": true,
 			"cwd": "${workspaceFolder}",
-			"environment": [],
+			"environment": [{
+				"name": "OBJC_DEBUG_MISSING_POOLS",
+				"value": "YES"
+			}],
 			"externalConsole": false,
 			"MIMode": "lldb"
 		}

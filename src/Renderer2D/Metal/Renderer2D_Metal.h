@@ -12,6 +12,7 @@
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
 #include <QuartzCore/QuartzCore.hpp>
+#include <simd/simd.h>
 
 #define N_QUAD_VERTICES 4
 
@@ -47,9 +48,9 @@ public:
 
 	struct Vertex
 	{
-		pt2df position;
-		Color color;
-		pt2df textureCoords;
+		simd::float2 position;
+		simd::float4 color;
+		simd::float2 textureCoords;
 	};
 
 	struct Texture
@@ -87,6 +88,8 @@ private:
 	std::vector<Sprite> m_sprites;
 	std::unordered_map<std::string, size_t> m_tagsMap;
 
+	NS::AutoreleasePool* m_pGlobalAutoreleasePool = nullptr;
+
 	// MTK::View* m_pView = nullptr;
 	CA::MetalLayer* m_pSwapchain = nullptr;
 	MTL::Device* m_pDevice = nullptr;
@@ -103,6 +106,8 @@ private:
 	CA::MetalDrawable* m_pDrawable = nullptr;
 	MTL::CommandBuffer* m_pCmd = nullptr;
 	MTL::RenderCommandEncoder* m_pEnc = nullptr;
+
+	dispatch_semaphore_t m_semaphore;
 
 	CGRect m_viewPort;
 

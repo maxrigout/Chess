@@ -174,7 +174,7 @@ private:
 
 	uint32_t m_currentImageIndex;
 
-	VkAllocationCallbacks* m_pCallbacks;
+	// VkAllocationCallbacks* m_pCallbacks;
 
 	VkInstance m_instance;
 	VkDebugUtilsMessengerEXT m_debugMessenger;

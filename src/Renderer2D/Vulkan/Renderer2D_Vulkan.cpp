@@ -43,7 +43,7 @@
 
 #define ARRAY_LEN(arr) (sizeof(arr) / sizeof(arr[0]))
 
-static const VkClearColorValue backgroundColor{ 0.2f, 0.0f, 0.2f, 0.0f };
+static const VkClearColorValue backgroundColor{ { 0.2f, 0.0f, 0.2f, 0.0f } };
 static VkClearValue clearColor = { { backgroundColor } };
 
 static const std::vector<const char*> validationLayers = {

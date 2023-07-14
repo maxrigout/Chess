@@ -12,7 +12,6 @@
 
 int main(int argc, char** argv)
 {
-	SDL_MetalView view;
 	try
 	{
 		ConfigReader::DumpConfig("config.yml");

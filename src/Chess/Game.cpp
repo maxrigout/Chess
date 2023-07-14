@@ -8,6 +8,8 @@
 #include "Assets.h"
 #include "Core/Logger.h"
 
+#include <chrono>
+
 #define MAX_AI_THINKING_TIMEOUT_SECOND 10
 
 Game::Game()
@@ -151,12 +153,18 @@ void Game::Run()
 		return;
 
 	m_isPlaying = true;
+	// auto startTime = std::chrono::high_resolution_clock::now();
+	auto frameStart = std::chrono::high_resolution_clock::now();
+	auto frameEnd = std::chrono::high_resolution_clock::now();
 	while(m_isPlaying)
 	{
-		// TODO frame limit cap
+		// float elapsed = std::chrono::duration<float, std::chrono::seconds::period>(frameEnd - startTime).count();
+		float dt = std::chrono::duration<float, std::chrono::seconds::period>(frameEnd - frameStart).count();
+		frameStart = std::chrono::high_resolution_clock::now();
 		HandleInput();
-		Update(0.0166);
+		Update(dt);
 		Render();
+		frameEnd = std::chrono::high_resolution_clock::now();
 	}
 }
 

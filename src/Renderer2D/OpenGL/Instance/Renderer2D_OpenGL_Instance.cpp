@@ -462,7 +462,8 @@ bool Renderer2D_OpenGL_Instance::DrawSprite(const pt2di& topLeft, const vec2di& 
 	};
 
 	Sprite sprite = m_sprites[spriteId];
-	Texture texture = m_textures[sprite.textureId];
+	// TODO: OpenGL Instance Texture
+	// Texture texture = m_textures[sprite.textureId];
 	pt2df normalizedPosition = normalizeCoords(topLeft, m_viewPortDim);
 	vec2df normalizedSize = normalizeSize(dimensions, m_viewPortDim);
 	if (!m_texturesBound.count(sprite.textureId) && m_boundTexture < maxTexturesBind)
