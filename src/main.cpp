@@ -19,7 +19,6 @@ int main(int argc, char** argv)
 		ChessConfiguration::Init(ConfigReader::GetFile("config.yml")["chess"]);
 		RendererConfiguration::Init(ConfigReader::GetFile("config.yml")["renderer"]);
 		LOG_DEBUG("hello");
-		// LOG_DEBUG(ConfigReader::GetFile("config.yml")["name"].GetStringValue());
 		LOG_DEBUG(argv[0]);
 		Game game;
 		game.Init(800, 600);

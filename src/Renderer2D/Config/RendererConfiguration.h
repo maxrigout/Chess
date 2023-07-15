@@ -8,7 +8,7 @@ class OpenGLSettings
 public:
 	static void Init(const ConfigReader::Property& props)
 	{
-		s_renderMode = props["opengl-render-mode"].GetStringValue();
+		s_renderMode = props["render-mode"].GetStringValue();
 	}
 
 	static const std::string& GetRenderMode()
