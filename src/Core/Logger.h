@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <exception>
 // #include <set>
 
 class Logger
@@ -30,8 +31,10 @@ private:
 #define LOG_ERROR_ONCE(msg) Logger::ErrorOnce(__FILE__, __func__, __LINE__, msg)
 #define LOG_FATAL(msg) Logger::Fatal(__FILE__, __func__, __LINE__, msg)
 #else
+#define LOG_TAG(tag, msg)
 #define LOG_INFO(tag, msg)
 #define LOG_DEBUG(msg)
 #define LOG_ERROR(msg)
+#define LOG_ERROR_ONCE(msg)
 #define LOG_FATAL(msg)
 #endif

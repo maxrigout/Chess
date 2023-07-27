@@ -2,7 +2,6 @@
 #include <SDL2/SDL.h>
 
 #include "Chess/Board.h"
-#include "Chess/Piece.h"
 #include "Chess/Player.h"
 #include "Core/Window.h"
 #include "Renderer2D/Renderer2D.h"

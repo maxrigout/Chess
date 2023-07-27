@@ -8,14 +8,12 @@
 
 #include "Core/Logger.h"
 
-#define MAKE_COPIES
+#define MAKE_COPIES 1
 
-// TODO add to configuration
-unsigned int searchDepth = 4;
-
-AIPlayer::AIPlayer(Board* pBoard, TEAM team)
-	: Player(pBoard, team)
+AIPlayer::AIPlayer(Board* pBoard, TEAM team, int searchDepth)
+	: Player(pBoard, team), m_searchDepth{ searchDepth }
 {
+	LOG_INFO("AI Player initialized, searchDepth = " + std::to_string(m_searchDepth));
 	long seed = time(0);
 	srand(seed);
 	LOG_DEBUG("AIPlayer seed: " + std::to_string(seed));
@@ -56,7 +54,7 @@ void AIPlayer::PlayThread()
 {
 	m_stackSizeAtBeginningOfTurn = m_pBoard->GetStackSize();
 	CopyBoard();
-#if !defined MAKE_COPIES
+#if !MAKE_COPIES
 	m_boardCopy = std::make_unique<Board>(*m_pBoard);
 	m_copyOfThis = std::make_unique<MaximizingPlayer>(m_boardCopy.get(), m_team);
 	m_copyOfOpponent = std::make_unique<MinimizingPlayer>(m_boardCopy.get(), GetOpposingTeam());
@@ -99,7 +97,7 @@ std::vector<Move> AIPlayer::GetBestMoves(const std::vector<Move>& moves)
 		}
 		TestMove(pieceToMove, move);
 		// we're searching searchDepth - 1 because we're already searching level 1 in this function.
-		int moveScore = alphabeta(&board, searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
+		int moveScore = alphabeta(&board, m_searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
 		// int moveScore = minimax(&board, searchDepth - 1, false);
 		snprintf(message, 200, "move %d: %c (%s -> %s) - score %d (%d)",
 			i,
@@ -194,7 +192,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 			return score;
 		for (const auto& move : moves)
 		{
-#if defined MAKE_COPIES
+#if MAKE_COPIES
 			 Board board(*pBoard);
 			 Piece* pieceToMove = board.GetPieceAtCell(move.origin);
 			 TestMove(pieceToMove, move);
@@ -232,7 +230,7 @@ int AIPlayer::alphabeta(Board* pBoard, int depth, int alpha, int beta, bool isMa
 		std::vector<Move> moves = copyOfOpponent.GetPossibleMoves();
 		for (const auto& move : moves)
 		{
-#if defined MAKE_COPIES
+#if MAKE_COPIES
 			 Board board(*pBoard);
 			 Piece* pieceToMove = board.GetPieceAtCell(move.origin);
 			 TestMove(pieceToMove, move);

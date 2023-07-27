@@ -1,9 +1,12 @@
+#include "Core/PlatformSupport.h"
 #include "Window_SDL.h"
+
+#include "Renderer2D/Renderer2DFactory.h"
 
 #include "Renderer2D/SDL/Renderer2D_SDL.h"
 
 #ifdef SUPPORT_OPENGL
-#include "Renderer2D/OpenGL/Renderer2D_OpenGL.h"
+#include "Renderer2D/OpenGL/Renderer2D_OpenGLFactory.h"
 #endif
 
 #ifdef SUPPORT_METAL
@@ -11,10 +14,15 @@
 #include "Renderer2D/Metal/Renderer2D_Metal.h"
 #endif
 
+#ifdef SUPPORT_VULKAN
+#include "Renderer2D/Vulkan/Renderer2D_Vulkan.h"
+#include <SDL2/SDL_vulkan.h>
+#endif
+
 #include "Core/Logger.h"
 
 // #include <SDL2/SDL_syswm.h>
-
+#include <stdexcept>
 #include <string>
 
 static MouseButton mouseButtonMap[6];
@@ -42,8 +50,7 @@ static Uint32 GetWindowFlags(const WindowFlags& flags)
 			f |= 0;
 			break;
 		default:
-			// TODO: throw exception because unsupported
-			break;
+			throw std::runtime_error("backend type unsupported");
 	}
 	return f;
 }
@@ -144,7 +151,10 @@ Window_SDL::Window_SDL()
 Window_SDL::~Window_SDL()
 {
 	if (m_pRenderer != nullptr)
+	{
 		SDL_DestroyRenderer(m_pSDLRenderer);
+	}
+	
 	SDL_DestroyWindow(m_pWindow);
 
 	numInstances--;
@@ -198,13 +208,37 @@ void Window_SDL::Create(const WindowCreationInfo& createInfo)
 		m_height, // height in px
 		windowFlags
 	);
-
-	// need to create the vulkan surface here....
-	// SDL_Vulkan_CreateSurface(m_pWindow, m_instance, &m_surface);
 }
 
 Renderer2D* Window_SDL::CreateRenderer()
 {
+// 		Renderer2DFactory factory(
+// 			m_rendererType,
+// #ifdef SUPPORT_OPENGL
+// 			SDL_GL_GetProcAddress,
+// 			[this]()
+// 			{
+// 				SDL_GL_SwapWindow(this->m_pWindow);
+// 			},
+// #else
+// 			nullptr,
+// 			[](){},
+// #endif
+// #ifdef SUPPORT_VULKAN
+// 			[this](unsigned int* extCount, const char** exts)
+// 			{
+// 				return SDL_Vulkan_GetInstanceExtensions(this->m_pWindow, extCount, exts) == SDL_TRUE;
+// 			},
+// 			[this](VkInstance instance, VkSurfaceKHR* surface)
+// 			{
+// 				// return SDL_Vulkan_CreateSurface(this->m_pWindow, (VkInstance)instance, (VkSurfaceKHR*)surface) == SDL_TRUE;
+// 				return SDL_Vulkan_CreateSurface(this->m_pWindow, instance, surface) == SDL_TRUE;
+// 			}
+// #else
+// 			[](unsigned int*, const char**){ return false; },
+// 			[](VkInstance, VkSurfaceKHR*){ return false; }
+// #endif
+// 		);
 	switch (m_rendererType)
 	{
 	case RendererBackendType::Unspec:
@@ -212,11 +246,8 @@ Renderer2D* Window_SDL::CreateRenderer()
 	case RendererBackendType::OpenGL: return CreateOpenGLRenderer();
 	case RendererBackendType::Vulkan: return CreateVulkanRenderer();
 	case RendererBackendType::Metal: return CreateMetalRenderer();
-	// TODO: DirectX
-	default:
-		break;
+	case RendererBackendType::Unknown: return nullptr;
 	}
-	return nullptr;
 }
 
 Renderer2D* Window_SDL::CreateSDLRenderer()
@@ -238,12 +269,17 @@ Renderer2D* Window_SDL::CreateOpenGLRenderer()
 	if (context == NULL)
 		LOG_ERROR("Failed to create OpenGL Context");
 	Renderer2D_OpenGL::LoadOpenGLLibrary(SDL_GL_GetProcAddress);
-	Renderer2D_OpenGL* openGLRenderer = new Renderer2D_OpenGL();
-	openGLRenderer->OnRenderEnd([this](){
-		SDL_GL_SwapWindow(this->m_pWindow);
-	});
+	Renderer2D_OpenGL* openGLRenderer = Renderer2D_OpenGLFactory::CreateOpenGLRenderer();
+	openGLRenderer->OnRenderEnd(
+		[this]()
+		{
+			SDL_GL_SwapWindow(this->m_pWindow);
+		});
+	openGLRenderer->SetViewPortDim({ m_width, m_height });
+
 	m_pRenderer = openGLRenderer;
-	m_pRenderer->SetViewPortDim({ m_width, m_height });
+#else
+	throw std::runtime_error("OpenGL renderer is not supported!");
 #endif
 	return m_pRenderer;
 }
@@ -251,6 +287,25 @@ Renderer2D* Window_SDL::CreateOpenGLRenderer()
 Renderer2D* Window_SDL::CreateVulkanRenderer()
 {
 #ifdef SUPPORT_VULKAN
+	auto instanceExtensionGetter = [this](unsigned int* extCount, const char** exts)
+	{
+		return SDL_Vulkan_GetInstanceExtensions(this->m_pWindow, extCount, exts) == SDL_TRUE;
+	};
+	auto surfaceCreator = [this](VkInstance instance, VkSurfaceKHR* surface)
+	{
+		return SDL_Vulkan_CreateSurface(this->m_pWindow, instance, surface) == SDL_TRUE;
+	};
+	Renderer2D_Vulkan* vulkanRenderer = new Renderer2D_Vulkan();
+	vulkanRenderer->SetInstanceExtensionProvider(/* TODO */);
+	vulkanRenderer->SetSurfaceProvider(/* TODO */);
+	vulkanRenderer->SetInstanceExtensionGetter(instanceExtensionGetter);
+	vulkanRenderer->SetSurfaceCreator(surfaceCreator);
+	vulkanRenderer->SetViewPortDim({ m_width, m_height });
+	vulkanRenderer->Init();
+	
+	m_pRenderer = vulkanRenderer;
+#else
+	throw std::runtime_error("Vulkan renderer is not supported!");
 #endif
 	return m_pRenderer;
 }
@@ -259,10 +314,14 @@ Renderer2D* Window_SDL::CreateMetalRenderer()
 {
 #ifdef SUPPORT_METAL
 	SDL_MetalView view = SDL_Metal_CreateView(m_pWindow);
-	// TODO: destroy the view...
-	Renderer2D_Metal* pRenderer = new Renderer2D_Metal(SDL_Metal_GetLayer(view));
+	m_onDeleteRenderer = [=]() {
+		// SDL_Metal_DestroyView(view);
+	};
+	Renderer2D_Metal* pRenderer = new Renderer2D_Metal(SDL_Metal_GetLayer(view), m_width, m_height);
 	m_pRenderer = pRenderer;
 	m_pRenderer->SetViewPortDim({ m_width, m_height });
+#else
+	throw std::runtime_error("Metal renderer is not supported!");
 #endif
 	return m_pRenderer;
 }
@@ -270,6 +329,8 @@ Renderer2D* Window_SDL::CreateMetalRenderer()
 Renderer2D* Window_SDL::CreateDirectXRenderer()
 {
 #ifdef SUPPORT_DIRECTX
+#else
+	throw std::runtime_error("DirectX renderer is not supported!");
 #endif
 	return m_pRenderer;
 }
@@ -277,6 +338,7 @@ Renderer2D* Window_SDL::CreateDirectXRenderer()
 void Window_SDL::FreeRenderer()
 {
 	delete m_pRenderer;
+	m_onDeleteRenderer();
 }
 
 

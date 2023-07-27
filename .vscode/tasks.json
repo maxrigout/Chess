@@ -14,18 +14,23 @@
                 "-Ideps/include",
                 "-Ideps/include/metal-cpp",
                 "-Ideps/include/metal-cpp-extensions",
+                "-I/Users/max/dev/VulkanSDK/1.3.231.1/macOS/include",
                 "-Isrc",
                 "${workspaceFolder}/src/*.cpp",
                 "${workspaceFolder}/src/Chess/*.cpp",
                 "${workspaceFolder}/src/Chess/Pieces/*.cpp",
                 "${workspaceFolder}/src/Chess/Players/*.cpp",
                 "${workspaceFolder}/src/Core/*.cpp",
-                "${workspaceFolder}/src/Core/SDL/*.cpp",
+                "${workspaceFolder}/src/Core/Impl/SDL/*.cpp",
                 "${workspaceFolder}/src/Core/3rd_party/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/SDL/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/OpenGL/*.cpp",
-                "${workspaceFolder}/src/Renderer2D/OpenGL/*.c",
+                "${workspaceFolder}/src/Renderer2D/OpenGL/Classic/*.cpp",
+                "${workspaceFolder}/src/Renderer2D/OpenGL/Batch/*.cpp",
+                "${workspaceFolder}/src/Renderer2D/OpenGL/Instance/*.cpp",
                 "${workspaceFolder}/src/Renderer2D/Metal/*.cpp",
+                "${workspaceFolder}/src/Renderer2D/Vulkan/*.cpp",
+                "~/dev/VulkanSDK/1.3.231.1/macOS/lib/libvulkan.1.dylib",
                 "-o",
                 "${workspaceFolder}/out",
                 "-F/Library/Frameworks",
@@ -46,13 +51,15 @@
                 "-framework",
                 "CoreFoundation",
                 "-framework",
-				"Metal",
-				"-framework",
-				"QuartzCore",
-				"-framework",
-				"Foundation",
-				"-framework",
-				"MetalKit",
+                "Metal",
+                "-framework",
+                "QuartzCore",
+                "-framework",
+                "Foundation",
+                "-framework",
+                "MetalKit",
+                "-framework",
+                "vulkan",
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -62,7 +69,7 @@
             ],
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
             },
             "detail": "compiler: /usr/bin/clang++"
         },
@@ -74,10 +81,12 @@
             "options": {
                 "cwd": "${workspaceFolder}"
             },
-            "dependsOn": ["compile test"],
+            "dependsOn": [
+                "compile test"
+            ],
             "group": {
                 "kind": "test",
-                "isDefault": true
+                "isDefault": false
             },
             "detail": "runs tests in the tests folder."
         },
@@ -116,6 +125,19 @@
                 "isDefault": false
             },
             "detail": "compiler: /usr/bin/clang++"
+        },
+        {
+            "type": "shell",
+            "label": "generate project",
+            "command": "./scripts/macos/generate_project.sh",
+            "args": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": {
+                "isDefault": true
+            },
+            "problemMatcher": []
         }
     ]
 }

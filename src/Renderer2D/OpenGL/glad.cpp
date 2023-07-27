@@ -24,6 +24,8 @@
 #include <string.h>
 #include <glad/glad.h>
 
+extern "C" {
+
 static void* get_proc(const char *namez);
 
 #if defined(_WIN32) || defined(__CYGWIN__)
@@ -1831,3 +1833,4 @@ int gladLoadGLLoader(GLADloadproc load) {
 	return GLVersion.major != 0 || GLVersion.minor != 0;
 }
 
+}

@@ -47,7 +47,7 @@ void Logger::ErrorOnce(const char* file, const char* function, int lineNumber, c
 
 void Logger::Fatal(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
-
+		std::cout << "\x1B[31m" << "[FATAL]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
 }
 
 std::string Logger::GetTime()

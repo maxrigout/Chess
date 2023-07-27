@@ -37,7 +37,7 @@ project "Chess"
 	{
 		"src",
 		"deps/include",
-		"deps/include/SDL2"
+		"deps/include/SDL2",
 	}
 
 	postbuildcommands
@@ -54,30 +54,54 @@ project "Chess"
 		optimize "On"
 
 	filter "system:windows"
+		includedirs
+		{
+			"C:/VulkanSDK/1.3.250.1/Include"
+		}
 		libdirs
 		{
 			"deps/lib",
-		}    
+			"C:/VulkanSDK/1.3.250.1/Lib"
+		}
 		links
 		{
 			"SDL2.lib",
 			"SDL2main.lib",
 			"SDL2_ttf.lib",
-			"SDL2_image.lib"
+			"SDL2_image.lib",
+			"vulkan-1.lib"
 		}
 
 	filter "system:macosx"
+		includedirs
+		{
+			"deps/include/metal-cpp",
+			"deps/include/metal-cpp-extensions",
+			"~/dev/VulkanSDK/1.3.250.1/macOS/include"
+		}
 		links
 		{
+			"vulkan.framework",
 			"SDL2.framework",
 			"SDL2_ttf.framework",
-			"SDL2_image.framework"
+			"SDL2_image.framework",
+			"OpenGL.framework",
+			"Cocoa.framework",
+			"IOKit.framework",
+			"CoreVideo.framework",
+			"CoreFoundation.framework",
+			"Metal.framework",
+			"QuartzCore.framework",
+			"Foundation.framework",
+			"MetalKit.framework"
 		}
-		linkoptions {"-F/Library/Frameworks"}
+		linkoptions { "-F/Library/Frameworks" }
 
 	filter "system:linux"
 		-- TODO
-project "Tests"
-	kind "ConsoleApp"
-	language "C++"
-	cppdialect "C++17"
+
+-- TODO tests projects
+-- project "Tests"
+-- 	kind "ConsoleApp"
+-- 	language "C++"
+-- 	cppdialect "C++17"

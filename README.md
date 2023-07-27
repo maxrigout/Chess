@@ -60,7 +60,7 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
    * Open the project in VS Code.
    * Go to Terminal > Run Build Task to build the project.
 * With Make:
-   * Run `scripts/macos/generate_project.bat` from the root of the project.
+   * Run `scripts/macos/generate_project.sh` from the root of the project.
    * Run `make` to build the project with make.
 
 ### Windows (with Visual Studio 2022)

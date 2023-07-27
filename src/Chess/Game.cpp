@@ -1,18 +1,14 @@
 #include "Game.h"
-#include "Chess/Pieces/Pawn.h"
-#include "Chess/Pieces/Rook.h"
-#include "Chess/Pieces/Knight.h"
-#include "Chess/Pieces/Bishop.h"
-#include "Chess/Pieces/Queen.h"
-#include "Chess/Pieces/King.h"
-
-#include "Chess/Players/HumanPlayer.h"
-
-#include "Core/SDL/Window_SDL.h"
+#include "Core/Factories/WindowFactory.h"
+#include "Chess/Factory/PlayerFactory.h"
+#include "Core/Config/SystemConfiguration.h"
+#include "Renderer2D/Config/RendererConfiguration.h"
 
 #define DEBUG
 #include "Assets.h"
 #include "Core/Logger.h"
+
+#include <chrono>
 
 #define MAX_AI_THINKING_TIMEOUT_SECOND 10
 
@@ -40,8 +36,8 @@ void Game::InitWindow(int width, int height)
 	info.title = "Chess";
 	info.width = width;
 	info.height = height;
-	info.flags.rendererBackend = RendererBackendType::SDL2;
-	m_pWindow = new Window_SDL();
+	info.flags.rendererBackend = RendererConfiguration::GetRendererBackendType();
+	m_pWindow = WindowFactory::CreateWindow();
 	m_pWindow->Create(info);
 	m_pRenderer = m_pWindow->CreateRenderer();
 
@@ -104,8 +100,8 @@ void Game::InitBoard()
 
 	// Player set up
 	// the pieces set up should be done in the constructor
-	m_pPlayer1 = new HumanPlayer(m_pBoard, TEAM::ONE);
-	m_pPlayer2 = new AIPlayer(m_pBoard, TEAM::TWO);
+	m_pPlayer1 = PlayerFactory::CreatePlayer1(m_pBoard);
+	m_pPlayer2 = PlayerFactory::CreatePlayer2(m_pBoard);
 
 	m_pActivePlayer = m_pPlayer1;
 	m_pPlayer2->AttackCells();
@@ -157,12 +153,18 @@ void Game::Run()
 		return;
 
 	m_isPlaying = true;
+	// auto startTime = std::chrono::high_resolution_clock::now();
+	auto frameStart = std::chrono::high_resolution_clock::now();
+	auto frameEnd = std::chrono::high_resolution_clock::now();
 	while(m_isPlaying)
 	{
-		// TODO frame limit cap
+		// float elapsed = std::chrono::duration<float, std::chrono::seconds::period>(frameEnd - startTime).count();
+		float dt = std::chrono::duration<float, std::chrono::seconds::period>(frameEnd - frameStart).count();
+		frameStart = std::chrono::high_resolution_clock::now();
 		HandleInput();
-		Update(0.0166);
+		Update(dt);
 		Render();
+		frameEnd = std::chrono::high_resolution_clock::now();
 	}
 }
 
@@ -214,7 +216,7 @@ void Game::Render()
 {
 	// Draw
 	m_pRenderer->Begin();
-	m_pRenderer->Clear(BLACK);
+	m_pRenderer->Clear(RED);
 
 	m_pBoard->DrawBoard(m_pRenderer); // Draw the board
 	m_pBoard->HighlightCell(m_pRenderer, m_hoveredCellPos); // highlight the cell under the mouse cursor
