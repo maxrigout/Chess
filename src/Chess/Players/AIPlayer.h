@@ -9,12 +9,14 @@
 #include <memory>
 #include <chrono>
 
+#define MAKE_COPIES 1
+
 class TestClass;
 
 class AIPlayer : public Player
 {
 public:
-	AIPlayer(Board* pBoard, TEAM team, int searchDepth);
+	AIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeout);
 	virtual ~AIPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
@@ -25,7 +27,7 @@ public:
 	int GetPieceValue(Piece* piece) const;
 	int GetPieceValue(char type) const;
 
-	void PlayThread();
+	virtual void PlayThread() = 0;
 	int minimax(Board* pBoard, int depth, bool isMaximizingPlayer);
 	int alphabeta(Board* pBoard,  int depth, int alpha, int beta, bool isMaximizingPlayer);
 
@@ -34,7 +36,7 @@ public:
 	void UndoMove(Board* pBoard);
 	int EvaluateBoard(Board* pBoard) const;
 
-private:
+protected:
 	int m_boardScore;
 
 	pt2di m_lastMoveStart{-100, -100};
@@ -80,6 +82,7 @@ private:
 	std::unique_ptr<MinimizingPlayer> m_copyOfOpponent;
 
 	int m_searchDepth;
+	int m_processingTimeout;
 
 	friend class TestClass;
 

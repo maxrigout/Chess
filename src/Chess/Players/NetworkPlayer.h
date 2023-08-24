@@ -4,6 +4,9 @@
 #include "Math/point2d.h"
 #include "Core/Network/Socket.h"
 
+#include <thread>
+#include <chrono>
+
 class NetworkPlayer : public Player
 {
 public:

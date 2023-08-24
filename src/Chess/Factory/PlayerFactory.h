@@ -1,5 +1,5 @@
 #pragma once
-#include "Chess/Player.h"
+#include "Chess/Players/Players.h"
 #include "Chess/Config/ChessConfig.h"
 #include <memory>
 
@@ -27,13 +27,31 @@ public:
 	{
 		return CreatePlayer(pBoard, TEAM::TWO, playerType);
 	}
+
+	static AIPlayer* CreateAIPlayer(Board* pBoard, TEAM team, const std::string aiType = ChessConfiguration::GetAIProperties().GetType())
+	{
+		if (aiType == "min-max")
+		{
+
+		}
+		else if (aiType == "alpha-beta")
+		{
+			return new AlphaBetaAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
+		}
+		else if (aiType == "neural-net")
+		{
+
+		}
+		return nullptr;
+	}
+
 private:
 	static Player* CreatePlayer(Board* pBoard, TEAM team, const std::string playerType)
 	{
 		if (playerType == "human")
 			return new HumanPlayer(pBoard, team);
 		else if (playerType == "ai")
-			return new AIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth());
+			return CreateAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetType());
 		return nullptr;
 	}
 };

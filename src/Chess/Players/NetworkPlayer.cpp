@@ -37,7 +37,7 @@ void NetworkPlayer::Play(const PlayingContext& context)
 	{
 		auto now = std::chrono::high_resolution_clock::now();
 		int timeEllapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - m_playBegin).count();
-		bool timeExeeced = timeEllapsedSeconds > context.maxProcessingDelay;
+		bool timeExeeced = timeEllapsedSeconds > 10;
 		if (timeExeeced)
 			LOG_INFO("time exceeded!");
 		m_shouldStopProcessing = context.shouldQuit || timeExeeced;

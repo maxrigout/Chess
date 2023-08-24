@@ -1,7 +1,8 @@
 chess:
   ai-properties:
-    type: min-max
+    type: alpha-beta
     search-depth: 3
+    timeout-ms: 10000
   player1: human
   player2: ai
 system:

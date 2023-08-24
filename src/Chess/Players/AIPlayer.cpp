@@ -8,10 +8,8 @@
 
 #include "Core/Logger.h"
 
-#define MAKE_COPIES 1
-
-AIPlayer::AIPlayer(Board* pBoard, TEAM team, int searchDepth)
-	: Player(pBoard, team), m_searchDepth{ searchDepth }
+AIPlayer::AIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeout)
+	: Player(pBoard, team), m_searchDepth{ searchDepth }, m_processingTimeout{ processingTimeout }
 {
 	LOG_INFO("AI Player initialized, searchDepth = " + std::to_string(m_searchDepth));
 	long seed = time(0);
@@ -42,7 +40,7 @@ void AIPlayer::Play(const PlayingContext& context)
 	{
 		auto now = std::chrono::high_resolution_clock::now();
 		int timeEllapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - m_playBegin).count();
-		bool timeExeeced = timeEllapsedSeconds > context.maxProcessingDelay;
+		bool timeExeeced = timeEllapsedSeconds > m_processingTimeout;
 		if (timeExeeced)
 			LOG_INFO("time exceeded!");
 		m_shouldStopProcessing = context.shouldQuit || timeExeeced;
@@ -50,27 +48,27 @@ void AIPlayer::Play(const PlayingContext& context)
 	}
 }
 
-void AIPlayer::PlayThread()
-{
-	m_stackSizeAtBeginningOfTurn = m_pBoard->GetStackSize();
-	CopyBoard();
-#if !MAKE_COPIES
-	m_boardCopy = std::make_unique<Board>(*m_pBoard);
-	m_copyOfThis = std::make_unique<MaximizingPlayer>(m_boardCopy.get(), m_team);
-	m_copyOfOpponent = std::make_unique<MinimizingPlayer>(m_boardCopy.get(), GetOpposingTeam());
-#endif
-	std::vector<Move> possibleMoves = GetPossibleMoves();
-	std::vector<Move> bestMoves = GetBestMoves(possibleMoves);
+// void AIPlayer::PlayThread()
+// {
+// 	m_stackSizeAtBeginningOfTurn = m_pBoard->GetStackSize();
+// 	CopyBoard();
+// #if !MAKE_COPIES
+// 	m_boardCopy = std::make_unique<Board>(*m_pBoard);
+// 	m_copyOfThis = std::make_unique<MaximizingPlayer>(m_boardCopy.get(), m_team);
+// 	m_copyOfOpponent = std::make_unique<MinimizingPlayer>(m_boardCopy.get(), GetOpposingTeam());
+// #endif
+// 	std::vector<Move> possibleMoves = GetPossibleMoves();
+// 	std::vector<Move> bestMoves = GetBestMoves(possibleMoves);
 
-	Move move = bestMoves[rand() % bestMoves.size()];
-	Piece* pieceToMove = m_pBoard->GetPieceAtCell(move.origin);
-	pieceToMove->Move(move.target);
-	m_lastMoveStart = move.origin;
-	m_lastMoveEnd = move.target;
-	LOG_INFO("AI Player finished playing");
-	EndTurn();
-	m_isPlaying = false;
-}
+// 	Move move = bestMoves[rand() % bestMoves.size()];
+// 	Piece* pieceToMove = m_pBoard->GetPieceAtCell(move.origin);
+// 	pieceToMove->Move(move.target);
+// 	m_lastMoveStart = move.origin;
+// 	m_lastMoveEnd = move.target;
+// 	LOG_INFO("AI Player finished playing");
+// 	EndTurn();
+// 	m_isPlaying = false;
+// }
 
 std::vector<Move> AIPlayer::GetBestMoves(const std::vector<Move>& moves)
 {
