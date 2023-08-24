@@ -1,6 +1,6 @@
 chess:
   ai-properties:
-    type: alpha-beta
+    type: min-max
     search-depth: 3
     timeout-ms: 10000
   player1: human

@@ -21,20 +21,10 @@ public:
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 
-	int EvaluateBoard() const;
-	int GetPiecePoints(Piece* piece) const;
-	int GetPiecePoints(char type) const;
-	int GetPieceValue(Piece* piece) const;
-	int GetPieceValue(char type) const;
-
 	virtual void PlayThread() = 0;
-	int minimax(Board* pBoard, int depth, bool isMaximizingPlayer);
-	int alphabeta(Board* pBoard,  int depth, int alpha, int beta, bool isMaximizingPlayer);
 
-	std::vector<Move> GetBestMoves(const std::vector<Move>& moves);
 	void TestMove(Piece* piece, const Move& move);
 	void UndoMove(Board* pBoard);
-	int EvaluateBoard(Board* pBoard) const;
 
 protected:
 	int m_boardScore;

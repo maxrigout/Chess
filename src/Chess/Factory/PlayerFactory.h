@@ -31,17 +31,9 @@ public:
 	static AIPlayer* CreateAIPlayer(Board* pBoard, TEAM team, const std::string aiType = ChessConfiguration::GetAIProperties().GetType())
 	{
 		if (aiType == "min-max")
-		{
-
-		}
+			return new MinMaxAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
 		else if (aiType == "alpha-beta")
-		{
 			return new AlphaBetaAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
-		}
-		else if (aiType == "neural-net")
-		{
-
-		}
 		return nullptr;
 	}
 
