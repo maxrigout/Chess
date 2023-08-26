@@ -1,5 +1,4 @@
 #pragma once
-#include <SDL2/SDL.h>
 
 #include "Chess/Board.h"
 #include "Chess/Player.h"

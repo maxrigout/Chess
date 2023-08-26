@@ -100,32 +100,58 @@ public:
 		return m_isBound;
 	}
 
-	bool Listen();
+	bool Listen()
+	{
+		listen(m_socket, 0);
+	}
 
 	template <typename T>
 	bool Send(T payload)
 	{
-		
+		char* data = (char*)&payload;
+		size_t totalBytesSent = 0;
+		while (totalBytesSent < sizeof(T))
+		{
+			int bytesSent = send(m_socket, data + totalBytesSent, sizeof(T) - totalBytesSent, 0);
+			if (bytesSent < 0)
+			{
+				// error
+				return false;
+			}
+			else if (bytesSent == 0)
+			{
+				// disconnected
+				return false;
+			}
+			totalBytesSent += bytesSent;
+		}
+		return true;
 	}
 
 	template <typename T>
 	NetworkMessage<T> Receive() const
 	{
 		NetworkMessage<T> message;
-		uint8_t buffer[sizeof(T)] = { 0 };
+		char* buffer[sizeof(T)] = { 0 };
 		size_t totalBytesReceived = 0;
 		while (totalBytesReceived < sizeof(T))
 		{
 			message.header.status = MessageStatus::RECEIVING;
-			int bytes = recv(m_socket, (char*)buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
-			if (bytes == 0)
+			int bytesReceived = recv(m_socket, buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
+			if (bytesReceived < 0)
+			{
+				message.header.status = MessageStatus::INCOMPLETE;
+				// error
+				break;
+			}
+			if (bytesReceived == 0)
 			{
 				message.header.status = MessageStatus::INCOMPLETE;
 				// only for TCP sockets
 				// client disconnected...
 				break;
 			}
-			totalBytesReceived += bytes;
+			totalBytesReceived += bytesReceived;
 		}
 		return message;
 	}
@@ -134,21 +160,28 @@ public:
 	template <typename T>
 	Socket& operator<<(const T& value)
 	{
-		uint8_t* data = (uint8_t*)&value;
-		size_t bytesSent = 0;
-		while (bytesSent < sizeof(T))
+		char* data = (char*)&value;
+		size_t totalBytesSent = 0;
+		while (totalBytesSent < sizeof(T))
 		{
-			int sent = send(m_socket, (char*)data + bytesSent, sizeof(T) - bytesSent, 0);
-			if (sent == 0)
+			int bytesSent = send(m_socket, data + totalBytesSent, sizeof(T) - totalBytesSent, 0);
+			if (bytesSent < 0)
+			{
+				// error
+				m_isConnected = false;
+				break;
+			}
+			if (bytesSent == 0)
 			{
 				// disconnected...
 				m_isConnected = false;
+				break;
 			}
+			totalBytesSent += bytesSent;
 		}
 		return *this;
 	}
 
-	template <>
 	Socket& operator<<(const std::string& value)
 	{
 		size_t sz = value.length();
@@ -175,11 +208,17 @@ public:
 	template <typename T>
 	Socket& operator>>(T& value)
 	{
-		uint8_t buffer[sizeof(T)] = { 0 };
+		char* buffer[sizeof(T)] = { 0 };
 		size_t totalBytesReceived = 0;
 		while (totalBytesReceived < sizeof(T))
 		{
-			int bytesReceived = recv(m_socket, (char*)buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
+			int bytesReceived = recv(m_socket, buffer + totalBytesReceived, sizeof(T) - totalBytesReceived, 0);
+			if (bytesReceived < 0)
+			{
+				// error
+				m_isConnected = false;
+				break;
+			}
 			if (bytesReceived == 0)
 			{
 				// only for TCP sockets
@@ -193,12 +232,11 @@ public:
 		return *this;
 	}
 
-	template <>
 	Socket& operator>>(std::string& value)
 	{
 		size_t sz = 0;
 		*this >> sz;
-		value.reserve(sz);
+		value.resize(sz);
 		for (int i = 0; i < sz; ++i)
 		{
 			char c;
