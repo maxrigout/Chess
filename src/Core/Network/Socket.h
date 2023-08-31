@@ -102,7 +102,7 @@ public:
 
 	bool Listen()
 	{
-		listen(m_socket, 0);
+		return listen(m_socket, 0) == 0;
 	}
 
 	template <typename T>
@@ -228,7 +228,7 @@ public:
 			}
 			totalBytesReceived += bytesReceived;
 		}
-		value = (T)(*buffer);
+		value = *((T*)(buffer));
 		return *this;
 	}
 

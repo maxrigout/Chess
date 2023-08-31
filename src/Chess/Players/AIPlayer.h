@@ -32,7 +32,7 @@ protected:
 	pt2di m_lastMoveStart{-100, -100};
 	pt2di m_lastMoveEnd{-100, -100};
 
-	Player* m_opponentPlayer = nullptr;
+	// Player* m_opponentPlayer = nullptr;
 
 	std::thread m_playThread;
 	std::chrono::time_point<std::chrono::high_resolution_clock> m_playBegin;

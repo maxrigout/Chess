@@ -90,6 +90,7 @@ int MinMaxAIPlayer::minimax(Board* pBoard, int depth, bool isMaximizingPlayer)
 {
 	// TODO: cleanup
 	// TODO: properly handle checkmates
+	// TODO: fix nullptr
 	if (depth <= 0 || IsCheckMate())
 		return EvaluateBoard(pBoard);
 
@@ -111,10 +112,11 @@ int MinMaxAIPlayer::minimax(Board* pBoard, int depth, bool isMaximizingPlayer)
 	else
 	{
 		int min_score = std::numeric_limits<int>::max();
-		m_opponentPlayer->CalculateLegalMoves();
-		if (m_opponentPlayer->IsCheckMate())
+		DummyPlayer copyOfOpponent(pBoard, GetOpposingTeam());
+		copyOfOpponent.CalculateLegalMoves();
+		if (copyOfOpponent.IsCheckMate())
 			return 10000;
-		std::vector<Move> moves = m_opponentPlayer->GetPossibleMoves();
+		std::vector<Move> moves = copyOfOpponent.GetPossibleMoves();
 		// for (const auto& move : moves)
 		for (int i = 0; i < moves.size(); ++i)
 		{

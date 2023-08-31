@@ -1,6 +1,6 @@
 chess:
   ai-properties:
-    type: min-max
+    type: alpha-beta
     search-depth: 3
     timeout-ms: 10000
   player1: human
@@ -8,6 +8,6 @@ chess:
 system:
   windowing-system: sdl
 renderer:
-  renderer-backend: metal
+  renderer-backend: vulkan
   opengl-settings:
     render-mode: instance
