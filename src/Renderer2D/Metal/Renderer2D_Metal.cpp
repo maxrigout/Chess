@@ -126,11 +126,14 @@ Renderer2D_Metal::Renderable Renderer2D_Metal::CreateRenderable(const std::vecto
 
 static Renderer2D_Metal::Texture LoadTextureToGPU(MTL::Device* pDevice, const char* path)
 {
+	const size_t maxMsgSz = 500;
+	char message[maxMsgSz] = { 0 };
 	int width, height, nComponents;
 	unsigned char* imageData = stbi_load(path, &width, &height, &nComponents, STBI_rgb_alpha);
 	if (!imageData)
 	{
 		// cannot load image...
+		snprintf(message, maxMsgSz, "unable to load %s", path);
 		stbi_image_free(imageData);
 		return {{}, {-1, -1}, path};
 	}
@@ -152,9 +155,6 @@ static Renderer2D_Metal::Texture LoadTextureToGPU(MTL::Device* pDevice, const ch
 	texture.texture = pTexture;
 	texture.dim = { width, height };
 	texture.path = path;
-
-	const size_t maxMsgSz = 500;
-	char message[maxMsgSz] = { 0 };
 
 	snprintf(message, maxMsgSz, "loaded %s", path);
 

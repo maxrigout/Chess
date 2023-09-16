@@ -129,14 +129,15 @@ struct UniformBufferObject
 * y+
 */
 
-static const Vertex vertices[] = {
 #if USE_CENTERED_QUAD
+static const Vertex vertices[] = {
 	{ { -0.5f, -0.5f }, { 0.0f, 1.0f, 0.0f } },
 	{ {  0.5f, -0.5f }, { 0.0f, 0.0f, 1.0f } },
 	{ {  0.5f,  0.5f }, { 1.0f, 0.0f, 1.0f } },
 	{ { -0.5f,  0.5f }, { 1.0f, 0.0f, 0.0f } },
 };
 #else
+static const Vertex vertices[] = {
 	{ {  0.0f,  0.0f }, { 0.0f, 1.0f, 0.0f } },
 	{ {  1.0f,  0.0f }, { 0.0f, 0.0f, 1.0f } },
 	{ {  1.0f,  1.0f }, { 1.0f, 0.0f, 1.0f } },
@@ -301,33 +302,34 @@ void Renderer2D_Vulkan::End()
 
 	// END RECORD COMMAND BUFFER
 
-	VkSemaphore waitSemaphores[] = { m_imageAvailableSemaphore };
-	VkSemaphore signalSemaphores[] = { m_renderFinishedSemaphore };
-	VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	std::array waitSemaphores = { m_imageAvailableSemaphore };
+	std::array signalSemaphores = { m_renderFinishedSemaphore };
+	std::array<VkPipelineStageFlags, 1> waitStages = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+	std::array commandBuffers = { m_commandBuffer };
 	
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.waitSemaphoreCount = static_cast<uint32_t>(ARRAY_LEN(waitSemaphores));
-	submitInfo.pWaitSemaphores = waitSemaphores;
-	submitInfo.pWaitDstStageMask = waitStages;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &m_commandBuffer;
-	submitInfo.signalSemaphoreCount = static_cast<uint32_t>(ARRAY_LEN(signalSemaphores));
-	submitInfo.pSignalSemaphores = signalSemaphores;
+	submitInfo.waitSemaphoreCount = waitSemaphores.size();
+	submitInfo.pWaitSemaphores = waitSemaphores.data();
+	submitInfo.pWaitDstStageMask = waitStages.data();
+	submitInfo.commandBufferCount = commandBuffers.size();
+	submitInfo.pCommandBuffers = commandBuffers.data();
+	submitInfo.signalSemaphoreCount = signalSemaphores.size();
+	submitInfo.pSignalSemaphores = signalSemaphores.data();
 
 	if (vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, m_inFlightFence) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to submit draw command buffer!");
 	}
 
-	VkSwapchainKHR swapChains[] = { m_swapChain };
+	std::array swapChains = { m_swapChain };
 
 	VkPresentInfoKHR presentInfo{};
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	presentInfo.waitSemaphoreCount = static_cast<uint32_t>(ARRAY_LEN(signalSemaphores));
-	presentInfo.pWaitSemaphores = signalSemaphores;
-	presentInfo.swapchainCount = static_cast<uint32_t>(ARRAY_LEN(swapChains));
-	presentInfo.pSwapchains = swapChains;
+	presentInfo.waitSemaphoreCount = signalSemaphores.size();
+	presentInfo.pWaitSemaphores = signalSemaphores.data();
+	presentInfo.swapchainCount = swapChains.size();
+	presentInfo.pSwapchains = swapChains.data();
 	presentInfo.pImageIndices = &m_currentImageIndex;
 	presentInfo.pResults = nullptr;
 
