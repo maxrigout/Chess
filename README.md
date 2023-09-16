@@ -92,10 +92,10 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 - [x] Window and input system (03-05-2023)
 - [x] Setup script (02-22-2023)
 - [x] AI Timeout (03-05-2023)
-- [ ] Implementing different rendering backends (Vulkan / Metal etc...)
+- [x] Implementing different rendering backends (Vulkan / Metal etc...)
 - [ ] Network play
 - [ ] Use better testing framework. ([catch2](https://github.com/catchorg/Catch2) or [googletest](https://github.com/google/googletest))
-- [ ] Game configurator (ie configure the AI difficulty, human vs human etc..)
+- [x] Game configurator (ie configure the AI difficulty, human vs human etc..)
 - [ ] GUI
 - [ ] Ability to reset a game
 
