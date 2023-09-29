@@ -14,5 +14,4 @@ public:
 
 private:
 	bool IsCellReachable(const pt2di& coords) const;
-	bool IsMoveValid2(const pt2di& target, MoveInfo& info) const;
 };

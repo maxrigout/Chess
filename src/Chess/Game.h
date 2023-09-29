@@ -5,12 +5,14 @@
 #include "Core/Window.h"
 #include "Renderer2D/Renderer2D.h"
 
+#include <memory>
+
 class Game final
 {
 public:
 	
-	Game();
-	~Game();
+	Game() = default;
+	~Game() = default;
 
 	void Init(int width, int height);
 	void Run();
@@ -28,7 +30,7 @@ private:
 	void Update(float dt);
 	void Render();
 
-	bool IsMouseButtonPressed(MouseButton button);
+	bool IsMouseButtonPressed(MouseButton button) const;
 
 	void SelectCell(const pt2di& cellBoardPosition);
 	void SwitchPlayers();
@@ -40,7 +42,7 @@ private:
 	bool OnKeyboardDown(const KeyboardDownEvent& event);
 	bool OnKeyboardUp(const KeyboardUpEvent& event);
 
-	Window* m_pWindow;
+	std::unique_ptr<Window> m_pWindow = nullptr;
 	bool m_mouseLeftDown = false;
 	bool m_mouseRightDown = false;
 	bool m_mouseMiddleDown = false;
@@ -49,7 +51,7 @@ private:
 
 	Renderer2D* m_pRenderer = nullptr;
 
-	pt2di m_mousePos;
+	pt2di m_mousePos{};
 
 	bool m_isBoardInitialized = false;
 	bool m_isInitialized = false;
@@ -59,11 +61,11 @@ private:
 	pt2di m_hoveredCellPos{ -1, 0 };
 	pt2di m_selectedCellPos{ -1, 0 };
 
-	Board* m_pBoard;
+	Board* m_pBoard = nullptr;
 	TEAM m_activeTeam = TEAM::NONE;
-	Player* m_pActivePlayer;
-	Player* m_pPlayer1;
-	Player* m_pPlayer2;
+	Player* m_pActivePlayer = nullptr;
+	Player* m_pPlayer1 = nullptr;
+	Player* m_pPlayer2 = nullptr;
 
 	std::vector<Renderer2D::SpriteID> m_piecesSprites;
 };

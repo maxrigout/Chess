@@ -10,7 +10,7 @@ bool SlowPiece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 	if (target == m_boardPosition)
 		return false;
 
-	// if we're checking for an out of bounds cell
+	// if we're checking for an out-of-bounds cell
 	if (!m_pBoard->IsPositionValid(target)) 
 		return false;
 

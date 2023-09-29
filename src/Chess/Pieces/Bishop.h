@@ -7,7 +7,7 @@ public:
 	Bishop(Board* board, TEAM team, const pt2di& initialBoardPosition)
 		: FastPiece(board, 'B', team, initialBoardPosition, sMoves)
 	{}
-	virtual ~Bishop() = default;
+	virtual ~Bishop() override = default;
 
 	static const std::vector<vec2di> sMoves;
 };

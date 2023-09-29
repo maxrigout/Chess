@@ -10,16 +10,6 @@
 
 #include <chrono>
 
-Game::Game()
-{
-	
-}
-
-Game::~Game()
-{
-
-}
-
 void Game::Init(int width, int height)
 {
 	InitWindow(width, height);
@@ -40,12 +30,24 @@ void Game::InitWindow(int width, int height)
 	m_pRenderer = m_pWindow->CreateRenderer();
 
 	// Setting the callbacks
-	m_pWindow->OnWindowClose(std::bind(&Game::OnWindowClose, this, std::placeholders::_1));
-	m_pWindow->OnMouseMove(std::bind(&Game::OnMouseMove, this, std::placeholders::_1));
-	m_pWindow->OnMouseButtonDown(std::bind(&Game::OnMouseButtonDown, this, std::placeholders::_1));
-	m_pWindow->OnMouseButtonUp(std::bind(&Game::OnMouseButtonUp, this, std::placeholders::_1));
-	m_pWindow->OnKeyboardDown(std::bind(&Game::OnKeyboardDown, this, std::placeholders::_1));
-	m_pWindow->OnKeyboardUp(std::bind(&Game::OnKeyboardUp, this, std::placeholders::_1));
+	m_pWindow->OnWindowClose([this](const WindowCloseEvent& event) {
+        return this->OnWindowClose(event);
+    });
+	m_pWindow->OnMouseMove([this](const MouseMoveEvent& event) {
+        return this->OnMouseMove(event);
+    });
+	m_pWindow->OnMouseButtonDown([this](const MouseButtonDownEvent& event) {
+        return this->OnMouseButtonDown(event);
+    });
+	m_pWindow->OnMouseButtonUp([this](const MouseButtonUpEvent& event) {
+        return this-> OnMouseButtonUp(event);
+    });
+	m_pWindow->OnKeyboardDown([this](const KeyboardDownEvent& event) {
+        return this->OnKeyboardDown(event);
+    });
+	m_pWindow->OnKeyboardUp([this](const KeyboardUpEvent& event) {
+        return this->OnKeyboardUp(event);
+    });
 
 	m_isWindowInitialized = true;
 }
@@ -122,6 +124,7 @@ void Game::FreeBoard()
 
 void Game::LoadGraphics()
 {
+    // TODO: file
 	std::vector<SpriteDescriptor> sprites;
 	sprites.push_back({ { 201, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P1" });
 	sprites.push_back({ { 415, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H1" });
@@ -170,8 +173,6 @@ void Game::Cleanup()
 {
 	FreeBoard();
 	m_pWindow->FreeRenderer();
-	// delete m_pRenderer;
-	delete m_pWindow;
 	m_pWindow = nullptr;
 }
 
@@ -180,7 +181,7 @@ void Game::HandleInput()
 	m_pWindow->PollEvents();
 }
 
-bool Game::IsMouseButtonPressed(MouseButton button)
+bool Game::IsMouseButtonPressed(MouseButton button) const
 {
 	switch (button)
 	{
@@ -294,7 +295,6 @@ bool Game::OnMouseButtonDown(const MouseButtonDownEvent& event)
 	case MouseButton::Left: m_mouseLeftDown = true; return true;
 	case MouseButton::Right: m_mouseRightDown = true; return true;
 	case MouseButton::Middle: m_mouseMiddleDown = true; return true;
-	default: break;
 	}
 	return false;
 }
@@ -306,7 +306,6 @@ bool Game::OnMouseButtonUp(const MouseButtonUpEvent& event)
 	case MouseButton::Left: m_mouseLeftDown = false; return true;
 	case MouseButton::Right: m_mouseRightDown = false; return true;
 	case MouseButton::Middle: m_mouseMiddleDown = false; return true;
-	default: break;
 	}
 	return false;
 }

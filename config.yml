@@ -8,6 +8,6 @@ chess:
 system:
   windowing-system: sdl
 renderer:
-  renderer-backend: vulkan
+  renderer-backend: opengl
   opengl-settings:
-    render-mode: instance
+    render-mode: classic

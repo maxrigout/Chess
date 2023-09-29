@@ -18,16 +18,31 @@ void Logger::Tag(const char* tag, const char* file, const char* function, int li
 	std::cout << "[" << tag << "][] - " << msg << std::endl;
 }
 
-void Logger::Info(const char* file, const char* function, int lineNumber, const std::string& msg)
+void Logger::Trace(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
-	// display the level in green
-	std::cout << "\x1B[32m" << "[INFO]" << "\x1B[0m" << "[" << GetTime() << "]" << " - " << msg << std::endl;
+    Tag("TRACE", file, function, lineNumber, msg);
+}
+
+void Logger::Verbose(const char* file, const char* function, int lineNumber, const std::string& msg)
+{
+    Tag("VERBOSE", file, function, lineNumber, msg);
+}
+
+void Logger::Warn(const char* file, const char* function, int lineNumber, const std::string& msg)
+{
+    Tag("WARN", file, function, lineNumber, msg);
 }
 
 void Logger::Debug(const char* file, const char* function, int lineNumber, const std::string& msg)
 {
-	// display the level in yellow
-	std::cout << "\x1B[33m" << "[DEBUG]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
+    // display the level in yellow
+    std::cout << "\a\x1B[33m" << "[DEBUG]" << "\x1B[0m" << "[" << GetTime() << "][" << file << "::" << function << "::" << lineNumber << "] - " << msg << std::endl;
+}
+
+void Logger::Info(const char* file, const char* function, int lineNumber, const std::string& msg)
+{
+	// display the level in green
+	std::cout << "\x1B[32m" << "[INFO]" << "\x1B[0m" << "[" << GetTime() << "]" << " - " << msg << std::endl;
 }
 
 void Logger::Error(const char* file, const char* function, int lineNumber, const std::string& msg)

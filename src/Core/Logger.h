@@ -12,8 +12,11 @@ public:
 	// static void Error(const char* file, const char* function, int lineNumber, const char* msg);
 	// static void Fatal(const char* file, const char* function, int lineNumber, const char* msg);
 	static void Tag(const char* tag, const char* file, const char* function, int lineNumber, const std::string& msg);
-	static void Info(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void Trace(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void Verbose(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void Warn(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Debug(const char* file, const char* function, int lineNumber, const std::string& msg);
+	static void Info(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Error(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void ErrorOnce(const char* file, const char* function, int lineNumber, const std::string& msg);
 	static void Fatal(const char* file, const char* function, int lineNumber, const std::string& msg);

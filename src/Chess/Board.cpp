@@ -593,7 +593,7 @@ std::string Board::MoveStackToString() const
 	return ss.str();
 }
 
-std::vector<Piece*> Board::GetPlayerPieces(TEAM team) const
+const std::vector<Piece*>& Board::GetPlayerPieces(TEAM team) const
 {
 	if (team == TEAM::ONE)
 		return m_player1Pieces;
@@ -601,7 +601,7 @@ std::vector<Piece*> Board::GetPlayerPieces(TEAM team) const
 	if (team == TEAM::TWO)
 		return m_player2Pieces;
 
-	return {};
+	throw "invalid team!";
 }
 
 Piece* Board::CopyPiece(Piece* piece)

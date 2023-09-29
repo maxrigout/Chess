@@ -5,13 +5,14 @@
 
 #include <map>
 #include <exception>
+#include <memory>
 
 class WindowFactory
 {
 public:
-	static Window* CreateWindow(const std::string& type = SystemConfiguration::GetWindowingSystem())
+	static std::unique_ptr<Window> CreateWindow(const std::string& type = SystemConfiguration::GetWindowingSystem())
 	{
-		if (type == "sdl") return new Window_SDL();
+		if (type == "sdl") return std::make_unique<Window_SDL>();
 		return nullptr;
 		// const auto ite = s_constructorMap.find(type);
 		// if (ite == s_constructorMap.end())

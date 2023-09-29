@@ -10,16 +10,16 @@ King::King(Board* pBoard, TEAM team, const pt2di& initialBoardPosition)
 
 bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 {
-	// if we're checking for an out of bounds cell
+	// if we're checking for an out-of-bounds cell
 	if (!m_pBoard->IsPositionValid(target))
 	{
 		info.reason = MoveInfo::INVALID_CELL;
 		return false;
 	}
-	vec2di movevect(target - m_boardPosition);
+	vec2di moveVect(target - m_boardPosition);
 
 	// if we're checking against the current piece position
-	if (movevect.x == 0 && movevect.y == 0)
+	if (moveVect.x == 0 && moveVect.y == 0)
 	{
 		info.reason = MoveInfo::INVALID_MOVE;
 		return false;
@@ -27,7 +27,7 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 
 	if (m_isFirstMove) // check castle
 	{
-		if (movevect == vec2di(2, 0))
+		if (moveVect == vec2di(2, 0))
 		{
 			Piece* rightTower = m_pBoard->GetPieceAtCell(m_boardPosition + vec2di(3, 0));
 			if (rightTower == nullptr)
@@ -44,7 +44,7 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 			}
 			return true;
 		}
-		else if (movevect == vec2di(-3, 0))
+		else if (moveVect == vec2di(-3, 0))
 		{
 			Piece* leftTower = m_pBoard->GetPieceAtCell(m_boardPosition + vec2di(-4, 0));
 			if (leftTower == nullptr)
@@ -66,20 +66,20 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 
 	for (const auto& m1 : m_moves)
 	{
-		if (movevect == m1)
+		if (moveVect == m1)
 		{
-			pt2di target = m_boardPosition + m1;
-			if (!m_pBoard->IsPositionValid(target))
+			pt2di moveTarget = m_boardPosition + m1;
+			if (!m_pBoard->IsPositionValid(moveTarget))
 			{
 				info.reason = MoveInfo::INVALID_CELL;
 				return false;
 			}
-			if (m_pBoard->IsCellAttacked(target, m_team))
+			if (m_pBoard->IsCellAttacked(moveTarget, m_team))
 			{
 				info.reason = MoveInfo::CELL_GUARDED;
 				return false;
 			}
-			Piece* piece = m_pBoard->GetPieceAtCell(target);
+			Piece* piece = m_pBoard->GetPieceAtCell(moveTarget);
 			if (piece == nullptr)
 			{
 				info.reason = MoveInfo::NONE;
@@ -90,7 +90,7 @@ bool King::IsMoveValid(const pt2di& target, MoveInfo& info) const
 				info.reason = MoveInfo::ALREADY_OCCUPIED | MoveInfo::SAME_TEAM;
 				return false;
 			}
-			if (!m_pBoard->IsCellAttacked(target, m_team))
+			if (!m_pBoard->IsCellAttacked(moveTarget, m_team))
 			{
 				info.reason = MoveInfo::NONE;
 				return true;
@@ -151,7 +151,7 @@ void King::Move(const pt2di& target)
 
 bool King::CanAttack(const pt2di& target) const
 {
-	// if we're checking for an out of bounds cell
+	// if we're checking for an out-of-bounds cell
 	if (!m_pBoard->IsPositionValid(target))
 		return false;
 
