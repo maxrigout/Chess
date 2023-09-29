@@ -64,6 +64,7 @@ private:
 	Board* m_pBoard = nullptr;
 	TEAM m_activeTeam = TEAM::NONE;
 	Player* m_pActivePlayer = nullptr;
+	Player* m_pOtherPlayer = nullptr;
 	Player* m_pPlayer1 = nullptr;
 	Player* m_pPlayer2 = nullptr;
 

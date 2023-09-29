@@ -174,7 +174,7 @@ void Board::DrawBoardTextured(const Renderer2D* renderer) const
 		for (int i = 0; i < m_width; i++)
 		{
 			if (m_cells[j * m_width + i].m_attackedBy != TEAM::NONE)
-				HighlightCell(renderer, {i, j}, {15, 15}, RED);
+				HighlightCell(renderer, {i, j}, {15, 15}, FG_RED);
 		}
 	}
 #endif
@@ -214,7 +214,7 @@ void Board::DrawBoardBasic(const Renderer2D* renderer) const
 #ifdef DRAW_DEBUG
 			// if we want to draw the cells that are attacked
 			if (m_cells[j * m_width + i].m_attackedBy != TEAM::NONE)
-				HighlightCell(renderer, { i, j }, { 15, 15 }, RED);
+				HighlightCell(renderer, { i, j }, { 15, 15 }, FG_RED);
 			// 	DrawSelectedCell(renderer, { i, j }, 5, DARK_BLUE);
 #endif
 		}
@@ -448,7 +448,10 @@ bool Board::UndoMove(int i)
 	if (i)
 		LOG_DEBUG("undo move " + std::to_string(i));
 	if (m_moveStack.empty())
+	{
+		LOG_DEBUG("move stack is empty!");
 		return false;
+	}
 	MoveEvent lastEvent = m_moveStack.top();
 	m_moveStack.pop();
 	Piece* piece = lastEvent.piece;

@@ -13,6 +13,7 @@ public:
 	virtual ~RandomPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
+	virtual bool AllowsUndos() const { return true; }
 
 	void PlayThread();
 

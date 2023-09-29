@@ -15,7 +15,7 @@ public:
 	int GetSearchDepth() const
 	{
 		return m_searchDepth;
-	} 
+	}
 
 	const std::string& GetType() const
 	{

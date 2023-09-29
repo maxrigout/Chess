@@ -23,6 +23,7 @@ public:
 	virtual ~Player();
 	virtual void Play(const PlayingContext& context) = 0;
 	virtual void DrawLastMove(const Renderer2D* renderer) const {};
+	virtual bool AllowsUndos() const { return false; }
 	void UpdatePieces(float dt);
 	bool HasEndedTurn() const { return m_hasTurnEnded; }
 	void BeginTurn() { m_hasTurnEnded = false; CalculateLegalMoves(); }

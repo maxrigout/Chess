@@ -1,6 +1,8 @@
 #pragma once
 #include "Chess/Players/Players.h"
 #include "Chess/Config/ChessConfig.h"
+#include "Chess/Exceptions/UnknownAITypeException.h"
+#include "Chess/Exceptions/UnknownPlayerTypeException.h"
 #include <memory>
 
 enum class PlayerType
@@ -34,7 +36,8 @@ public:
 			return new MinMaxAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
 		else if (aiType == "alpha-beta")
 			return new AlphaBetaAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
-		return nullptr;
+
+		throw std::runtime_error("unknown ai type: " + aiType);
 	}
 
 private:
@@ -44,6 +47,11 @@ private:
 			return new HumanPlayer(pBoard, team);
 		else if (playerType == "ai")
 			return CreateAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetType());
-		return nullptr;
+		else if (playerType == "network")
+			return new NetworkPlayer(pBoard, team);
+		else if (playerType == "random")
+			return new RandomPlayer(pBoard, team);
+
+		throw std::runtime_error("unknown player type: " + playerType);
 	}
 };

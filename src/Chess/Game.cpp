@@ -259,9 +259,15 @@ void Game::SwitchPlayers()
 	// switch players
 	player = (player + 1) % 2;
 	if (player == 0)
+	{
 		m_pActivePlayer = m_pPlayer1;
+		m_pOtherPlayer = m_pPlayer2;
+	}
 	else
+	{
 		m_pActivePlayer = m_pPlayer2;
+		m_pOtherPlayer = m_pPlayer1;
+	}
 	m_pActivePlayer->BeginTurn();
 	m_activeTeam = m_pActivePlayer->GetTeam();
 	if (m_pActivePlayer->IsCheckMate())
@@ -314,18 +320,42 @@ bool Game::OnKeyboardDown(const KeyboardDownEvent& event)
 {
 	if (event.key == Key::Z && !m_isZPressed)
 	{
+		LOG_TRACE("Z key down");
 		m_isZPressed = true;
-		if (m_pBoard->UndoMove())
-			SwitchPlayers();
-		return true;
+		if (m_pOtherPlayer->AllowsUndos())
+		{
+			// undo 2 moves
+			if (m_pBoard->UndoMove())
+			{
+				if (m_pBoard->UndoMove())
+				{
+					LOG_DEBUG("Undo Successful");
+					return true;
+				} else
+				{
+					LOG_DEBUG("Was only able to undo 1 move... Switching Players");
+					SwitchPlayers();
+				}
+			}
+			else
+			{
+				LOG_DEBUG("cannot undo");
+			}
+		}
+		else
+		{
+			LOG_DEBUG("other player doesn't allow undos!");
+		}
 	}
 	return false;
 }
 
 bool Game::OnKeyboardUp(const KeyboardUpEvent& event) 
 {
+	LOG_TRACE("OnKeyboardUp");
 	if (event.key == Key::Z)
 	{
+		LOG_TRACE("Z key up");
 		m_isZPressed = false;
 		return true;
 	}

@@ -14,7 +14,6 @@ int main(int argc, char** argv)
 {
 	try
 	{
-		ConfigReader::DumpConfig("config.yml");
 		SystemConfiguration::Init(ConfigReader::GetFile("config.yml")["system"]);
 		ChessConfiguration::Init(ConfigReader::GetFile("config.yml")["chess"]);
 		RendererConfiguration::Init(ConfigReader::GetFile("config.yml")["renderer"]);
@@ -25,7 +24,7 @@ int main(int argc, char** argv)
 		game.Run();
 		game.Cleanup();
 	}
-	catch (std::exception& e)
+	catch (const std::exception& e)
 	{
 		LOG_FATAL(e.what());
 	}
