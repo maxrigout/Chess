@@ -6,10 +6,10 @@ template <typename T>
 struct vector2d
 {
 	vector2d() { x = 0; y = 0; }
-	vector2d(T value1, T value2)
+	vector2d(T _x, T _y)
 	{
-		x = value1;
-		y = value2;
+		x = _x;
+		y = _y;
 	}
 	
 	template <typename U>

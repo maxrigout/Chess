@@ -15,7 +15,7 @@ public:
 	int GetSearchDepth() const
 	{
 		return m_searchDepth;
-	} 
+	}
 
 	const std::string& GetType() const
 	{
@@ -26,28 +26,6 @@ public:
 	{
 		return m_timeoutMs;
 	}
-/*
-	static void Init(const ConfigReader::Property& props)
-	{
-		s_searchDepth = props["search-depth"].GetIntValue();
-		s_type = props["type"].GetStringValue();
-	}
-
-	static const int GetSearchDepth()
-	{
-		return s_searchDepth;
-	} 
-
-	static const std::string& GetType()
-	{
-		return s_type;
-	}
-
-	static const int GetTimeoutMs()
-	{
-		return s_timeoutMs;
-	}
-*/
 
 private:
 	static int s_searchDepth;

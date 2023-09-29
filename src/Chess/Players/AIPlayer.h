@@ -20,6 +20,7 @@ public:
 	virtual ~AIPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
+	virtual bool AllowsUndos() const override { return true; }
 
 	virtual void PlayThread() = 0;
 

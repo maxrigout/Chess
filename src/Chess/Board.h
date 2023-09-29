@@ -31,7 +31,7 @@ public:
 	void SetMargin(const vec2di& margin) { m_margin = margin; }
 	const vec2di& GetMargin() const { return m_margin; }
 
-	std::vector<Piece*> GetPlayerPieces(TEAM team) const;
+	const std::vector<Piece*>& GetPlayerPieces(TEAM team) const;
 
 	Piece* GetPieceAtCell(const pt2di& pos) const;
 	void PlacePiece(Piece* piece);

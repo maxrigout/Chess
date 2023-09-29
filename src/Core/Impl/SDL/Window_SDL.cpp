@@ -355,7 +355,7 @@ void Window_SDL::PollEvents()
 			case SDL_MOUSEBUTTONDOWN:	m_onMouseButtonDown({ mouseButtonMap[event.button.button] }); break;
 			case SDL_MOUSEWHEEL:		m_onMouseWheel({ event.wheel.x, event.wheel.y }); break;
 			case SDL_KEYDOWN:			m_onKeyboardDown({ keyboardMap[event.key.keysym.scancode] }); break;
-			case SDL_KEYUP:				m_onKeyboardDown({ keyboardMap[event.key.keysym.scancode] }); break;
+			case SDL_KEYUP:				m_onKeyboardUp({ keyboardMap[event.key.keysym.scancode] }); break;
 			default: break;
 		}
 	}

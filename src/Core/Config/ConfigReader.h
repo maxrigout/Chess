@@ -17,10 +17,10 @@ public:
 	class Property
 	{
 	public:
-		Property() {}
-		Property(const std::string& cannonicalName, const std::string& name, const std::string& value,
-			const std::unordered_map<std::string, Property>& children = {})
-		: m_cannonicalName(cannonicalName), m_name(name), m_value(value), m_childProperties(children)
+		Property() = default;
+		Property(const std::string& canonicalName, const std::string& name, const std::string& value,
+                 const std::unordered_map<std::string, Property>& children = {})
+		: m_canonicalName(canonicalName), m_name(name), m_value(value), m_childProperties(children)
 		{}
 		bool HasValue() const { return !m_value.empty(); }
 		bool HasChildren() const { return !m_childProperties.empty(); }
@@ -56,7 +56,7 @@ public:
 		}
 
 	private:
-		std::string m_cannonicalName;
+		std::string m_canonicalName;
 		std::string m_name;
 		std::string m_value;
 		std::unordered_map<std::string, Property> m_childProperties;

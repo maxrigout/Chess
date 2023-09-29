@@ -8,48 +8,45 @@ FastPiece::FastPiece(Board* pBoard, char type, TEAM team, const pt2di& initialBo
 
 bool FastPiece::IsMoveValid(const pt2di& target, MoveInfo& info) const
 {
-	for (const auto& move : m_availableMoves)
-	{
-		if (move == target)
-			return true;
-	}
-	return false;
+    return std::any_of(m_availableMoves.begin(), m_availableMoves.end(), [&](const pt2di& move) {
+       return (move == target);
+    });
 }
 
 bool FastPiece::CanAttack(const pt2di& target) const
 {
-	// if we're checking for an out of bounds cell
+	// if we're checking for an out-of-bounds cell
 	if (!m_pBoard->IsPositionValid(target))
 		return false;
 
-	vec2di stepdir;
-	vec2di movevect(target - m_boardPosition);
+	vec2di stepDir;
+	vec2di moveVector(target - m_boardPosition);
 	bool found_dir = false;
 	int nSteps = 0;
 
 	// if we're checking against the current piece position
-	if (movevect.x == 0 && movevect.y == 0)
+	if (moveVector.x == 0 && moveVector.y == 0)
 		return false;
 
 	for (const auto& m : m_moves)
 	{
-		if (movevect.IsPositiveMultiple(m))
+		if (moveVector.IsPositiveMultiple(m))
 		{
 			if (m.x != 0)
 			{
-				nSteps = movevect.x / m.x;
+				nSteps = moveVector.x / m.x;
 			}
 			else
 			{
-				nSteps = movevect.y / m.y;
+				nSteps = moveVector.y / m.y;
 			}
-			stepdir = m;
+            stepDir = m;
 			found_dir = true;
 			break;
 		}
 	}
 
-	// check each cells between current pos and target pos
+	// check each cell between current pos and target pos
 	if (found_dir) {
 		std::vector<pt2di> path;
 		bool blocked = false;
@@ -57,7 +54,7 @@ bool FastPiece::CanAttack(const pt2di& target) const
 
 		for (int i = 1; i < nSteps + 1; ++i)
 		{
-			path[i - 1] = m_boardPosition + (stepdir * i);
+			path[i - 1] = m_boardPosition + (stepDir * i);
 		}
 		for (const auto& tile : path)
 		{

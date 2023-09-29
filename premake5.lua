@@ -77,8 +77,13 @@ project "Chess"
 		{
 			"deps/include/metal-cpp",
 			"deps/include/metal-cpp-extensions",
-			"~/dev/VulkanSDK/1.3.250.1/macOS/include"
+			"~/dev/VulkanSDK/1.3.261.1/macOS/include"
 		}
+
+		buildoptions {
+			
+		}
+
 		links
 		{
 			"vulkan.framework",
@@ -95,7 +100,12 @@ project "Chess"
 			"Foundation.framework",
 			"MetalKit.framework"
 		}
-		linkoptions { "-F/Library/Frameworks" }
+		linkoptions
+		{
+			"-rpath",
+			"/Library/Frameworks",
+			"-F/Library/Frameworks"
+		}
 
 	filter "system:linux"
 		-- TODO

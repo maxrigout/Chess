@@ -26,31 +26,31 @@ bool Pawn::IsMoveValid(const pt2di& target, MoveInfo& info) const
 	if (target == m_boardPosition)
 		return false;
 
-	vec2di move_vect(target - m_boardPosition);
+	vec2di moveVect(target - m_boardPosition);
 
 	vec2di move_front(m_moves[0]);
 	vec2di move_front2(move_front + move_front);
 	vec2di capture_left(move_front + vec2di(-1, 0));
 	vec2di capture_right(move_front + vec2di(1, 0));
 
-	// if we're checking for an out of bounds cell
+	// if we're checking for an out-of-bounds cell
 	if (!m_pBoard->IsPositionValid(target))
 		return false;
 
 	// checking for 1 cell in front
-	if (move_vect == move_front)
+	if (moveVect == move_front)
 	{
-		return m_pBoard->GetPieceAtCell(m_boardPosition + move_vect) == nullptr;
+		return m_pBoard->GetPieceAtCell(m_boardPosition + moveVect) == nullptr;
 	}
 	// if we're moving 2 spaces forward, we need to check for both cells in front
-	if (m_isFirstMove && move_vect == move_front2)
+	if (m_isFirstMove && moveVect == move_front2)
 	{
-		return m_pBoard->GetPieceAtCell(m_boardPosition + move_front) == nullptr && m_pBoard->GetPieceAtCell(m_boardPosition + move_vect) == nullptr;
+		return m_pBoard->GetPieceAtCell(m_boardPosition + move_front) == nullptr && m_pBoard->GetPieceAtCell(m_boardPosition + moveVect) == nullptr;
 	}
 	// if we're capturing a piece
-	if (move_vect == capture_left || move_vect == capture_right)
+	if (moveVect == capture_left || moveVect == capture_right)
 	{
-		Piece* targetPiece = m_pBoard->GetPieceAtCell(m_boardPosition + move_vect);
+		Piece* targetPiece = m_pBoard->GetPieceAtCell(m_boardPosition + moveVect);
 		return targetPiece != nullptr && !targetPiece->IsSameTeam(m_team);
 	}
 
@@ -60,16 +60,16 @@ bool Pawn::IsMoveValid(const pt2di& target, MoveInfo& info) const
 
 bool Pawn::CanAttack(const pt2di& target) const
 {
-	vec2di move_vect(target - m_boardPosition);
+	vec2di moveVect(target - m_boardPosition);
 	const vec2di& move_front = m_moves[0];
 	vec2di capture_left(move_front + vec2di(-1, 0));
 	vec2di capture_right(move_front + vec2di(1, 0));
 
-		// if we're checking for an out of bounds cell
+    // if we're checking for an out-of-bounds cell
 	if (!m_pBoard->IsPositionValid(target))
 		return false;
 
-	return move_vect != capture_left && move_vect != capture_right;
+	return moveVect != capture_left && moveVect != capture_right;
 }
 
 void Pawn::AttackCells() const
