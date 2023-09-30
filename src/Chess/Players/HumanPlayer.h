@@ -12,5 +12,5 @@ public:
 	virtual ~HumanPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override {}
-	virtual bool AllowsUndos() const { return true; }
+	virtual bool AllowsUndos() const override { return true; }
 };

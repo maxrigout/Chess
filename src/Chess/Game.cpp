@@ -301,6 +301,10 @@ bool Game::OnMouseButtonDown(const MouseButtonDownEvent& event)
 	case MouseButton::Left: m_mouseLeftDown = true; return true;
 	case MouseButton::Right: m_mouseRightDown = true; return true;
 	case MouseButton::Middle: m_mouseMiddleDown = true; return true;
+	case MouseButton::X1:
+	case MouseButton::X2:
+	case MouseButton::N_MOUSE_BUTTONS:
+		break;
 	}
 	return false;
 }
@@ -312,39 +316,43 @@ bool Game::OnMouseButtonUp(const MouseButtonUpEvent& event)
 	case MouseButton::Left: m_mouseLeftDown = false; return true;
 	case MouseButton::Right: m_mouseRightDown = false; return true;
 	case MouseButton::Middle: m_mouseMiddleDown = false; return true;
+	case MouseButton::X1:
+	case MouseButton::X2:
+	case MouseButton::N_MOUSE_BUTTONS:
+		break;
 	}
 	return false;
 }
 
 bool Game::OnKeyboardDown(const KeyboardDownEvent& event) 
 {
-	if (event.key == Key::Z && !m_isZPressed)
+	if (event.key == Key::Z)
 	{
-		LOG_TRACE("Z key down");
-		m_isZPressed = true;
-		if (m_pOtherPlayer->AllowsUndos())
+		if (m_isZPressed)
+			// z is already pressed!
+			return false;
+		if (!m_pOtherPlayer->AllowsUndos())
 		{
-			// undo 2 moves
+			LOG_DEBUG("other player doesn't allow undos!");
+			return false;
+		}
+		// undo 2 moves
+		if (m_pBoard->UndoMove())
+		{
 			if (m_pBoard->UndoMove())
 			{
-				if (m_pBoard->UndoMove())
-				{
-					LOG_DEBUG("Undo Successful");
-					return true;
-				} else
-				{
-					LOG_DEBUG("Was only able to undo 1 move... Switching Players");
-					SwitchPlayers();
-				}
+				LOG_DEBUG("Undo Successful");
+				return true;
 			}
 			else
 			{
-				LOG_DEBUG("cannot undo");
+				LOG_DEBUG("Was only able to undo 1 move... Switching Players");
+				SwitchPlayers();
 			}
 		}
 		else
 		{
-			LOG_DEBUG("other player doesn't allow undos!");
+			LOG_DEBUG("cannot undo");
 		}
 	}
 	return false;

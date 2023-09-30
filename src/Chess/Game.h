@@ -43,11 +43,13 @@ private:
 	bool OnKeyboardUp(const KeyboardUpEvent& event);
 
 	std::unique_ptr<Window> m_pWindow = nullptr;
+	bool m_isWindowInitialized = false;
+
+	// mouse and keyboard states
 	bool m_mouseLeftDown = false;
 	bool m_mouseRightDown = false;
 	bool m_mouseMiddleDown = false;
 	bool m_isZPressed = false;
-	bool m_isWindowInitialized = false;
 
 	Renderer2D* m_pRenderer = nullptr;
 
