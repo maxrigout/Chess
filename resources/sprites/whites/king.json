@@ -1,0 +1,14 @@
+{
+  "texture_path": "resources/graphics/pieces4.png",
+  "name": "White King",
+  "tag": "K1",
+  "offset": {
+    "x": 1270,
+    "y": 989
+  },
+  "size": {
+    "x": 191,
+    "y": 191
+  },
+  "offsetType": "Bottom Right"
+}

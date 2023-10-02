@@ -1,0 +1,14 @@
+{
+  "texture_path": "resources/graphics/pieces4.png",
+  "name": "Black Pawn",
+  "tag": "P2",
+  "offset": {
+    "x": 201,
+    "y": 1196
+  },
+  "size": {
+    "x": 191,
+    "y": 191
+  },
+  "offsetType": "Bottom Right"
+}

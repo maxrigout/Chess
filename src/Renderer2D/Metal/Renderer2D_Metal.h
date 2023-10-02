@@ -34,9 +34,10 @@ public:
 	virtual void DrawText(const pt2di& position, const std::string& text, const Color& color) const override;
 	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const override;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const override;
-	
-	virtual SpriteID LoadTexture(const char* path, const std::string& tag) override;
+
+	virtual SpriteID LoadSprite(const SpriteDescriptor& spriteDescriptor) override { return -1; }
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors) override;
+	virtual SpriteID LoadTexture(const char* path, const std::string& tag) override;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const override;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const override;
 	

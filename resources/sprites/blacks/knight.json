@@ -1,0 +1,14 @@
+{
+  "texture_path": "resources/graphics/pieces4.png",
+  "name": "Black Knight",
+  "tag": "H2",
+  "offset": {
+    "x": 415,
+    "y": 1196
+  },
+  "size": {
+    "x": 191,
+    "y": 191
+  },
+  "offsetType": "Bottom Right"
+}

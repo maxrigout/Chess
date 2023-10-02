@@ -61,8 +61,9 @@ enum class SpriteOffsetType
 
 struct SpriteDescriptor
 {
+	std::string texturePath;
 	pt2di offset{-1, -1};
-	vec2di size{-1, -1};
+	vec2di size{-1, -1}; // if the size.x == -1, we mean that we want the entire width of the texture. Same thing for size.y for the height
 	SpriteOffsetType offsetType = SpriteOffsetType::TopLeft;
 	std::string tag = "";
 };
@@ -87,8 +88,9 @@ public:
 	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const = 0;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const = 0;
 	
-	virtual SpriteID LoadTexture(const char* path, const std::string& tag) = 0;
+	virtual SpriteID LoadSprite(const SpriteDescriptor& spriteDescriptor) = 0;
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors) = 0;
+	virtual SpriteID LoadTexture(const char* path, const std::string& tag) = 0;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const = 0;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const = 0;
 	

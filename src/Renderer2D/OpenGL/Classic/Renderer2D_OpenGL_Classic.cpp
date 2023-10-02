@@ -251,7 +251,7 @@ Renderer2D_OpenGL_Classic::Renderer2D_OpenGL_Classic()
 Renderer2D_OpenGL_Classic::~Renderer2D_OpenGL_Classic()
 {
 	DestroyRenderable(m_quadRenderable);
-	for (auto& texture : m_textures)
+	for (auto& [path, texture] : m_textures)
 	{
 		glDeleteTextures(1, &texture.id);
 	}
@@ -280,6 +280,16 @@ void Renderer2D_OpenGL_Classic::End()
 void Renderer2D_OpenGL_Classic::Flush()
 {
 	
+}
+
+Renderer2D_OpenGL_Classic::Texture& Renderer2D_OpenGL_Classic::GetTexture(const std::string& path)
+{
+	if (m_textures.count(path) == 0)
+	{
+		Texture t = LoadTextureToGPU(path.c_str());
+		m_textures.emplace(path, t);
+	}
+	return m_textures[path];
 }
 
 void Renderer2D_OpenGL_Classic::Clear(const Color& color) const
@@ -335,68 +345,79 @@ void Renderer2D_OpenGL_Classic::DrawArrow(const pt2di& start, const pt2di& end, 
 }
 */
 
-
-Renderer2D::SpriteID Renderer2D_OpenGL_Classic::LoadTexture(const char* path, const std::string& tag)
+Renderer2D::SpriteID Renderer2D_OpenGL_Classic::LoadSprite(const SpriteDescriptor& spriteDescriptor)
 {
-	Texture texture = LoadTextureToGPU(path);
-	m_textures.push_back(texture);
-	size_t textureId = m_textures.size() - 1;
-	m_sprites.push_back({ textureId, { 0.0f, 0.0f }, { 1.0f, 1.0f } });
-	SpriteID spriteId = m_sprites.size() - 1;
-	m_tagsMap.emplace(tag, spriteId);
-
-	return spriteId;
-}
-
-std::vector<Renderer2D::SpriteID> Renderer2D_OpenGL_Classic::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
-{
-	Texture texture = LoadTextureToGPU(path);
-	m_textures.push_back(texture);
-	size_t textureId = m_textures.size() - 1;
-	std::vector<SpriteID> sprites;
-
+	Texture texture = GetTexture(spriteDescriptor.texturePath);
+	Sprite sprite;
+	sprite.textureId = spriteDescriptor.texturePath;
 	float textureWidth = (float)texture.dim.w;
 	float textureHeight = (float)texture.dim.h;
 
-	for (const auto& desc : spriteDescriptors)
+	pt2di topLeft = spriteDescriptor.offset;
+	vec2di effectiveSize = spriteDescriptor.size;
+	if (spriteDescriptor.size.x == -1)
 	{
-		Sprite sprite;
-		sprite.textureId = textureId;
+		effectiveSize.w = texture.dim.w;
+	}
 
-		pt2di topLeft = desc.offset;
-		switch (desc.offsetType)
-		{
+	if (spriteDescriptor.size.y == -1)
+	{
+		effectiveSize.h = texture.dim.h;
+	}
+	switch (spriteDescriptor.offsetType)
+	{
 		case SpriteOffsetType::TopLeft:
 			break;
 
 		case SpriteOffsetType::TopRight:
-			topLeft.x -= desc.size.w;
+			topLeft.x -= effectiveSize.w;
 			break;
 
 		case SpriteOffsetType::BottomLeft:
-			topLeft.y -= desc.size.h;
+			topLeft.y -= effectiveSize.h;
 			break;
 
 		case SpriteOffsetType::BottomRight:
-			topLeft = desc.offset - desc.size;
+			topLeft = spriteDescriptor.offset - effectiveSize;
 			break;
-		
+
 		default:
 			LOG_ERROR("unknown SpriteOffsetType.");
-			continue;
-		}
+	}
 
-		pt2di bottomRight = topLeft + desc.size;
+	pt2di bottomRight = topLeft + effectiveSize;
 
-		sprite.topLeft = { (float)topLeft.x / textureWidth, (float)topLeft.y / textureHeight };
-		sprite.bottomRight = { (float)bottomRight.x / textureWidth, (float)bottomRight.y / textureHeight };
+	sprite.topLeft = { (float)topLeft.x / textureWidth, (float)topLeft.y / textureHeight };
+	sprite.bottomRight = { (float)bottomRight.x / textureWidth, (float)bottomRight.y / textureHeight };
 
-		m_sprites.push_back(sprite);
-		SpriteID spriteId = m_sprites.size() - 1;
-		m_tagsMap.emplace(desc.tag, spriteId);
+	m_sprites.push_back(sprite);
+	SpriteID spriteId = m_sprites.size() - 1;
+	m_tagsMap.emplace(spriteDescriptor.tag, spriteId);
+	return spriteId;
+}
+
+
+std::vector<Renderer2D::SpriteID> Renderer2D_OpenGL_Classic::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
+{
+	std::vector<SpriteID> sprites(spriteDescriptors.size());
+
+	for (const auto& desc : spriteDescriptors)
+	{
+		sprites.push_back(LoadSprite(desc));
 	}
 
 	return sprites;
+}
+
+Renderer2D::SpriteID Renderer2D_OpenGL_Classic::LoadTexture(const char* path, const std::string& tag)
+{
+	Texture texture = LoadTextureToGPU(path);
+	m_textures.emplace(path, texture);
+	m_sprites.push_back({ path, { 0.0f, 0.0f }, { 1.0f, 1.0f } });
+	SpriteID spriteId = m_sprites.size() - 1;
+	m_tagsMap.emplace(tag, spriteId);
+
+	return spriteId;
 }
 
 bool Renderer2D_OpenGL_Classic::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const
@@ -415,7 +436,7 @@ bool Renderer2D_OpenGL_Classic::DrawSprite(const pt2di& topLeft, const vec2di& d
 	};
 
 	Sprite sprite = m_sprites[spriteId];
-	Texture texture = m_textures[sprite.textureId];
+	Texture texture = m_textures.at(sprite.textureId);
 
 	pt2df normalizedPosition = normalizeCoords(topLeft, m_viewPortDim);
 	vec2df normalizedSize = normalizeSize(dimensions, m_viewPortDim);

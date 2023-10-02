@@ -1,0 +1,14 @@
+{
+  "texture_path": "resources/graphics/Highlightedcell.png",
+  "name": "Hovered Cell",
+  "tag": "hoveredCell",
+  "offset": {
+    "x": 0,
+    "y": 0
+  },
+  "size": {
+    "x": -1,
+    "y": -1
+  },
+  "offsetType": "Top Left"
+}

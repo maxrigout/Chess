@@ -1,0 +1,14 @@
+{
+  "texture_path": "resources/graphics/Green.png",
+  "name": "Available Cell",
+  "tag": "availableCell",
+  "offset": {
+    "x": 0,
+    "y": 0
+  },
+  "size": {
+    "x": -1,
+    "y": -1
+  },
+  "offsetType": "Top Left"
+}

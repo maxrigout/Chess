@@ -3,12 +3,12 @@
 #include "Chess/Factory/PlayerFactory.h"
 #include "Core/Config/SystemConfiguration.h"
 #include "Renderer2D/Config/RendererConfiguration.h"
-
-#define DEBUG
 #include "Assets.h"
 #include "Core/Logger.h"
-
+#include <nlohmann/json.hpp>
 #include <chrono>
+
+#define DEBUG
 
 void Game::Init(int width, int height)
 {
@@ -124,28 +124,85 @@ void Game::FreeBoard()
 
 void Game::LoadGraphics()
 {
-    // TODO: file
-	std::vector<SpriteDescriptor> sprites;
-	sprites.push_back({ { 201, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P1" });
-	sprites.push_back({ { 415, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H1" });
-	sprites.push_back({ { 628, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B1" });
-	sprites.push_back({ { 842, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R1" });
-	sprites.push_back({ { 1056, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q1" });
-	sprites.push_back({ { 1270, 989 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K1" });
+	auto loadSpriteFromFile = [](const char* path) {
+		std::ifstream f(path);
+		if (!f.is_open())
+		{
+			LOG_ERROR(std::string("cannot open file: ") + path);
+			return SpriteDescriptor{};
+		}
+		nlohmann::json data = nlohmann::json::parse(f);
+		SpriteDescriptor desc;
+		desc.texturePath = data["texture_path"];
+		desc.offset.x = data["offset"]["x"];
+		desc.offset.y = data["offset"]["y"];
+		desc.size.x = data["size"]["x"];
+		desc.size.y = data["size"]["y"];
+		desc.tag = data["tag"];
 
-	sprites.push_back({ { 201, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "P2" });
-	sprites.push_back({ { 415, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "H2" });
-	sprites.push_back({ { 628, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "B2" });
-	sprites.push_back({ { 842, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "R2" });
-	sprites.push_back({ { 1056, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "Q2" });
-	sprites.push_back({ { 1270, 1196 }, { 191, 191 }, SpriteOffsetType::BottomRight, "K2" });
-	m_piecesSprites = m_pRenderer->LoadSpriteSheet(PIECES_TEXTURE_PATH, sprites);
+		// offsetType
+		std::string offsetType = data["offsetType"];
+		if (offsetType == "Top Left")
+		{
+			desc.offsetType = SpriteOffsetType::TopLeft;
+		}
+		else if (offsetType == "Top Right")
+		{
+			desc.offsetType = SpriteOffsetType::TopRight;
+		}
+		else if (offsetType == "Bottom Left")
+		{
+			desc.offsetType = SpriteOffsetType::BottomLeft;
+		}
+		else if (offsetType == "Bottom Right")
+		{
+			desc.offsetType = SpriteOffsetType::BottomRight;
+		}
+		else
+		{
+			LOG_ERROR("got unknown offset type when reading sprite file: " + offsetType);
+		}
 
-	m_pRenderer->LoadTexture(BOARD_TEXTURE_PATH, "board");
+		return desc;
+	};
 
-	m_pRenderer->LoadTexture(AVAILABLE_CELLS_PATH, "availableCell");
-	m_pRenderer->LoadTexture(HOVERED_CELLS_PATH, "hoveredCell");
-	m_pRenderer->LoadTexture(SELECTED_CELLS_PATH, "selectedCell");
+	auto wp = loadSpriteFromFile("resources/sprites/whites/pawn.json");
+	auto wh = loadSpriteFromFile("resources/sprites/whites/knight.json");
+	auto wb = loadSpriteFromFile("resources/sprites/whites/bishop.json");
+	auto wr = loadSpriteFromFile("resources/sprites/whites/rook.json");
+	auto wq = loadSpriteFromFile("resources/sprites/whites/queen.json");
+	auto wk = loadSpriteFromFile("resources/sprites/whites/king.json");
+
+	auto bp = loadSpriteFromFile("resources/sprites/blacks/pawn.json");
+	auto bh = loadSpriteFromFile("resources/sprites/blacks/knight.json");
+	auto bb = loadSpriteFromFile("resources/sprites/blacks/bishop.json");
+	auto br = loadSpriteFromFile("resources/sprites/blacks/rook.json");
+	auto bq = loadSpriteFromFile("resources/sprites/blacks/queen.json");
+	auto bk = loadSpriteFromFile("resources/sprites/blacks/king.json");
+
+	auto boardDesc = loadSpriteFromFile("resources/sprites/board.json");
+	auto availableCellDesc = loadSpriteFromFile("resources/sprites/available_cell.json");
+	auto hoveredCellDesc = loadSpriteFromFile("resources/sprites/hovered_cell.json");
+	auto selectedCellDesc = loadSpriteFromFile("resources/sprites/selected_cell.json");
+
+	m_pRenderer->LoadSprite(wp);
+	m_pRenderer->LoadSprite(wh);
+	m_pRenderer->LoadSprite(wb);
+	m_pRenderer->LoadSprite(wr);
+	m_pRenderer->LoadSprite(wq);
+	m_pRenderer->LoadSprite(wk);
+
+	m_pRenderer->LoadSprite(bp);
+	m_pRenderer->LoadSprite(bh);
+	m_pRenderer->LoadSprite(bb);
+	m_pRenderer->LoadSprite(br);
+	m_pRenderer->LoadSprite(bq);
+	m_pRenderer->LoadSprite(bk);
+
+	m_pRenderer->LoadSprite(boardDesc);
+	m_pRenderer->LoadSprite(availableCellDesc);
+	m_pRenderer->LoadSprite(hoveredCellDesc);
+	m_pRenderer->LoadSprite(selectedCellDesc);
 }
 
 void Game::Run()
@@ -188,7 +245,10 @@ bool Game::IsMouseButtonPressed(MouseButton button) const
 	case MouseButton::Left: return m_mouseLeftDown;
 	case MouseButton::Right: return m_mouseRightDown;
 	case MouseButton::Middle: return m_mouseMiddleDown;
-	default: break;
+	case MouseButton::X1:
+	case MouseButton::X2:
+	case MouseButton::N_MOUSE_BUTTONS:
+		break;
 	}
 	return false;
 }
