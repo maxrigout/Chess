@@ -353,12 +353,11 @@ void Renderer2D_Metal::DrawArrow(const pt2di& start, const pt2di& end, const Col
 
 }
 
-
 Renderer2D::SpriteID Renderer2D_Metal::LoadTexture(const char* path, const std::string& tag)
 {
 	Texture texture = ::LoadTextureToGPU(m_pDevice, path);
-	m_textures.push_back(texture);
-	size_t textureId = m_textures.size() - 1;
+	m_textures.emplace(path, texture);
+	std::string textureId = path;
 	m_sprites.push_back({ textureId, { 0.0f, 0.0f }, { 1.0f, 1.0f } });
 	SpriteID spriteId = m_sprites.size() - 1;
 	m_tagsMap.emplace(tag, spriteId);
@@ -366,51 +365,81 @@ Renderer2D::SpriteID Renderer2D_Metal::LoadTexture(const char* path, const std::
 	return spriteId;
 }
 
-std::vector<Renderer2D::SpriteID> Renderer2D_Metal::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
+Renderer2D_Metal::Texture& Renderer2D_Metal::GetTexture(const std::string& path)
 {
-	Texture texture = ::LoadTextureToGPU(m_pDevice, path);
-	m_textures.push_back(texture);
-	size_t textureId = m_textures.size() - 1;
-	std::vector<SpriteID> sprites;
+	if (m_textures.count(path) == 0)
+	{
+		Texture t = ::LoadTextureToGPU(m_pDevice, path.c_str());
+		m_textures.emplace(path, t);
+	}
+	return m_textures[path];
+}
+
+Renderer2D::SpriteID Renderer2D_Metal::LoadSprite(const SpriteDescriptor& spriteDescriptor) 
+{
+	Texture texture = GetTexture(spriteDescriptor.texturePath.c_str());
 
 	float textureWidth = (float)texture.dim.w;
 	float textureHeight = (float)texture.dim.h;
 
+	Sprite sprite;
+	sprite.textureId = texture.path;
+
+	pt2di topLeft = spriteDescriptor.offset;
+	vec2di effectiveSize = spriteDescriptor.size;
+	if (spriteDescriptor.size.x == -1)
+	{
+		effectiveSize.w = texture.dim.w;
+	}
+
+	if (spriteDescriptor.size.y == -1)
+	{
+		effectiveSize.h = texture.dim.h;
+	}
+
+	switch (spriteDescriptor.offsetType)
+	{
+	case SpriteOffsetType::TopLeft:
+		break;
+
+	case SpriteOffsetType::TopRight:
+		topLeft.x -= effectiveSize.w;
+		break;
+
+	case SpriteOffsetType::BottomLeft:
+		topLeft.y -= effectiveSize.h;
+		break;
+
+	case SpriteOffsetType::BottomRight:
+		topLeft = spriteDescriptor.offset - effectiveSize;
+		break;
+	
+	default:
+		LOG_ERROR("unknown SpriteOffsetType.");
+		return -1;
+	}
+
+	pt2di bottomRight = topLeft + effectiveSize;
+
+	sprite.topLeft = { (float)topLeft.x / textureWidth, (float)topLeft.y / textureHeight };
+	sprite.bottomRight = { (float)bottomRight.x / textureWidth, (float)bottomRight.y / textureHeight };
+
+	m_sprites.push_back(sprite);
+	SpriteID spriteId = m_sprites.size() - 1;
+	m_tagsMap.emplace(spriteDescriptor.tag, spriteId);
+	return spriteId;
+}
+
+std::vector<Renderer2D::SpriteID> Renderer2D_Metal::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
+{
+	std::vector<SpriteID> sprites;
+
 	for (const auto& desc : spriteDescriptors)
 	{
-		Sprite sprite;
-		sprite.textureId = textureId;
-
-		pt2di topLeft = desc.offset;
-		switch (desc.offsetType)
-		{
-		case SpriteOffsetType::TopLeft:
-			break;
-
-		case SpriteOffsetType::TopRight:
-			topLeft.x -= desc.size.w;
-			break;
-
-		case SpriteOffsetType::BottomLeft:
-			topLeft.y -= desc.size.h;
-			break;
-
-		case SpriteOffsetType::BottomRight:
-			topLeft = desc.offset - desc.size;
-			break;
-		
-		default:
-			LOG_ERROR("unknown SpriteOffsetType.");
+		SpriteID spriteId = LoadSprite(desc);
+		if (spriteId == -1) {
 			continue;
 		}
-
-		pt2di bottomRight = topLeft + desc.size;
-
-		sprite.topLeft = { (float)topLeft.x / textureWidth, (float)topLeft.y / textureHeight };
-		sprite.bottomRight = { (float)bottomRight.x / textureWidth, (float)bottomRight.y / textureHeight };
-
-		m_sprites.push_back(sprite);
-		SpriteID spriteId = m_sprites.size() - 1;
 		m_tagsMap.emplace(desc.tag, spriteId);
 	}
 
@@ -433,7 +462,7 @@ bool Renderer2D_Metal::DrawSprite(const pt2di& topLeft, const vec2di& dimensions
 	};
 
 	Sprite sprite = m_sprites[spriteId];
-	Texture texture = m_textures[sprite.textureId];
+	Texture texture = m_textures.at(sprite.textureId);
 
 	UniformBuffer uniform;
 

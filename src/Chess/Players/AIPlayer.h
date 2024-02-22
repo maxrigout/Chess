@@ -73,7 +73,7 @@ protected:
 	std::unique_ptr<MinimizingPlayer> m_copyOfOpponent;
 
 	int m_searchDepth;
-	int m_processingTimeout;
+	std::chrono::milliseconds m_processingTimeoutMs;
 
 	friend class TestClass;
 

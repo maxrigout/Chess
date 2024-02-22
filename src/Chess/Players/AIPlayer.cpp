@@ -8,8 +8,10 @@
 
 #include "Core/Logger.h"
 
-AIPlayer::AIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeout)
-	: Player(pBoard, team), m_searchDepth{ searchDepth }, m_processingTimeout{ processingTimeout }
+using namespace std::chrono_literals;
+
+AIPlayer::AIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeoutMs)
+	: Player(pBoard, team), m_searchDepth{ searchDepth }, m_processingTimeoutMs{ processingTimeoutMs }
 {
 	LOG_INFO("AI Player initialized, searchDepth = " + std::to_string(m_searchDepth));
 	long seed = time(0);
@@ -40,8 +42,8 @@ void AIPlayer::Play(const PlayingContext& context)
 	else
 	{
 		auto now = std::chrono::high_resolution_clock::now();
-		uint64_t timeEllapsedSeconds = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_playBegin).count();
-		bool timeExeeced = timeEllapsedSeconds > m_processingTimeout;
+		auto timeEllapsedSeconds = now - m_playBegin;
+		bool timeExeeced = timeEllapsedSeconds > m_processingTimeoutMs;
 		if (timeExeeced)
 			LOG_WARN("time exceeded!");
 		m_shouldStopProcessing = context.shouldQuit || timeExeeced;

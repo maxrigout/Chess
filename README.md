@@ -6,10 +6,10 @@ Minimax: https://en.wikipedia.org/wiki/Minimax
 Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 
 ## Dependencies
-| Name | Url |
-| ---- | --- |
-| SDL2 | [https://github.com/libsdl-org/SDL](https://github.com/libsdl-org/SDL) |
-| SDL2_ttf | [https://github.com/libsdl-org/SDL_ttf](https://github.com/libsdl-org/SDL_ttf) |
+| Name       | Url                                                                                |
+| ---------- | ---------------------------------------------------------------------------------- |
+| SDL2       | [https://github.com/libsdl-org/SDL](https://github.com/libsdl-org/SDL)             |
+| SDL2_ttf   | [https://github.com/libsdl-org/SDL_ttf](https://github.com/libsdl-org/SDL_ttf)     |
 | SDL2_image | [https://github.com/libsdl-org/SDL_image](https://github.com/libsdl-org/SDL_image) |
 
 * run the scripts/setup.sh file.
@@ -98,6 +98,9 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 - [x] Game configurator (ie configure the AI difficulty, human vs human etc..)
 - [ ] GUI
 - [ ] Ability to reset a game
+- [ ] Piece promotion (and other unimplemented chess rules)
+- [ ] Universal Chess Interface ([https://en.wikipedia.org/wiki/Universal_Chess_Interface](https://en.wikipedia.org/wiki/Universal_Chess_Interface))
+- [ ] integrate ImGUI
 
 ## Issues to resolve
 - [x] The King's moves aren't properly calculated when using the AIPlayer. (02-18-2023)

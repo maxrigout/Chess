@@ -340,6 +340,7 @@ void Game::SwitchPlayers()
 	LOG_INFO(msg);
 	msg = "Chess - " + msg;
 	m_pWindow->SetTitle(msg);
+	m_turnNumber++;
 }
 
 bool Game::OnWindowClose(const WindowCloseEvent& event) 
@@ -426,6 +427,10 @@ bool Game::OnKeyboardUp(const KeyboardUpEvent& event)
 		LOG_TRACE("Z key up");
 		m_isZPressed = false;
 		return true;
+	}
+	if (event.key == Key::Escape)
+	{
+		m_isPlaying = false;
 	}
 	return false;
 }

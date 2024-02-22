@@ -151,6 +151,9 @@ void Renderer2D_SDL::DrawText(const pt2di& topLeft, const vec2di& dimensions, co
 {
 	SetRenderDrawColor(color);
 	SDL_Surface* surfaceMessage = TTF_RenderText_Solid(defaultFont, text.c_str(), toSDL_Color(color));
+	// https://stackoverflow.com/questions/55864308/how-do-find-out-the-width-and-height-of-the-text-without-using-surface-in-sdl2
+	int textWidth, textHeight;
+	TTF_SizeText(defaultFont, text.c_str(), &textWidth, &textHeight);
 	SDL_Texture* message = SDL_CreateTextureFromSurface(m_renderer, surfaceMessage);
 	// SDL_Rect dest{ topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y };
 	SDL_Rect dest{ topLeft.x, topLeft.y, dimensions.x, dimensions.y };

@@ -652,6 +652,16 @@ void Board::CreatePieces()
 	CreatePlayer2Pieces();
 }
 
+MoveEvent Board::GetLastMoveEvent() const
+{
+	return m_moveStack.top();
+}
+
+Move Board::GetLastMove() const
+{
+	return {m_moveStack.top().origin, m_moveStack.top().target};
+}
+
 // TODO move this inside a GUI manager class
 void Board::ShowHourglass(const std::string& additionalMessage) const
 {

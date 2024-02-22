@@ -8,8 +8,12 @@
 			"name": "(lldb) Launch",
 			"type": "lldb",
 			"request": "launch",
-			"program": "${workspaceFolder}/bin/Debug_x86_64/Chess",
+			"program": "~/dev/bin/Chess/Debug/Chess",
 			"args": [],
+			"envFile": "${workspaceFolder}/debug-metal.env",
+			"env": {
+				"ENV": "TEST"
+			},
 			"cwd": "${workspaceFolder}"
 		},
 		{

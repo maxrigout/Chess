@@ -10,16 +10,18 @@ workspace "Chess"
 
 	projectName = "Chess"
 	baseDir = ""
-	intdir = "obj/%{cfg.buildcfg}_%{cfg.architecture}"
-	outputdir = "bin/%{cfg.buildcfg}_%{cfg.architecture}"
+	-- intdir = "obj/%{cfg.buildcfg}_%{cfg.architecture}"
+	-- outputdir = "bin/%{cfg.buildcfg}_%{cfg.architecture}"
+	intdir = os.getenv("PREMAKE_INT_DIR")
+	outputdir = os.getenv("PREMAKE_OUT_DIR")
 
 project "Chess"
 	kind "ConsoleApp"
 	language "C++"
 	cppdialect "C++17"
 
-	objdir(intdir)
-	targetdir(outputdir)
+	objdir(intdir .. "/%{prj.name}/%{cfg.buildcfg}")
+	targetdir(outputdir .. "/%{prj.name}/%{cfg.buildcfg}")
 
 	files 
 	{
@@ -80,7 +82,8 @@ project "Chess"
 			"~/dev/VulkanSDK/1.3.261.1/macOS/include"
 		}
 
-		buildoptions {
+		buildoptions
+		{
 			
 		}
 

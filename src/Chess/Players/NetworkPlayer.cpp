@@ -2,18 +2,28 @@
 
 #include "Core/Logger.h"
 
+using namespace std::chrono_literals;
+
 
 NetworkPlayer::NetworkPlayer(Board* pBoard, TEAM team)
 	: Player(pBoard, team)
 {
 	// TODO: need to initialize winsock here (windows)...
+	// would probably need some sort of networking class
 
-	// TODO: need to configure the play: should probably be its own class
+	// TODO: would need some sort of chat
+
+	// TODO: need to configure the play
+	//     should probably be its own class (in the future)
+	//         maybe in the config
 	//	hosting or joining
 	//	which ip to use?
-	// did the other accept?
-
-	// TODO: need to disable undo as well...
+	//  did the other accept?
+	//  handshake
+	//     game version
+	//     send verification token of the initial board, make sure they match
+	//     host will be white
+	//     joiner will be black
 }
 
 NetworkPlayer::~NetworkPlayer()
@@ -26,18 +36,25 @@ void NetworkPlayer::Play(const PlayingContext& context)
 {
 	if (!m_isPlaying)
 	{
+		m_isGameFirstMove = context.turnNumber != 0;
 		m_isPlaying = true;
+		// TODO: recycle thread
 		if (m_playThread.joinable())
 			m_playThread.join();
 		m_shouldStopProcessing = false;
 		m_playBegin = std::chrono::high_resolution_clock::now();
 		m_playThread = std::thread(&NetworkPlayer::PlayThread, this);
+		// need to send the last move and the board verification token
 	}
 	else
 	{
+		// need to wait for move from the other player
+		// play the move and verify the verification token
+		// what to do if we receive a bad verification token?
+		// should we really add a delay?
 		auto now = std::chrono::high_resolution_clock::now();
-		int timeEllapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(now - m_playBegin).count();
-		bool timeExeeced = timeEllapsedSeconds > 10;
+		auto timeEllapsedSeconds = now - m_playBegin;
+		bool timeExeeced = timeEllapsedSeconds > 10s;
 		if (timeExeeced)
 			LOG_INFO("time exceeded!");
 		m_shouldStopProcessing = context.shouldQuit || timeExeeced;
@@ -53,17 +70,23 @@ void NetworkPlayer::DrawLastMove(const Renderer2D* renderer) const
 	renderer->DrawArrow(arrowStart, arrowEnd, MAGENTA);
 }
 
+// need to use the session
 void NetworkPlayer::PlayThread()
 {
-
-	// need to send the previous move as well...
-	// this should probably be in a "beginTurn" function
-	if (!SendMove(Move{}))
+	if (!m_isGameFirstMove)
 	{
-		// unable to send the message
+		Move lastMove = m_pBoard->GetLastMove();
+		// TODO: calculate the verification token
+		// TODO: send move
 	}
+	// TODO: send the verification token of the board too
+	// TODO: handle communication errors
+	// unable to send the message
 
-	Move move = ReceiveMove();
+	// this is ok since we're recieving from another thread... can't quit easily tho
+	// would need 
+	// Move move = ReceiveMove();
+	Move move{};
 
 	Piece* pieceToMove = m_pBoard->GetPieceAtCell(move.origin);
 	pieceToMove->Move(move.target);
@@ -75,18 +98,4 @@ void NetworkPlayer::PlayThread()
 
 	EndTurn();
 	m_isPlaying = false;
-}
-
-bool NetworkPlayer::SendMove(const Move& move) const
-{
-	return false;
-}
-
-Move NetworkPlayer::ReceiveMove() const
-{
-	NetworkMessage<Move> messageReceived = m_socket.Receive<Move>(/*TODO: should pass a context here...*/);
-	if (messageReceived.header.status == MessageStatus::COMPLETE)
-		return messageReceived.payload;
-
-	return messageReceived.payload;
 }

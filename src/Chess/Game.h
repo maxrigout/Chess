@@ -70,5 +70,7 @@ private:
 	Player* m_pPlayer1 = nullptr;
 	Player* m_pPlayer2 = nullptr;
 
+	unsigned int m_turnNumber = 0;
+
 	std::vector<Renderer2D::SpriteID> m_piecesSprites;
 };

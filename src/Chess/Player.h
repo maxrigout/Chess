@@ -14,6 +14,7 @@ struct PlayingContext
 	pt2di selectedCellPosition;
 	float dt;
 	bool shouldQuit;
+	int turnNumber = 0;
 };
 
 class Player

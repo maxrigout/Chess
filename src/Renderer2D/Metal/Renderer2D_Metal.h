@@ -35,7 +35,7 @@ public:
 	virtual void DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const override;
 	virtual void DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const override;
 
-	virtual SpriteID LoadSprite(const SpriteDescriptor& spriteDescriptor) override { return -1; }
+	virtual SpriteID LoadSprite(const SpriteDescriptor& spriteDescriptor) override;
 	virtual std::vector<SpriteID> LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors) override;
 	virtual SpriteID LoadTexture(const char* path, const std::string& tag) override;
 	virtual bool DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const override;
@@ -64,7 +64,7 @@ public:
 	struct Sprite
 	{
 		// the internal texture id... (ie the index in the texture array)
-		size_t textureId;
+		std::string textureId;
 		pt2df topLeft;
 		pt2df bottomRight;
 	};
@@ -84,7 +84,9 @@ private:
 
 	bool IsValidSpriteId(SpriteID spriteId) const { return m_sprites.size() > spriteId; }
 
-	std::vector<Texture> m_textures;
+	Texture& GetTexture(const std::string& path);
+
+	std::unordered_map<std::string, Texture> m_textures;
 	std::vector<Sprite> m_sprites;
 	std::unordered_map<std::string, size_t> m_tagsMap;
 

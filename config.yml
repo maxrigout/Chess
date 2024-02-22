@@ -3,11 +3,18 @@ chess:
     type: alpha-beta
     search-depth: 3
     timeout-ms: 10000
-  player1: human
-  player2: ai
+  player1: ai
+  player2: human
 system:
   windowing-system: sdl
+  session:
+    type: host
+    host:
+      port: 32000
+    join:
+      ip: 192.168.1.1
+      port: 32000
 renderer:
-  renderer-backend: opengl
+  renderer-backend: metal
   opengl-settings:
     render-mode: classic

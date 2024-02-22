@@ -79,6 +79,9 @@ public:
 	size_t GetStackSize() const { return m_moveStack.size(); }
 	void CreatePieces();
 
+	MoveEvent GetLastMoveEvent() const;
+	Move GetLastMove() const;
+
 private:
 	Cell* GetCell(const pt2di& pos);
 	const Cell* GetCell(const pt2di& pos) const;
