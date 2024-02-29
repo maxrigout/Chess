@@ -27,3 +27,6 @@ src/Utils/
 # Make
 *.make
 Makefile
+
+# CLion
+.idea/
