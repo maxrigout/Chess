@@ -70,6 +70,7 @@ public:
 	void DrawHourglass(const Renderer2D* renderer) const;
 	
 	std::string GetBoardCoordinates(const pt2di& position) const;
+	pt2di ToBoardCoordinates(const std::string& coords) const;
 
 	std::string ToString() const;
 	std::string MoveStackToString() const;
@@ -79,6 +80,7 @@ public:
 	size_t GetStackSize() const { return m_moveStack.size(); }
 	void CreatePieces();
 
+	bool IsFirstMove() const;
 	MoveEvent GetLastMoveEvent() const;
 	Move GetLastMove() const;
 

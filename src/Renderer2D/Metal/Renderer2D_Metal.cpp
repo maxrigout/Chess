@@ -493,7 +493,7 @@ bool Renderer2D_Metal::DrawSprite(const pt2di& topLeft, const vec2di& dimensions
 	}
 	catch (const std::exception& e)
 	{
-		LOG_ERROR("an error has occured with tag: " + tag + " - " + e.what());
+		LOG_ERROR("an error has occured with tag: ", tag, " - ", e.what());
 	}
 	return false;
 }

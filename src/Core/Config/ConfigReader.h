@@ -39,7 +39,7 @@ public:
 			}
 			catch (...)
 			{
-				LOG_FATAL("unable to locate child property <" + key + "> of " + m_name);
+				LOG_FATAL("unable to locate child property <", key, "> of ", m_name);
 				throw std::runtime_error("unable to locate child property <" + key + "> of " + m_name);
 			}
 		}
@@ -66,17 +66,17 @@ public:
 	
 public:
 
-	static const Property& GetFile(const std::string& fileName) 
-	{ 
+	static const Property& ReadYaml(const std::string& fileName) 
+	{
 		auto ite = s_files.find(fileName);
 		if (ite == s_files.end())
 		{
 			// load the file
-			Property file = ParseFile(fileName);
+			Property file = ParseYamlFile(fileName);
 			auto [existing_ite, insert_successful] = s_files.emplace(fileName, file);
 			if (!insert_successful)
 			{
-				LOG_ERROR("unable to cache the file: " + fileName);
+				LOG_ERROR("unable to cache the file: ", fileName);
 			}
 			ite = existing_ite;
 		}
@@ -85,7 +85,7 @@ public:
 
 	static void DumpConfig(const std::string& fileName)
 	{
-		Property file = GetFile(fileName);
+		Property file = ReadYaml(fileName);
 		std::string msg = fileName + '\n' + file.Dump();
 		LOG_DEBUG(msg);
 	}
@@ -96,7 +96,7 @@ private:
 
 	ConfigReader() {}
 
-	static Property ParseFile(const std::string& fileName)
+	static Property ParseYamlFile(const std::string& fileName)
 	{
 		std::fstream f(fileName);
 		if (!f.is_open())
@@ -124,7 +124,7 @@ private:
 
 		for (int i = 0; i < lines.size() - 1; ++i)
 		{
-			Property p = ParseProperty("", lines, i);
+			Property p = ParseYamlProperty("", lines, i);
 			properties.emplace(p.GetName(), p);
 		}
 
@@ -132,7 +132,7 @@ private:
 	}
 
 	// need to include the '.' in the parent name
-	static Property ParseProperty(const std::string& parentName, const std::vector<std::string>& lines, int& startIndex)
+	static Property ParseYamlProperty(const std::string& parentName, const std::vector<std::string>& lines, int& startIndex)
 	{
 		const std::string& line = lines[startIndex];
 		auto [key, value] = ExtractPropertyInfo(line);
@@ -150,7 +150,7 @@ private:
 			PropertyMap children;
 			while (currentIndent - indent == 1 && startIndex < lines.size() - 1)
 			{
-				Property childProperty = ParseProperty(parentName + key + '.', lines, ++startIndex);
+				Property childProperty = ParseYamlProperty(parentName + key + '.', lines, ++startIndex);
 				children.emplace(childProperty.GetName(), childProperty);
 				currentIndent = CountIndent(lines[startIndex + 1]);
 			}

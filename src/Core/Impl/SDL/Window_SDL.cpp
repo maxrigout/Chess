@@ -185,7 +185,7 @@ void Window_SDL::Create(const WindowCreationInfo& createInfo)
 	{
 		// Default OpenGL is fine.
 		if (SDL_GL_LoadLibrary(NULL) != 0)
-			LOG_ERROR(std::string("cannot load OpenGL library") + SDL_GetError());
+			LOG_ERROR("cannot load OpenGL library", SDL_GetError());
 		// Request an OpenGL 4.5 context (should be core)
 		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);

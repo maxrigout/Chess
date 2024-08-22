@@ -20,4 +20,5 @@ public:
 	int EvaluateBoard(Board* pBoard) const;
 
 private:
+	int m_searchDepth;
 };

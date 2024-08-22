@@ -16,7 +16,7 @@ class TestClass;
 class AIPlayer : public Player
 {
 public:
-	AIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeout);
+	AIPlayer(Board* pBoard, TEAM team, int processingTimeoutMs);
 	virtual ~AIPlayer();
 	virtual void Play(const PlayingContext& context) override;
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
@@ -39,6 +39,7 @@ protected:
 	std::chrono::time_point<std::chrono::high_resolution_clock> m_playBegin;
 	bool m_isPlaying = false;
 	bool m_shouldStopProcessing = false;
+	std::chrono::milliseconds m_processingTimeoutMs;
 
 	size_t m_stackSizeAtBeginningOfTurn = 0;
 
@@ -71,9 +72,6 @@ protected:
 	std::unique_ptr<Board> m_boardCopy;
 	std::unique_ptr<MaximizingPlayer> m_copyOfThis;
 	std::unique_ptr<MinimizingPlayer> m_copyOfOpponent;
-
-	int m_searchDepth;
-	std::chrono::milliseconds m_processingTimeoutMs;
 
 	friend class TestClass;
 

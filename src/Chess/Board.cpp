@@ -55,8 +55,6 @@ Board::Board(int width, int height)
 	}
 	// m_benchCursor = { m_width - 1, 0 };
 	m_benchCursor = { 0, 0 };
-	CreatePlayer1Pieces();
-	CreatePlayer2Pieces();
 }
 
 Board::Board(const Board& other)
@@ -319,6 +317,16 @@ std::string Board::GetBoardCoordinates(const pt2di& position) const
 	return boardCoords;
 }
 
+pt2di Board::ToBoardCoordinates(const std::string& coords) const
+{
+	pt2di position;
+
+	position.x = coords[0] - 'a';
+	position.y = m_height - coords[1] + '0';
+
+	return position;
+}
+
 std::string Board::ToString() const
 {
 	std::string out("+");
@@ -446,7 +454,7 @@ void Board::ResetCellsAttack()
 bool Board::UndoMove(int i)
 {
 	if (i)
-		LOG_DEBUG("undo move " + std::to_string(i));
+		LOG_DEBUG("undo move ", i);
 	if (m_moveStack.empty())
 	{
 		LOG_DEBUG("move stack is empty!");
@@ -657,9 +665,14 @@ MoveEvent Board::GetLastMoveEvent() const
 	return m_moveStack.top();
 }
 
+bool Board::IsFirstMove() const
+{
+	return m_moveStack.empty();
+}
+
 Move Board::GetLastMove() const
 {
-	return {m_moveStack.top().origin, m_moveStack.top().target};
+	return { m_moveStack.top().target, m_moveStack.top().origin };
 }
 
 // TODO move this inside a GUI manager class

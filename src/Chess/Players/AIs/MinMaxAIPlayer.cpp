@@ -3,9 +3,9 @@
 #include "Core/Logger.h"
 
 MinMaxAIPlayer::MinMaxAIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeout)
-	: AIPlayer(pBoard, team, searchDepth, processingTimeout)
+	: AIPlayer(pBoard, team, processingTimeout), m_searchDepth{ searchDepth }
 {
-	LOG_INFO("MinMaxAIPlayer");
+	LOG_INFO("MinMaxAIPlayer initialized, searchDepth = ", m_searchDepth);
 }
 
 void MinMaxAIPlayer::PlayThread()
@@ -35,7 +35,7 @@ std::vector<Move> MinMaxAIPlayer::GetBestMoves(const std::vector<Move>& moves)
 	// TODO: cleanup
 	int maxScore = std::numeric_limits<int>::min();
 	std::vector<Move> bestMoves = {};
-	LOG_INFO("analyzing " + std::to_string(moves.size()) + " moves");
+	LOG_INFO("analyzing ", moves.size(), " moves");
 	int i = 0;
 	Board board(*m_pBoard);
 	for (const auto& move : moves)
@@ -49,7 +49,7 @@ std::vector<Move> MinMaxAIPlayer::GetBestMoves(const std::vector<Move>& moves)
 		Piece* pieceToMove = board.GetPieceAtCell(move.origin);
 		if (pieceToMove == nullptr)
 		{
-			LOG_DEBUG("\n" + board.ToString() + "\n" + board.GetBoardCoordinates(move.origin) + " -> " + board.GetBoardCoordinates(move.target));
+			LOG_DEBUG("\n", board.ToString(), "\n", board.GetBoardCoordinates(move.origin), " -> ", board.GetBoardCoordinates(move.target));
 			LOG_DEBUG("piece is nullptr");
 			continue;
 		}

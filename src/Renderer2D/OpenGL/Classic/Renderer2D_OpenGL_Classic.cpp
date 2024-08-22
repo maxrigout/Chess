@@ -93,7 +93,7 @@ static Renderer2D_OpenGL_Classic::Texture LoadTextureToGPU(const char* path)
 	if (!imageData)
 	{
 		// cannot load image...
-		LOG_ERROR("unable to load image at: " + std::string(path));
+		LOG_ERROR("unable to load image at: ", path);
 		//stbi_image_free(imageData);
 
 		return {(unsigned int)-1, {-1, -1}};
@@ -180,7 +180,7 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	if (!success)
 	{
 		glGetShaderInfoLog(shaderVertex, sizeof(infoLog), nullptr, infoLog);
-		LOG_ERROR(std::string("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n") + infoLog);
+		LOG_ERROR("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n", infoLog);
 	}
 	// 2. fragment shader
 	unsigned int shaderFragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -190,7 +190,7 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	if (!success)
 	{
 		glGetShaderInfoLog(shaderFragment, sizeof(infoLog), nullptr, infoLog);
-		LOG_ERROR(std::string("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n") + infoLog);
+		LOG_ERROR("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n", infoLog);
 	}
 
 	// create the shader progam
@@ -202,7 +202,7 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	if (!success)
 	{
 		glGetProgramInfoLog(id, sizeof(infoLog), nullptr, infoLog);
-		LOG_ERROR(std::string("ERROR::SHADER::PROGRAM::LINK_FAILED\n") + infoLog);
+		LOG_ERROR("ERROR::SHADER::PROGRAM::LINK_FAILED\n", infoLog);
 	}
 
 	glDeleteShader(shaderVertex);
@@ -227,7 +227,7 @@ Renderer2D_OpenGL_Classic::Renderer2D_OpenGL_Classic()
 		m_uniformQuadTextureCoordsLoc[i] = glGetUniformLocation(m_shader, uniform);
 		if (m_uniformQuadTextureCoordsLoc[i] < 0)
 		{
-			LOG_ERROR("unable to find quadTextureCoords[" + std::to_string(i) + "] uniform location.");
+			LOG_ERROR("unable to find quadTextureCoords[", i, "] uniform location.");
 		}
 	}
 

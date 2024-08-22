@@ -1,5 +1,6 @@
 #include "VulkanConfig.h"
 #if USE_TUTORIAL
+#include "Core/Logger.h"
 #include "Renderer2D_Vulkan.h"
 #ifdef SUPPORT_VULKAN
 // following tutorial https://vulkan-tutorial.com/en/
@@ -504,10 +505,10 @@ std::vector<VkExtensionProperties> Renderer2D_Vulkan::getAvailableExtensions()
 	std::vector<VkExtensionProperties> extensions(extensionCount);
 	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
-	std::cout << "Available Extensions:\n";
+	LOG_INFO("Available Extensions:");
 	for (const auto& ext : extensions)
 	{
-		std::cout << '\t' << ext.extensionName << '\n';
+		LOG_INFO("\t", ext.extensionName);
 	}
 
 	return extensions;

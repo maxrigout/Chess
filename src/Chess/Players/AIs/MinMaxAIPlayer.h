@@ -5,7 +5,7 @@ class MinMaxAIPlayer : public AIPlayer
 {
 public:
 	MinMaxAIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeout);
-	~MinMaxAIPlayer() {}
+	~MinMaxAIPlayer() = default;
 
 	virtual void PlayThread();
 
@@ -20,4 +20,5 @@ public:
 	int EvaluateBoard(Board* pBoard) const;
 
 private:
+	int m_searchDepth;
 };

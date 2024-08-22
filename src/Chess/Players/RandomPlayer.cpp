@@ -6,7 +6,7 @@ RandomPlayer::RandomPlayer(Board* pBoard, TEAM team)
 {
 	long seed = time(0);
 	srand(seed);
-	LOG_DEBUG("AIPlayer seed: " + std::to_string(seed));
+	LOG_DEBUG("AIPlayer seed: ", seed);
 }
 
 RandomPlayer::~RandomPlayer()

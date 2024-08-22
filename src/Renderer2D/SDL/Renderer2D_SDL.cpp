@@ -23,10 +23,10 @@ Renderer2D_SDL::Renderer2D_SDL(SDL_Renderer* renderer)
 	SDL_GetWindowSize(SDL_RenderGetWindow(m_renderer), &m_windowDim.w, &m_windowDim.h);
 	m_viewPortDim = { viewPortRect.w, viewPortRect.h };
 	if (TTF_Init() < 0)
-		LOG_ERROR(std::string("Error initializing SDL_ttf: ") + TTF_GetError());
+		LOG_ERROR("Error initializing SDL_ttf: ", TTF_GetError());
 
 	if (IMG_Init(IMG_INIT_JPG) < 0)
-		LOG_ERROR(std::string("Error initializing SDL_image: ") + IMG_GetError());
+		LOG_ERROR("Error initializing SDL_image: ", IMG_GetError());
 
 	defaultFont = TTF_OpenFont(FONT_PATH, 64);
 	// defaultFont = TTF_OpenFont("Fonts/VirtualNote.ttf", 64);
@@ -269,7 +269,7 @@ bool Renderer2D_SDL::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, 
 	}
 	catch (const std::exception& e)
 	{
-		LOG_ERROR("an error has occured with tag: " + tag + " - " + e.what());
+		LOG_ERROR("an error has occured with tag: ", tag, " - ", e.what());
 	}
 	return false;
 }
@@ -284,7 +284,7 @@ vec2di Renderer2D_SDL::GetSpriteSize(const std::string& spriteTag) const
 	}
 	catch (const std::exception& e)
 	{
-		LOG_ERROR("an error has occured with tag: " + spriteTag + " - " + e.what());
+		LOG_ERROR("an error has occured with tag: ", spriteTag, " - ", e.what());
 	}
 	return { -1, -1 };
 }

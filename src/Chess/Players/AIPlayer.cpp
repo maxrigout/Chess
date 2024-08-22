@@ -10,13 +10,12 @@
 
 using namespace std::chrono_literals;
 
-AIPlayer::AIPlayer(Board* pBoard, TEAM team, int searchDepth, int processingTimeoutMs)
-	: Player(pBoard, team), m_searchDepth{ searchDepth }, m_processingTimeoutMs{ processingTimeoutMs }
+AIPlayer::AIPlayer(Board* pBoard, TEAM team, int processingTimeoutMs)
+	: Player(pBoard, team), m_processingTimeoutMs{ processingTimeoutMs }
 {
-	LOG_INFO("AI Player initialized, searchDepth = " + std::to_string(m_searchDepth));
 	long seed = time(0);
 	srand(seed);
-	LOG_DEBUG("AIPlayer seed: " + std::to_string(seed));
+	LOG_DEBUG("AIPlayer seed: ", seed);
 }
 
 AIPlayer::~AIPlayer()

@@ -158,7 +158,7 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	if (!success)
 	{
 		glGetShaderInfoLog(shaderVertex, sizeof(infoLog), nullptr, infoLog);
-		LOG_ERROR(std::string("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n") + infoLog);
+		LOG_ERROR("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n", infoLog);
 	}
 	// 2. fragment shader
 	unsigned int shaderFragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -168,7 +168,7 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	if (!success)
 	{
 		glGetShaderInfoLog(shaderFragment, sizeof(infoLog), nullptr, infoLog);
-		LOG_ERROR(std::string("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n") + infoLog);
+		LOG_ERROR("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n", infoLog);
 	}
 
 	// create the shader progam
@@ -180,7 +180,7 @@ static int CreateShader(const char* v_shader, const char* v_fragment)
 	if (!success)
 	{
 		glGetProgramInfoLog(id, sizeof(infoLog), nullptr, infoLog);
-		LOG_ERROR(std::string("ERROR::SHADER::PROGRAM::LINK_FAILED\n") + infoLog);
+		LOG_ERROR("ERROR::SHADER::PROGRAM::LINK_FAILED\n", infoLog);
 	}
 
 	glDeleteShader(shaderVertex);
@@ -434,7 +434,7 @@ bool Renderer2D_OpenGL_Batch::DrawSprite(const pt2di& topLeft, const vec2di& dim
 	}
 	catch (const std::exception& e)
 	{
-		LOG_ERROR("an error has occured with tag: " + tag + " - " + e.what());
+		LOG_ERROR("an error has occured with tag: ", tag, " - ", e.what());
 	}
 	return false;
 }

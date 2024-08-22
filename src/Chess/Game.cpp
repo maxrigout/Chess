@@ -128,7 +128,7 @@ void Game::LoadGraphics()
 		std::ifstream f(path);
 		if (!f.is_open())
 		{
-			LOG_ERROR(std::string("cannot open file: ") + path);
+			LOG_ERROR("cannot open file: ", path);
 			return SpriteDescriptor{};
 		}
 		nlohmann::json data = nlohmann::json::parse(f);
@@ -160,7 +160,7 @@ void Game::LoadGraphics()
 		}
 		else
 		{
-			LOG_ERROR("got unknown offset type when reading sprite file: " + offsetType);
+			LOG_ERROR("got unknown offset type when reading sprite file: ", offsetType);
 		}
 
 		return desc;
