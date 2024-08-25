@@ -101,7 +101,8 @@ project "Chess"
 			"Metal.framework",
 			"QuartzCore.framework",
 			"Foundation.framework",
-			"MetalKit.framework"
+			"MetalKit.framework",
+			"curl"
 		}
 		linkoptions
 		{

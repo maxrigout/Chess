@@ -5,3 +5,4 @@
 #include "Chess/Players/HumanPlayer.h"
 #include "Chess/Players/NetworkPlayer.h"
 #include "Chess/Players/RandomPlayer.h"
+#include "Chess/Players/AIs/LLMPlayer.h"

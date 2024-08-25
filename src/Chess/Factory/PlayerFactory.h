@@ -1,6 +1,7 @@
 #pragma once
 #include "Chess/Players/Players.h"
 #include "Chess/Config/ChessConfig.h"
+#include "Core/Config/SecretManager.h"
 #include "Chess/Exceptions/UnknownAITypeException.h"
 #include "Chess/Exceptions/UnknownPlayerTypeException.h"
 #include <memory>
@@ -47,11 +48,21 @@ private:
 			return new HumanPlayer(pBoard, team);
 		else if (playerType == "ai")
 			return CreateAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetType());
+		else if (playerType == "llm")
+			return CreateLLMPlayer(pBoard, team, ChessConfiguration::GetLLMProperties().GetProvider());
 		else if (playerType == "network")
 			return new NetworkPlayer(pBoard, team);
 		else if (playerType == "random")
 			return new RandomPlayer(pBoard, team);
 
 		throw std::runtime_error("unknown player type: " + playerType);
+	}
+
+	static Player* CreateLLMPlayer(Board* pBoard, TEAM team, const std::string& llmProvider)
+	{
+		if (llmProvider == "gemini")
+			return new LLMPlayer(pBoard, team, SecretManager::GetSecret("gemini"));
+
+		throw std::runtime_error("unknown llm type: " + llmProvider);
 	}
 };

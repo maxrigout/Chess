@@ -6,13 +6,17 @@
 #include "Chess/Config/ChessConfig.h"
 #define RENDERER_CONFIG_IMPL
 #include "Renderer2D/Config/RendererConfiguration.h"
+#define SECRET_CONFIG_IMPL
+#include "Core/Config/SecretManager.h"
 
 #include "Chess/Game.h"
 #include "Core/Logger.h"
 
+#include "Core/HTTP/APIClient.h"
+#include "Core/LLMs/gemini/GeminiAgent.h"
+
 int main(int argc, char** argv)
 {
-
 	const char* missingPools = getenv("OBJC_DEBUG_MISSING_POOLS");
 
 	if (missingPools == nullptr)
@@ -48,9 +52,12 @@ int main(int argc, char** argv)
 
 	try
 	{
-		SystemConfiguration::Init(ConfigReader::GetFile("config.yml")["system"]);
-		ChessConfiguration::Init(ConfigReader::GetFile("config.yml")["chess"]);
-		RendererConfiguration::Init(ConfigReader::GetFile("config.yml")["renderer"]);
+		SystemConfiguration::Init(ConfigReader::ReadYaml("config.yml")["system"]);
+		ChessConfiguration::Init(ConfigReader::ReadYaml("config.yml")["chess"]);
+		RendererConfiguration::Init(ConfigReader::ReadYaml("config.yml")["renderer"]);
+		
+		SecretManager::Init(SystemConfiguration::GetSecretsFolder());
+
 		LOG_DEBUG("hello");
 		LOG_DEBUG(argv[0]);
 		Game game;

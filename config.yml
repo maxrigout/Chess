@@ -3,9 +3,12 @@ chess:
     type: alpha-beta
     search-depth: 3
     timeout-ms: 10000
-  player1: ai
+  llm-properties:
+    provider: gemini
+  player1: llm
   player2: human
 system:
+  secrets-folder: private/apiKeys/
   windowing-system: sdl
   session:
     type: host

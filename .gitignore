@@ -9,6 +9,7 @@ resources/
 **/.DS_Store
 .DS_Store
 *.app
+private/
 
 # Windows
 .vs/
