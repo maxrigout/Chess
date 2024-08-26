@@ -98,7 +98,9 @@ Alpha-Beta-Pruning: https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 - [x] Game configurator (ie configure the AI difficulty, human vs human etc..)
 - [ ] GUI
 - [ ] Ability to reset a game
-- [ ] Piece promotion (and other unimplemented chess rules)
+- [ ] unimplemented chess rules
+   - [ ] Pawn promotion
+   - [ ] En Passant
 - [ ] Universal Chess Interface ([https://en.wikipedia.org/wiki/Universal_Chess_Interface](https://en.wikipedia.org/wiki/Universal_Chess_Interface))
 - [ ] integrate ImGUI
 

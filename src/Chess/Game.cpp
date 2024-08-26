@@ -141,7 +141,7 @@ void Game::LoadGraphics()
 		desc.tag = data["tag"];
 
 		// offsetType
-		std::string offsetType = data["offsetType"];
+		std::string offsetType = data["offset_type"];
 		if (offsetType == "Top Left")
 		{
 			desc.offsetType = SpriteOffsetType::TopLeft;
