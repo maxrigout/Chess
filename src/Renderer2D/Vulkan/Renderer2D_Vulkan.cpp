@@ -671,7 +671,7 @@ std::vector<const char*> Renderer2D_Vulkan::getRequiredExtensions()
 
 #ifdef __APPLE__
 	std::cout << "MacOS Detected: ext VK_KHR_portability_enumeration required!\n";
-	extensions.push_back("VK_KHR_portability_enumeration");
+	extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif
 
 	return extensions;

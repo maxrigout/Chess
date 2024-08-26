@@ -57,7 +57,7 @@ void Game::InitBoard()
 	if (m_isBoardInitialized)
 		return;
 
-	m_pBoard = new Board(8, 8);
+	m_pBoard = std::make_unique<Board>(8, 8);
 	m_pBoard->SetScreenDim(m_pRenderer->GetViewPortDim());
 	vec2di baseMargin = { 95, 95 };
 	vec2di baseCellSize = { 137, 137 };
@@ -100,10 +100,10 @@ void Game::InitBoard()
 
 	// Player set up
 	// the pieces set up should be done in the constructor
-	m_pPlayer1 = PlayerFactory::CreatePlayer1(m_pBoard);
-	m_pPlayer2 = PlayerFactory::CreatePlayer2(m_pBoard);
+	m_pPlayer1 = PlayerFactory::CreatePlayer1(m_pBoard.get());
+	m_pPlayer2 = PlayerFactory::CreatePlayer2(m_pBoard.get());
 
-	m_pActivePlayer = m_pPlayer1;
+	m_pActivePlayer = m_pPlayer1.get();
 	m_pPlayer2->AttackCells();
 	m_pActivePlayer->BeginTurn();
 	m_activeTeam = m_pActivePlayer->GetTeam();
@@ -115,9 +115,9 @@ void Game::FreeBoard()
 	if (!m_isBoardInitialized)
 		return;
 
-	delete m_pPlayer2;
-	delete m_pPlayer1;
-	delete m_pBoard;
+	m_pPlayer2 = nullptr;
+	m_pPlayer1 = nullptr;
+	m_pBoard = nullptr;
 
 	m_isBoardInitialized = false;
 }
@@ -320,13 +320,13 @@ void Game::SwitchPlayers()
 	player = (player + 1) % 2;
 	if (player == 0)
 	{
-		m_pActivePlayer = m_pPlayer1;
-		m_pOtherPlayer = m_pPlayer2;
+		m_pActivePlayer = m_pPlayer1.get();
+		m_pOtherPlayer = m_pPlayer2.get();
 	}
 	else
 	{
-		m_pActivePlayer = m_pPlayer2;
-		m_pOtherPlayer = m_pPlayer1;
+		m_pActivePlayer = m_pPlayer2.get();
+		m_pOtherPlayer = m_pPlayer1.get();
 	}
 	m_pActivePlayer->BeginTurn();
 	m_activeTeam = m_pActivePlayer->GetTeam();

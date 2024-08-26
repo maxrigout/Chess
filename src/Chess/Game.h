@@ -63,12 +63,12 @@ private:
 	pt2di m_hoveredCellPos{ -1, 0 };
 	pt2di m_selectedCellPos{ -1, 0 };
 
-	Board* m_pBoard = nullptr;
+	std::unique_ptr<Board> m_pBoard;
 	TEAM m_activeTeam = TEAM::NONE;
 	Player* m_pActivePlayer = nullptr;
 	Player* m_pOtherPlayer = nullptr;
-	Player* m_pPlayer1 = nullptr;
-	Player* m_pPlayer2 = nullptr;
+	std::unique_ptr<Player> m_pPlayer1;
+	std::unique_ptr<Player> m_pPlayer2;
 
 	unsigned int m_turnNumber = 0;
 

@@ -18,50 +18,47 @@ enum class PlayerType
 class PlayerFactory
 {
 public:
-	std::unique_ptr<Player> CreatePlayer1(std::weak_ptr<Board> pBoard, PlayerType playerType);
-	std::unique_ptr<Player> CreatePlayer2(std::weak_ptr<Board> pBoard, PlayerType playerType);
-
-	static Player* CreatePlayer1(Board* pBoard, const std::string& playerType = ChessConfiguration::GetPlayerOneType())
+	static std::unique_ptr<Player> CreatePlayer1(Board* pBoard, const std::string& playerType = ChessConfiguration::GetPlayerOneType())
 	{
 		return CreatePlayer(pBoard, TEAM::ONE, playerType);
 	}
 
-	static Player* CreatePlayer2(Board* pBoard, const std::string& playerType = ChessConfiguration::GetPlayerTwoType())
+	static std::unique_ptr<Player> CreatePlayer2(Board* pBoard, const std::string& playerType = ChessConfiguration::GetPlayerTwoType())
 	{
 		return CreatePlayer(pBoard, TEAM::TWO, playerType);
 	}
 
-	static AIPlayer* CreateAIPlayer(Board* pBoard, TEAM team, const std::string& aiType = ChessConfiguration::GetAIProperties().GetType())
+	static std::unique_ptr<AIPlayer> CreateAIPlayer(Board* pBoard, TEAM team, const std::string& aiType = ChessConfiguration::GetAIProperties().GetType())
 	{
 		if (aiType == "min-max")
-			return new MinMaxAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
+			return std::make_unique<MinMaxAIPlayer>(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
 		else if (aiType == "alpha-beta")
-			return new AlphaBetaAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
+			return std::make_unique<AlphaBetaAIPlayer>(pBoard, team, ChessConfiguration::GetAIProperties().GetSearchDepth(), ChessConfiguration::GetAIProperties().GetTimeoutMs());
 
 		throw std::runtime_error("unknown ai type: " + aiType);
 	}
 
 private:
-	static Player* CreatePlayer(Board* pBoard, TEAM team, const std::string& playerType)
+	static std::unique_ptr<Player> CreatePlayer(Board* pBoard, TEAM team, const std::string& playerType)
 	{
 		if (playerType == "human")
-			return new HumanPlayer(pBoard, team);
+			return std::make_unique<HumanPlayer>(pBoard, team);
 		else if (playerType == "ai")
 			return CreateAIPlayer(pBoard, team, ChessConfiguration::GetAIProperties().GetType());
 		else if (playerType == "llm")
 			return CreateLLMPlayer(pBoard, team, ChessConfiguration::GetLLMProperties().GetProvider());
 		else if (playerType == "network")
-			return new NetworkPlayer(pBoard, team);
+			return std::make_unique<NetworkPlayer>(pBoard, team);
 		else if (playerType == "random")
-			return new RandomPlayer(pBoard, team);
+			return std::make_unique<RandomPlayer>(pBoard, team);
 
 		throw std::runtime_error("unknown player type: " + playerType);
 	}
 
-	static Player* CreateLLMPlayer(Board* pBoard, TEAM team, const std::string& llmProvider)
+	static std::unique_ptr<Player> CreateLLMPlayer(Board* pBoard, TEAM team, const std::string& llmProvider)
 	{
 		if (llmProvider == "gemini")
-			return new LLMPlayer(pBoard, team, SecretManager::GetSecret("gemini"));
+			return std::make_unique<LLMPlayer>(pBoard, team, SecretManager::GetSecret("gemini"));
 
 		throw std::runtime_error("unknown llm type: " + llmProvider);
 	}

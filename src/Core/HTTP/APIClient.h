@@ -56,13 +56,10 @@ class APIClient
 public:
 	APIClient(const std::string& baseUrl)
 	{
-		if (baseUrl[baseUrl.size() - 1] != '/')
+		m_baseUrl = baseUrl;
+		if (m_baseUrl[m_baseUrl.length() - 1] != '/')
 		{
-			m_baseUrl = baseUrl + "/";
-		}
-		else
-		{
-			m_baseUrl = baseUrl;
+			m_baseUrl += "/";
 		}
 	}
 

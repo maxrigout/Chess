@@ -66,12 +66,12 @@ struct vector2d
 
 	vector2d<T>& Normalize()
 	{
-		T norm = (*this) * (*this);
-		if (norm == 0)
+		T norm2 = Norm2();
+		if (norm2 == 0)
 		{
 			return *this;
 		}
-		*this = *this / norm;
+		*this = *this / sqrt(norm2);
 		return *this;
 	}
 	vector2d<T>& Rotate(double theta)
@@ -82,21 +82,21 @@ struct vector2d
 		x = x * c + y * s;
 		y = tmp * -s + y * c;
 		return *this;
-	};
+	}
 	vector2d<T>& Rotate90()
 	{
 		T tmp = x;
 		x = -y;
 		y = tmp;
 		return *this;
-	};
+	}
 	vector2d<T>& Rotate270()
 	{
 		T tmp = -x;
 		x = y;
 		y = tmp;
 		return *this;
-	};
+	}
 
 	bool IsColinear(const vector2d<T>& v) const
 	{

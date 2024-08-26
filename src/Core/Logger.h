@@ -35,7 +35,7 @@ public:
 	static void Tag(const char* tag, const char* file, const char* function, int lineNumber, TArgs... args)
 	{
 		std::lock_guard<std::mutex> lock(s_mu);
-		s_out << "[" << tag << "][] " << LogThreadId() << "- ";
+		s_out << "[" << tag << "][] " << LogThreadId() << "[" << file << "::" << lineNumber << "]" << "- ";
 		PrintArgs(args...);
 	}
 

@@ -41,10 +41,11 @@ std::vector<Move> AlphaBetaAIPlayer::GetBestMoves(const std::vector<Move>& moves
 	for (const auto& move : moves)
 	{
 		char message[200] = { 0 };
-		snprintf(message, 200, "move %d: (%s -> %s)",
+		snprintf(message, sizeof(message), "move %d: (%s -> %s)",
 			i,
 			m_pBoard->GetBoardCoordinates(move.origin).c_str(),
 			m_pBoard->GetBoardCoordinates(move.target).c_str());
+		// LOG_DEBUG("move ", i, ": (", m_pBoard->GetBoardCoordinates(move.origin).c_str(), " -> ", m_pBoard->GetBoardCoordinates(move.target).c_str(), ")");
 		LOG_DEBUG(message);
 		Piece* pieceToMove = board.GetPieceAtCell(move.origin);
 		if (pieceToMove == nullptr)
@@ -57,7 +58,7 @@ std::vector<Move> AlphaBetaAIPlayer::GetBestMoves(const std::vector<Move>& moves
 		// we're searching searchDepth - 1 because we're already searching level 1 in this function.
 		int moveScore = alphabeta(&board, m_searchDepth - 1, std::numeric_limits<int>::min(), std::numeric_limits<int>::max(), false);
 		// int moveScore = minimax(&board, searchDepth - 1, false);
-		snprintf(message, 200, "move %d: %c (%s -> %s) - score %d (%d)",
+		snprintf(message, sizeof(message), "move %d: %c (%s -> %s) - score %d (%d)",
 			i,
 			pieceToMove->Type(),
 			m_pBoard->GetBoardCoordinates(move.origin).c_str(),

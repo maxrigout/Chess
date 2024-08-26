@@ -6,6 +6,18 @@
 
 static std::string initialPrompt = "you are playing chess with me. You need to give me your moves with a start cell and end cell. return your moves in a json format like so: { \"start\": \"startCell\", \"end\": \"endCell\" }. ";
 
+static constexpr std::string_view TeamToString(TEAM team)
+{
+	switch (team)
+	{
+		case TEAM::NONE: return "None";
+		case TEAM::ONE: return "One";
+		case TEAM::TWO: return "Two";
+	}
+
+	return "unknown team";
+}
+
 LLMPlayer::LLMPlayer(Board* pBoard, TEAM team, const std::string& apiKey)
 	: AIPlayer(pBoard, team, 10000), m_agent(apiKey)
 {
@@ -52,6 +64,23 @@ void LLMPlayer::PlayThread()
 	if (piece == nullptr)
 	{
 		LOG_ERROR("no piece found at: " + origin);
+	}
+	if (piece->Team() != GetTeam())
+	{
+		LOG_ERROR("piece not from same team! (selected piece from team ", TeamToString(piece->Team()), " when player is part of team ", TeamToString(GetTeam()), ")");
+	}
+
+	// check for invalid moves
+	piece->CalculateAvailableMoves();
+	const auto& availableMoves = piece->GetAvailableMoves();
+	auto ite = std::find_if(availableMoves.begin(), availableMoves.end(), [move](const pt2di& m)
+	{
+		return m.x == move.target.x && m.y == move.target.y;
+	});
+
+	if (ite == availableMoves.end())
+	{
+		LOG_ERROR("not a legal move for ", piece->Type(), "! (", move.origin.x, ", ", move.origin.y, ") to (", move.target.y, ", ", move.target.y, ")");
 	}
 	
 	piece->Move(move.target);
