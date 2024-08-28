@@ -82,6 +82,11 @@
 		"__verbose_abort": "cpp",
 		"bit": "cpp",
 		"thread": "cpp",
-		"filesystem": "cpp"
+		"filesystem": "cpp",
+		"charconv": "cpp",
+		"execution": "cpp",
+		"forward_list": "cpp",
+		"span": "cpp",
+		"valarray": "cpp"
 	},
 }

@@ -18,6 +18,18 @@ static constexpr std::string_view TeamToString(TEAM team)
 	return "unknown team";
 }
 
+static bool isValidCoordinate(std::string_view coord)
+{
+	return coord.length() == 2
+		&& ('h' - coord[0]) >= 0
+		&& ('8' - coord[1]) >= 0;
+}
+
+static bool isValidCoordinate(const pt2di& pt, Board* pBoard)
+{
+	return pt.x >= 0 && pt.x < pBoard->GetWidth() && pt.y >= 0 && pt.y < pBoard->GetHeight();
+}
+
 LLMPlayer::LLMPlayer(Board* pBoard, TEAM team, const std::string& apiKey)
 	: AIPlayer(pBoard, team, 10000), m_agent(apiKey)
 {
@@ -54,11 +66,31 @@ void LLMPlayer::PlayThread()
 	std::string origin = res["start"].get<std::string>();
 	std::string target = res["end"].get<std::string>();
 
+	// validate coordinates
+	if (!isValidCoordinate(origin))
+	{
+		LOG_ERROR("wrong origin coordinate");
+	}
+	if (!isValidCoordinate(target))
+	{
+		LOG_ERROR("wrong target coordinate");
+	}
+
 	// convert to coordinates
 	Move move {
 		.origin = m_pBoard->ToBoardCoordinates(origin),
 		.target = m_pBoard->ToBoardCoordinates(target)
 	};
+
+	if (!isValidCoordinate(move.origin, m_pBoard))
+	{
+		LOG_ERROR("wrong origin coordinate");
+	}
+
+	if (!isValidCoordinate(move.target, m_pBoard))
+	{
+		LOG_ERROR("wrong target coordinate");
+	}
 
 	Piece* piece = m_pBoard->GetPieceAtCell(move.origin);
 	if (piece == nullptr)
