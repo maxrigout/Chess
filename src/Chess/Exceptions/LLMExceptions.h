@@ -1,0 +1,6 @@
+#include "Chess/Exceptions/LLMResponseDeserializationChessException.h"
+#include "Chess/Exceptions/LLMInvalidDataException.h"
+#include "Chess/Exceptions/LLMInvalidCellChessException.h"
+#include "Chess/Exceptions/LLMNoPieceChessException.h"
+#include "Chess/Exceptions/LLMInvalidPieceChessException.h"
+#include "Chess/Exceptions/LLMInvalidMoveChessException.h"

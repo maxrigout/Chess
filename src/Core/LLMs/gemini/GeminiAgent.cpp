@@ -11,6 +11,11 @@ GeminiAgent::GeminiAgent(const std::string& apiKey)
 	m_headers.add("Content-Type", "application/json");
 }
 
+void GeminiAgent::Reset()
+{
+	m_history.clear();
+}
+
 std::string GeminiAgent::Send(const std::string& msg)
 {
 	m_history.push_back({ ROLE::USER, msg });

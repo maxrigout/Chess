@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <string_view>
 
 #include "Chess/Common.h"
 #include "Chess/Board.h"
@@ -34,6 +35,7 @@ public:
 	void ResetCaptured();
 	const pt2di& Pos() const { return m_boardPosition; }
 	char Type() const { return m_pieceType; }
+	std::string_view GetTypeString() const;
 	int GetMod(TEAM team) const { return ((IsSameTeam(team)) ? 1 : -1); }
 	const std::vector<pt2di>& GetAvailableMoves();
 	void ResetAvailableMoves();

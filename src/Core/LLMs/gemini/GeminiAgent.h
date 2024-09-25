@@ -2,16 +2,19 @@
 
 #include <vector>
 
+#include "../LLMAgent.h"
 #include "Core/HTTP/APIClient.h"
 
-class GeminiAgent
+class GeminiAgent : public LLMAgent
 {
 public:
 	GeminiAgent(const std::string& apiKey);
 
-	~GeminiAgent() = default;
+	virtual ~GeminiAgent() = default;
 
-	std::string Send(const std::string& msg);
+	void Reset() override;
+
+	std::string Send(const std::string& msg) override;
 
 private:
 	enum class ROLE

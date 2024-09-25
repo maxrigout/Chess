@@ -22,6 +22,21 @@ char TeamToChar(TEAM team)
 	return 'U'; // U for unknown
 }
 
+std::string_view TypeToString(char type)
+{
+	switch (type)
+	{
+	case 'P': return "Pawn";
+	case 'T': return "Rook";
+	case 'H': return "Knight";
+	case 'B': return "Bishop";
+	case 'Q': return "Queen";
+	case 'K': return "King";
+	}
+
+	return "Unknown";
+}
+
 Piece::Piece(Board* pBoard, char type, TEAM team, const pt2di& initialBoardPosition, const std::vector<vec2di>& moves)
 {
 	m_isFirstMove = true;
@@ -129,4 +144,9 @@ void Piece::AddAvailableMove(const pt2di& target)
 {
 	m_availableMoves.push_back(target);
 	m_isMovesCalculated = true;
+}
+
+std::string_view Piece::GetTypeString() const
+{
+	return TypeToString(m_pieceType);
 }
