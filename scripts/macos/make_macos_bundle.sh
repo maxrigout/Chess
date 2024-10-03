@@ -1,3 +1,5 @@
+# !/bin/bash
+
 INPUT_BIN=$1
 OUTPUT_BUNDLE_NAME=$2
 

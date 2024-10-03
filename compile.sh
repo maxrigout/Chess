@@ -1,3 +1,5 @@
+# !/bin/bash
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 COMPILER_DIR=~/dev/VulkanSDK/1.3.250.1/macOS/bin
 SHADER_DIR=shaders/glsl

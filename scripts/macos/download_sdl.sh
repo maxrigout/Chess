@@ -1,3 +1,5 @@
+# !/bin/bash
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 $SCRIPT_DIR/install_framework.sh SDL2 https://github.com/libsdl-org/SDL/releases/download/release-2.26.3/SDL2-2.26.3.dmg

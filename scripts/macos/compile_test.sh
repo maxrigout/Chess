@@ -1,3 +1,5 @@
+# !/bin/bash
+
 PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd ../.. && pwd )
 
 rm -r $PROJECT_DIR/obj/test

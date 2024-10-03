@@ -1,6 +1,9 @@
+# !/bin/bash
+
 DEFINE=$1
 PROJECT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd ../.. && pwd )
 
+# check if a defined has been passed
 if [ -z $DEFINE ]; then
 	DEFINE=
 else
