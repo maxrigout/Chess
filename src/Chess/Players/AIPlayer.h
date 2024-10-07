@@ -8,6 +8,7 @@
 #include <thread>
 #include <memory>
 #include <chrono>
+#include <exception>
 
 #define MAKE_COPIES 1
 
@@ -22,6 +23,7 @@ public:
 	virtual void DrawLastMove(const Renderer2D* renderer) const override;
 	virtual bool AllowsUndos() const override { return true; }
 
+	void PlayThreadWrapper();
 	virtual void PlayThread() = 0;
 
 	void TestMove(Piece* piece, const Move& move);
@@ -68,6 +70,8 @@ protected:
 		virtual void Play(const PlayingContext& context) {}
 		void Minimize();
 	};
+
+	std::exception_ptr m_exceptionPtr = nullptr;
 
 	std::unique_ptr<Board> m_boardCopy;
 	std::unique_ptr<MaximizingPlayer> m_copyOfThis;

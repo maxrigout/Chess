@@ -1,5 +1,6 @@
 out
 test
+llm_conversation.txt
 
 # MacOS
 deps/

@@ -58,7 +58,7 @@ private:
 	static std::unique_ptr<Player> CreateLLMPlayer(Board* pBoard, TEAM team, const std::string& llmProvider)
 	{
 		if (llmProvider == "gemini")
-			return std::make_unique<LLMPlayer>(pBoard, team, SecretManager::GetSecret("gemini"));
+			return std::make_unique<GeminiLLMPlayer>(pBoard, team, SecretManager::GetSecret("gemini"));
 
 		throw std::runtime_error("unknown llm type: " + llmProvider);
 	}

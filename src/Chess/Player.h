@@ -45,6 +45,7 @@ public:
 	bool IsPieceSelected() { return m_selectedPiece != nullptr; }
 	void SelectPiece(const pt2di& position);
 	MoveInfo MoveSelectedPiece(const pt2di& position);
+	std::string GetBoardAsString() const;
 
 protected:
 	void UndoMove(const Move& move, char old_cell);

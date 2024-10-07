@@ -83,10 +83,10 @@ public:
 	bool IsFirstMove() const;
 	MoveEvent GetLastMoveEvent() const;
 	Move GetLastMove() const;
+	const Cell* GetCell(const pt2di& pos) const;
 
 private:
 	Cell* GetCell(const pt2di& pos);
-	const Cell* GetCell(const pt2di& pos) const;
 	void DrawBoardBasic(const Renderer2D* renderer) const;
 	void DrawBoardTextured(const Renderer2D* renderer) const;
 

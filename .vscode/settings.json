@@ -87,6 +87,7 @@
 		"execution": "cpp",
 		"forward_list": "cpp",
 		"span": "cpp",
-		"valarray": "cpp"
+		"valarray": "cpp",
+		"print": "cpp"
 	},
 }

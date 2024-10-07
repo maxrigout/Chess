@@ -35,6 +35,22 @@ std::string GeminiAgent::Send(const std::string& msg)
 	return m_history.back().parts;
 }
 
+void GeminiAgent::dump(std::ostream& os) const
+{
+	for (const auto& history: m_history)
+	{
+		if (history.role == ROLE::USER)
+		{
+			os << "you: ";
+		}
+		else
+		{
+			os << "gemini: ";
+		}
+		os << history.parts << "\n\n";
+	}
+}
+
 std::string GeminiAgent::makePayload(const std::string& msg)
 {
 	nlohmann::json j;

@@ -2,13 +2,52 @@
 
 #include "Core/Logger.h"
 
+#include <sstream>
+#include <fstream>
+
 #include <nlohmann/json.hpp>
 
 #include "Chess/Exceptions/LLMExceptions.h"
 
 static std::string initialPrompt = "you are playing chess with me. You need to give me your moves with a start cell and end cell. return your moves in a json format like so: { \"start\": \"startCell\", \"end\": \"endCell\" }. ";
 
-static constexpr std::string_view TeamToString(TEAM team)
+char to_lowercase(char c)
+{
+	return (c >= 'A' && c <= 'Z') ? c - 'A' + 'a' : c;
+}
+
+char to_uppercase(char c)
+{
+	return (c >= 'a' && c <= 'z') ? c - 'a' + 'A' : c;
+}
+
+std::string to_lowercase(const std::string& str)
+{
+	std::stringstream ss;
+	for (char c : str)
+	{
+		if (c >= 'A' && c <= 'Z')
+			ss << (char)(c - 'A' + 'a');
+		else
+			ss << c;
+	}
+	return ss.str();
+}
+
+std::string to_uppercase(const std::string& str)
+{
+	std::stringstream ss;
+	for (char c : str)
+	{
+		if (c >= 'a' && c <= 'z')
+			ss << (char)(c - 'a' + 'A');
+		else
+			ss << c;
+	}
+	return ss.str();
+}
+
+constexpr std::string_view TeamToString(TEAM team)
 {
 	switch (team)
 	{
@@ -22,6 +61,7 @@ static constexpr std::string_view TeamToString(TEAM team)
 
 static inline bool isValidCoordinate(std::string_view coord)
 {
+	// if ((coord[0] >= 'a' && coord[0] <= 'h') || (coord[0] >= 'A' && coord[0] <= 'H'))
 	return coord.length() == 2
 		&& ('h' - coord[0]) >= 0
 		&& ('8' - coord[1]) >= 0;
@@ -43,37 +83,67 @@ LLMPlayer::LLMPlayer(Board* pBoard, TEAM team, const std::string& apiKey)
 	LOG_INFO("LLMPlayer initialized!");
 }
 
+LLMPlayer::~LLMPlayer()
+{
+	std::ofstream f;
+	f.open("llm_conversation.txt", std::fstream::out);
+	if (!f.is_open())
+	{
+		LOG_WARN("unable to dump the conversation!");
+	}
+	else
+	{
+		m_agent.dump(f);
+	}
+
+	f.close();
+}
+
+// void LLMPlayer::PlayThread()
+// {
+// 	// ask for move from llm
+	
+// 	// attempt n times:
+
+// 	// do validation
+
+// 	// if there's an error during validation
+// 	//     need to communicate the error to the LLM
+// 	//     go to "do validation"
+
+	
+// }
+
 void LLMPlayer::PlayThread()
 {
-	Move move;
 	const size_t maxAttempts = 5;
 	size_t currentAttempt;
 	bool played = false;
 	std::string prompt;
+
+	if (!m_isAgentInitialized)
+	{
+		if (m_pBoard->IsFirstMove())
+		{
+			prompt = GetInitialYouGoFirstPrompt();
+		}
+		else
+		{
+			Move lastMove = m_pBoard->GetLastMove();
+			prompt = GetInitialYouGoSecondPrompt(lastMove);
+		}
+		m_isAgentInitialized = true;
+	}
+	else
+	{
+		Move lastMove = m_pBoard->GetLastMove();
+		prompt = GetMovePrompt(lastMove);
+	}
+
 	for (currentAttempt = 0; currentAttempt < maxAttempts && m_isPlaying; currentAttempt++)
 	{
 		try
 		{
-			if (!m_isAgentInitialized)
-			{
-				if (m_pBoard->IsFirstMove())
-				{
-					prompt = GetInitialYouGoFirstPrompt();
-				}
-				else
-				{
-					Move lastMove = m_pBoard->GetLastMove();
-					prompt = GetInitialYouGoSecondPrompt(lastMove);
-				}
-				m_isAgentInitialized = true;
-			}
-			else
-			{
-				Move lastMove = m_pBoard->GetLastMove();
-				prompt = GetMovePrompt(lastMove);
-			}
-
-
 			// Send the prompt to the LLM
 			// Receive the message back from the LLM
 			std::string llmResponse = m_agent.Send(prompt);
@@ -82,8 +152,8 @@ void LLMPlayer::PlayThread()
 			// validate the data that's received
 			nlohmann::json llmJsonResponse = ParseResponse(llmResponse);
 			
-			std::string origin = llmJsonResponse["start"].get<std::string>();
-			std::string target = llmJsonResponse["end"].get<std::string>();
+			std::string origin = to_lowercase(llmJsonResponse["start"].get<std::string>());
+			std::string target = to_lowercase(llmJsonResponse["end"].get<std::string>());
 
 			// validate data
 			if (!isValidCoordinate(origin))
@@ -152,35 +222,45 @@ void LLMPlayer::PlayThread()
 		}
 		catch (const LLMDeserializationChessException& e)
 		{
-			// TODO:
+			LOG_WARN("error while deserializing the response: ", e.what());
+			prompt = OnDeserializationErrorPrompt(e.getData());
 		}
 		catch (const LLMInvalidDataChessException& e)
 		{
-			OnInvalidDataReceived();
+			LOG_WARN("received invalid data from LLM: ", e.what());
+			prompt = OnInvalidDataReceivedPrompt(e.getType(), e.getData());
 		}
 		catch (const LLMInvalidCellChessException& e)
 		{
-			// TODO:
+			LOG_WARN("received an invalid chess cell: ", e.what());
+			prompt = OnInvalidChessCellPrompt(e.getCellType(), e.getCoordinates());
 		}
 		catch (const LLMNoPieceChessException& e)
 		{
-			OnNoPieceFound();
+			LOG_WARN("LLM selected an empty cell: ", e.what());
+			prompt = OnNoPieceFoundPrompt(e.getLocation());
 		}
 		catch (const LLMInvalidPieceChessException& e)
 		{
-			OnWrongPieceChosen();
+			LOG_WARN("LLM selected a piece from the opposite team: ", e.what());
+			prompt = OnWrongPieceChosenPrompt(e.getLocation());
 		}
 		catch (const LLMInvalidMoveChessException& e)
 		{
-			OnInvalidMove();
+			LOG_WARN("not a valid chess move: ", e.what());
+			prompt = OnInvalidMovePrompt(e.getPieceType(), e.getStart(), e.getEnd());
 		}
 		catch (const std::exception& e)
 		{
 			LOG_ERROR("non LLM error has occurred: ", e.what());
+			// should repeat the instructions
+			prompt = OnUnknownErrorPrompt();
 		}
 		catch (...)
 		{
 			LOG_ERROR("an unknown error has occurred!");
+			// should repeat the instructions
+			prompt = OnUnknownErrorPrompt();
 		}
 	}
 
@@ -191,12 +271,14 @@ void LLMPlayer::PlayThread()
 	}
 }
 
+/*
+
 void LLMPlayer::PlayThread_alt()
 {
 	Move move;
 	const size_t maxAttempts = 5;
-	size_t currentAttempts = 0;
-	while (currentAttempts < maxAttempts)
+	size_t currentAttempt = 0;
+	for (currentAttempt = 0; currentAttempt < maxAttempts && m_isPlaying; currentAttempt++)
 	{
 		try
 		{
@@ -265,7 +347,7 @@ void LLMPlayer::PlayThread_alt()
 		}
 		catch (const LLMDeserializationChessException& e)
 		{
-			// TODO:
+			OnDeserializationError();
 		}
 		catch (const LLMInvalidDataChessException& e)
 		{
@@ -273,7 +355,7 @@ void LLMPlayer::PlayThread_alt()
 		}
 		catch (const LLMInvalidCellChessException& e)
 		{
-			// TODO:
+			OnInvalidChessCell();
 		}
 		catch (const LLMNoPieceChessException& e)
 		{
@@ -297,12 +379,14 @@ void LLMPlayer::PlayThread_alt()
 		}
 	}
 
-	if (currentAttempts == maxAttempts)
+	if (currentAttempt == maxAttempts)
 	{
 		LOG_FATAL("unable to get a move from the LLM!");
 		throw std::runtime_error("unable to get a move from the LLM!");
 	}
 }
+
+*/
 
 void LLMPlayer::PlayThread_old()
 {

@@ -34,7 +34,7 @@ void AIPlayer::Play(const PlayingContext& context)
 			m_playThread.join();
 		m_shouldStopProcessing = false;
 		// TODO: reuse the thread
-		m_playThread = std::thread(&AIPlayer::PlayThread, this);
+		m_playThread = std::thread(&AIPlayer::PlayThreadWrapper, this);
 		m_playBegin = std::chrono::high_resolution_clock::now();
 		m_pBoard->ShowHourglass("AI Player thinking...");
 	}
@@ -47,6 +47,22 @@ void AIPlayer::Play(const PlayingContext& context)
 			LOG_WARN("time exceeded!");
 		m_shouldStopProcessing = context.shouldQuit || timeExeeced;
 		m_pBoard->UpdateHourglass(context.dt);
+		if (m_exceptionPtr)
+		{
+			std::rethrow_exception(m_exceptionPtr);
+		}
+	}
+}
+
+void AIPlayer::PlayThreadWrapper()
+{
+	try
+	{
+		PlayThread();
+	}
+	catch(...)
+	{
+		m_exceptionPtr = std::current_exception();
 	}
 }
 

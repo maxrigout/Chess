@@ -16,6 +16,8 @@ public:
 
 	std::string Send(const std::string& msg) override;
 
+	virtual void dump(std::ostream& os) const override;
+
 private:
 	enum class ROLE
 	{

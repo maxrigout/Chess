@@ -18,7 +18,7 @@ workspace "Chess"
 project "Chess"
 	kind "ConsoleApp"
 	language "C++"
-	cppdialect "C++17"
+	cppdialect "C++20"
 
 	objdir(intdir .. "/%{prj.name}/%{cfg.buildcfg}")
 	targetdir(outputdir .. "/%{prj.name}/%{cfg.buildcfg}")

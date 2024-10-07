@@ -7,7 +7,10 @@
 #include "Chess/Pieces/King.h"
 
 #include "Core/Logger.h"
-#include <signal.h>
+#include <sstream>
+
+extern char to_lowercase(char);
+extern char to_uppercase(char);
 
 Player::Player(Board* board, TEAM team)
 	: m_pBoard{ board }, m_team{ team }
@@ -416,4 +419,35 @@ bool Player::IsMoveLegal(const Piece* piece, const pt2di& target) const
 			return true;
 	}
 	return false;
+}
+
+
+std::string Player::GetBoardAsString() const
+{
+	std::stringstream board;
+	const Board* pBoard = m_pBoard;
+	for (int j = 0; j < m_pBoard->GetHeight(); ++j)
+	{
+		for (int i = 0; i < m_pBoard->GetWidth(); ++i)
+		{
+			const Piece* piece = pBoard->GetPieceAtCell({i, j});
+			if (piece == nullptr)
+			{
+				// empty cell
+				board << '.';
+			}
+			else if (piece->IsSameTeam(m_team))
+			{
+				board << to_uppercase(piece->Type());
+			}
+			else
+			{
+				board << to_lowercase(piece->Type());
+			}
+
+		}
+		board << '\n';
+	}
+
+	return board.str();
 }
