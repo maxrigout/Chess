@@ -45,6 +45,12 @@ struct WindowCreationInfo
 	RendererContext rendererContext{};
 };
 
+template <typename T>
+std::function<bool(const T&)> defaultEventHandlerFunction()
+{
+	return [](const T&) { return false; };
+}
+
 // sdl2 metal https://gist.github.com/gcatlin/b89e0efed78dd91364609ca4095da346
 // glfw metal https://gist.github.com/gcatlin/987be74e2d58da96093a7598f3fbfb27
 class Window

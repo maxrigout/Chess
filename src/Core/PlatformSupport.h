@@ -1,4 +1,5 @@
 #pragma once
+
 #if defined _WIN32
 #define SUPPORT_OPENGL
 #define SUPPORT_VULKAN

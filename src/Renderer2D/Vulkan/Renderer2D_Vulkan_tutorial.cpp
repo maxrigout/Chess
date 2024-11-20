@@ -1,7 +1,7 @@
 #include "VulkanConfig.h"
 #if USE_TUTORIAL
 #include "Core/Logger.h"
-#include "Renderer2D_Vulkan.h"
+#include "Renderer2D_Vulkan_tutorial.h"
 #ifdef SUPPORT_VULKAN
 // following tutorial https://vulkan-tutorial.com/en/
 
@@ -180,17 +180,17 @@ static std::vector<char> readFile(const std::string& fileName)
 
 }
 
-Renderer2D_Vulkan::Renderer2D_Vulkan()
+Renderer2D_Vulkan_tutorial::Renderer2D_Vulkan_tutorial()
 {
 }
 
-Renderer2D_Vulkan::~Renderer2D_Vulkan()
+Renderer2D_Vulkan_tutorial::~Renderer2D_Vulkan_tutorial()
 {
 	vkDeviceWaitIdle(m_device);
 	cleanup();
 }
 
-void Renderer2D_Vulkan::Begin()
+void Renderer2D_Vulkan_tutorial::Begin()
 {
 	vkWaitForFences(m_device, 1, &m_inFlightFence, VK_TRUE, UINT64_MAX);
 
@@ -213,7 +213,7 @@ void Renderer2D_Vulkan::Begin()
 	vkResetCommandBuffer(m_commandBuffer, 0);
 }
 
-void Renderer2D_Vulkan::End()
+void Renderer2D_Vulkan_tutorial::End()
 {
 	updateUniformBuffer(m_currentImageIndex);
 	recordCommandBuffer(m_commandBuffer, m_currentImageIndex);
@@ -265,7 +265,7 @@ void Renderer2D_Vulkan::End()
 
 #pragma region COMMON
 
-void Renderer2D_Vulkan::Clear(const Color& color) const
+void Renderer2D_Vulkan_tutorial::Clear(const Color& color) const
 {
 	clearColor.color.float32[0] = color.r;
 	clearColor.color.float32[1] = color.g;
@@ -273,98 +273,98 @@ void Renderer2D_Vulkan::Clear(const Color& color) const
 	clearColor.color.float32[3] = color.a;
 }
 
-void Renderer2D_Vulkan::DrawDisk(const pt2di& center, int radius, const Color& color) const
+void Renderer2D_Vulkan_tutorial::DrawDisk(const pt2di& center, int radius, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::DrawCircle(const pt2di& center, int radius, const Color& color) const
+void Renderer2D_Vulkan_tutorial::DrawCircle(const pt2di& center, int radius, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::FillCircle(const pt2di& center, int radius, const Color& color) const
+void Renderer2D_Vulkan_tutorial::FillCircle(const pt2di& center, int radius, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
+void Renderer2D_Vulkan_tutorial::DrawRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
+void Renderer2D_Vulkan_tutorial::FillRect(const pt2di& position, const vec2di& dimensions, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::DrawLine(const pt2di& start, const pt2di& end, const Color& color) const
+void Renderer2D_Vulkan_tutorial::DrawLine(const pt2di& start, const pt2di& end, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::DrawText(const pt2di& position, const std::string& text, const Color& color) const
+void Renderer2D_Vulkan_tutorial::DrawText(const pt2di& position, const std::string& text, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const
+void Renderer2D_Vulkan_tutorial::DrawText(const pt2di& topLeft, const vec2di& dimensions, const std::string& text, const Color& color) const
 {
 
 }
 
-void Renderer2D_Vulkan::DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const
+void Renderer2D_Vulkan_tutorial::DrawArrow(const pt2di& start, const pt2di& end, const Color& color) const
 {
 
 }
 
-Renderer2D::SpriteID Renderer2D_Vulkan::LoadTexture(const char* path, const std::string& tag)
+Renderer2D::SpriteID Renderer2D_Vulkan_tutorial::LoadTexture(const char* path, const std::string& tag)
 {
 	return 0;
 }
 
-std::vector<Renderer2D::SpriteID> Renderer2D_Vulkan::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
+std::vector<Renderer2D::SpriteID> Renderer2D_Vulkan_tutorial::LoadSpriteSheet(const char* path, const std::vector<SpriteDescriptor>& spriteDescriptors)
 {
 	return {};
 }
 
-bool Renderer2D_Vulkan::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const
+bool Renderer2D_Vulkan_tutorial::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const SpriteID& spriteId) const
 {
 	return false;
 }
 
-bool Renderer2D_Vulkan::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
+bool Renderer2D_Vulkan_tutorial::DrawSprite(const pt2di& topLeft, const vec2di& dimensions, const std::string& tag) const
 {
 	return false;
 }
 
-vec2di Renderer2D_Vulkan::GetSpriteSize(const std::string& spriteTag) const
+vec2di Renderer2D_Vulkan_tutorial::GetSpriteSize(const std::string& spriteTag) const
 {
 	return {0, 0};
 }
 
-const vec2di& Renderer2D_Vulkan::GetCellDim() const
+const vec2di& Renderer2D_Vulkan_tutorial::GetCellDim() const
 {
 	return m_cellDim;
 }
 
-const vec2di& Renderer2D_Vulkan::GetViewPortDim() const
+const vec2di& Renderer2D_Vulkan_tutorial::GetViewPortDim() const
 {
 	return m_viewPortDim;
 }
 
-void Renderer2D_Vulkan::SetCellDim(const vec2di& dim)
+void Renderer2D_Vulkan_tutorial::SetCellDim(const vec2di& dim)
 {
 	m_cellDim = dim;
 }
 
-void Renderer2D_Vulkan::SetViewPortDim(const vec2di& dim)
+void Renderer2D_Vulkan_tutorial::SetViewPortDim(const vec2di& dim)
 {
 	m_viewPortDim = dim;
 }
 #pragma endregion
 
-void Renderer2D_Vulkan::initVulkan()
+void Renderer2D_Vulkan_tutorial::initVulkan()
 {
 	createInstance();
 	setupDebugMessenger();
@@ -387,7 +387,7 @@ void Renderer2D_Vulkan::initVulkan()
 	createSyncObjects();
 }
 
-void Renderer2D_Vulkan::cleanup()
+void Renderer2D_Vulkan_tutorial::cleanup()
 {
 #if defined CLEANUP_V1
 	vkDestroyBuffer(m_device, m_vertexBuffer, nullptr);
@@ -446,7 +446,7 @@ void Renderer2D_Vulkan::cleanup()
 #endif
 }
 
-void Renderer2D_Vulkan::createInstance()
+void Renderer2D_Vulkan_tutorial::createInstance()
 {
 	// check and enable validation layers
 	if (enableValidationLayers && !checkValidationLayerSupport()) 
@@ -498,7 +498,7 @@ void Renderer2D_Vulkan::createInstance()
 	}
 }
 
-std::vector<VkExtensionProperties> Renderer2D_Vulkan::getAvailableExtensions()
+std::vector<VkExtensionProperties> Renderer2D_Vulkan_tutorial::getAvailableExtensions()
 {
 	uint32_t extensionCount = 0;
 	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
@@ -514,7 +514,7 @@ std::vector<VkExtensionProperties> Renderer2D_Vulkan::getAvailableExtensions()
 	return extensions;
 }
 
-std::vector<const char*> Renderer2D_Vulkan::getRequiredExtensions()
+std::vector<const char*> Renderer2D_Vulkan_tutorial::getRequiredExtensions()
 {
 	uint32_t extensionCount = 0;
 
@@ -544,7 +544,7 @@ std::vector<const char*> Renderer2D_Vulkan::getRequiredExtensions()
 	return extensions;
 }
 
-bool Renderer2D_Vulkan::ExtensionsAreSupported(const std::vector<VkExtensionProperties>& available, const std::vector<const char*>& required)
+bool Renderer2D_Vulkan_tutorial::ExtensionsAreSupported(const std::vector<VkExtensionProperties>& available, const std::vector<const char*>& required)
 {
 	for (const auto& req : required)
 	{
@@ -559,7 +559,7 @@ bool Renderer2D_Vulkan::ExtensionsAreSupported(const std::vector<VkExtensionProp
 	return true;
 }
 
-bool Renderer2D_Vulkan::checkValidationLayerSupport() 
+bool Renderer2D_Vulkan_tutorial::checkValidationLayerSupport() 
 {
 	uint32_t layerCount;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -593,7 +593,7 @@ bool Renderer2D_Vulkan::checkValidationLayerSupport()
 	return true;
 }
 
-void Renderer2D_Vulkan::setupDebugMessenger()
+void Renderer2D_Vulkan_tutorial::setupDebugMessenger()
 {
 	if (!enableValidationLayers) return;
 	VkDebugUtilsMessengerCreateInfoEXT createInfo{};
@@ -605,7 +605,7 @@ void Renderer2D_Vulkan::setupDebugMessenger()
 	}
 }
 
-void Renderer2D_Vulkan::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
+void Renderer2D_Vulkan_tutorial::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo)
 {
 	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	createInfo.messageSeverity =
@@ -621,7 +621,7 @@ void Renderer2D_Vulkan::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCr
 	createInfo.pUserData = nullptr; // optional
 }
 
-VkResult Renderer2D_Vulkan::CreateDebugUtilsMessengerEXT(
+VkResult Renderer2D_Vulkan_tutorial::CreateDebugUtilsMessengerEXT(
 	VkInstance instance,
 	const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
 	const VkAllocationCallbacks* pAllocator,
@@ -634,7 +634,7 @@ VkResult Renderer2D_Vulkan::CreateDebugUtilsMessengerEXT(
 	return VK_ERROR_EXTENSION_NOT_PRESENT;
 }
 
-void Renderer2D_Vulkan::DestroyDebugUtilsMessengerEXT(
+void Renderer2D_Vulkan_tutorial::DestroyDebugUtilsMessengerEXT(
 	VkInstance instance,
 	VkDebugUtilsMessengerEXT& debugMessenger,
 	const VkAllocationCallbacks* pAllocator)
@@ -644,7 +644,7 @@ void Renderer2D_Vulkan::DestroyDebugUtilsMessengerEXT(
 		func(instance, debugMessenger, pAllocator);
 }
 
-void Renderer2D_Vulkan::createSurface()
+void Renderer2D_Vulkan_tutorial::createSurface()
 {
 #ifdef MANUALLY_CREATE_SURFACE
 #ifdef _WIN32
@@ -678,7 +678,7 @@ void Renderer2D_Vulkan::createSurface()
 #endif
 }
 
-void Renderer2D_Vulkan::pickPhysicalDevice()
+void Renderer2D_Vulkan_tutorial::pickPhysicalDevice()
 {
 #if defined PICK_PHYSICAL_DEVICE_V1
 	uint32_t deviceCount = 0;
@@ -727,7 +727,7 @@ void Renderer2D_Vulkan::pickPhysicalDevice()
 #endif
 }
 
-bool Renderer2D_Vulkan::isDeviceSuitable(VkPhysicalDevice device)
+bool Renderer2D_Vulkan_tutorial::isDeviceSuitable(VkPhysicalDevice device)
 {
 	VkPhysicalDeviceProperties deviceProperties;
 	VkPhysicalDeviceFeatures deviceFeatures;
@@ -749,7 +749,7 @@ bool Renderer2D_Vulkan::isDeviceSuitable(VkPhysicalDevice device)
 	return indices.isComplete() && extensionSupported && swapChainAdequate;
 }
 
-int Renderer2D_Vulkan::rateDeviceSuitability(VkPhysicalDevice device)
+int Renderer2D_Vulkan_tutorial::rateDeviceSuitability(VkPhysicalDevice device)
 {
 	VkPhysicalDeviceProperties deviceProperties;
 	VkPhysicalDeviceFeatures deviceFeatures;
@@ -772,7 +772,7 @@ int Renderer2D_Vulkan::rateDeviceSuitability(VkPhysicalDevice device)
 	return score;
 }
 
-bool Renderer2D_Vulkan::checkDeviceExtensionSupport(VkPhysicalDevice device)
+bool Renderer2D_Vulkan_tutorial::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
 	uint32_t extensionCount;
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -789,7 +789,7 @@ bool Renderer2D_Vulkan::checkDeviceExtensionSupport(VkPhysicalDevice device)
 	return requiredExtensions.empty();
 }
 
-QueueFamilyIndices Renderer2D_Vulkan::findQueueFamilies(VkPhysicalDevice device)
+QueueFamilyIndices Renderer2D_Vulkan_tutorial::findQueueFamilies(VkPhysicalDevice device)
 {
 	QueueFamilyIndices indices;
 
@@ -835,7 +835,7 @@ QueueFamilyIndices Renderer2D_Vulkan::findQueueFamilies(VkPhysicalDevice device)
 	return indices;
 }
 
-void Renderer2D_Vulkan::createLogicalDevice() 
+void Renderer2D_Vulkan_tutorial::createLogicalDevice() 
 {
 	QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 
@@ -882,7 +882,7 @@ void Renderer2D_Vulkan::createLogicalDevice()
 	// TODO: try with a transfer queue
 }
 
-SwapChainSupportDetails Renderer2D_Vulkan::querySwapChainSupport(VkPhysicalDevice device)
+SwapChainSupportDetails Renderer2D_Vulkan_tutorial::querySwapChainSupport(VkPhysicalDevice device)
 {
 	SwapChainSupportDetails details;
 
@@ -907,7 +907,7 @@ SwapChainSupportDetails Renderer2D_Vulkan::querySwapChainSupport(VkPhysicalDevic
 	return details;
 }
 
-VkSurfaceFormatKHR Renderer2D_Vulkan::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
+VkSurfaceFormatKHR Renderer2D_Vulkan_tutorial::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
 {
 	for (const auto& format : availableFormats)
 	{
@@ -930,7 +930,7 @@ VkSurfaceFormatKHR Renderer2D_Vulkan::chooseSwapSurfaceFormat(const std::vector<
 	return availableFormats[0];
 }
 
-VkPresentModeKHR Renderer2D_Vulkan::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
+VkPresentModeKHR Renderer2D_Vulkan_tutorial::chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes)
 {
 	for (const auto& presentMode : availablePresentModes)
 	{
@@ -948,7 +948,7 @@ VkPresentModeKHR Renderer2D_Vulkan::chooseSwapPresentMode(const std::vector<VkPr
 	return VK_PRESENT_MODE_FIFO_KHR; // only one guaranteed to be available
 }
 
-VkExtent2D Renderer2D_Vulkan::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) 
+VkExtent2D Renderer2D_Vulkan_tutorial::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities) 
 {
 	if (capabilities.currentExtent.width == std::numeric_limits<uint32_t>::max())
 	{
@@ -967,7 +967,7 @@ VkExtent2D Renderer2D_Vulkan::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& c
 	return capabilities.currentExtent;
 }
 
-void Renderer2D_Vulkan::createSwapChain()
+void Renderer2D_Vulkan_tutorial::createSwapChain()
 {
 	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(m_physicalDevice);
 
@@ -1025,7 +1025,7 @@ void Renderer2D_Vulkan::createSwapChain()
 	m_swapChainExtent = extent;
 }
 
-void Renderer2D_Vulkan::createImageViews()
+void Renderer2D_Vulkan_tutorial::createImageViews()
 {
 	m_swapChainImageViews.resize(m_swapChainImages.size());
 	for (size_t i = 0; i < m_swapChainImages.size(); i++)
@@ -1052,7 +1052,7 @@ void Renderer2D_Vulkan::createImageViews()
 	}
 }
 
-VkShaderModule Renderer2D_Vulkan::createShaderModule(const std::vector<char>& code)
+VkShaderModule Renderer2D_Vulkan_tutorial::createShaderModule(const std::vector<char>& code)
 {
 	VkShaderModuleCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -1067,7 +1067,7 @@ VkShaderModule Renderer2D_Vulkan::createShaderModule(const std::vector<char>& co
 	return shaderModule;
 }
 
-void Renderer2D_Vulkan::createRenderPass()
+void Renderer2D_Vulkan_tutorial::createRenderPass()
 {
 	VkAttachmentDescription colorAttachment{};
 	colorAttachment.format = m_swapChainImageFormat;
@@ -1111,7 +1111,7 @@ void Renderer2D_Vulkan::createRenderPass()
 	}
 }
 
-void Renderer2D_Vulkan::createDescriptorSetLayout()
+void Renderer2D_Vulkan_tutorial::createDescriptorSetLayout()
 {
 	VkDescriptorSetLayoutBinding uboLayoutBinding {};
 	uboLayoutBinding.binding = 0;
@@ -1131,7 +1131,7 @@ void Renderer2D_Vulkan::createDescriptorSetLayout()
 	}
 }
 
-void Renderer2D_Vulkan::createGraphicsPipeline()
+void Renderer2D_Vulkan_tutorial::createGraphicsPipeline()
 {
 	auto vertShaderCode = readFile("shaders/glsl/compiled/vert.spv");
 	auto fragShaderCode = readFile("shaders/glsl/compiled/frag.spv");
@@ -1315,7 +1315,7 @@ void Renderer2D_Vulkan::createGraphicsPipeline()
 	vkDestroyShaderModule(m_device, vertShaderModule, nullptr);
 }
 
-void Renderer2D_Vulkan::createFramebuffers()
+void Renderer2D_Vulkan_tutorial::createFramebuffers()
 {
 	m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
 
@@ -1341,7 +1341,7 @@ void Renderer2D_Vulkan::createFramebuffers()
 	}
 }
 
-void Renderer2D_Vulkan::createCommandPool()
+void Renderer2D_Vulkan_tutorial::createCommandPool()
 {
 	QueueFamilyIndices queueFamilyIndices = findQueueFamilies(m_physicalDevice);
 	
@@ -1356,7 +1356,7 @@ void Renderer2D_Vulkan::createCommandPool()
 	}
 }
 
-void Renderer2D_Vulkan::createCommandBuffer()
+void Renderer2D_Vulkan_tutorial::createCommandBuffer()
 {
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1370,7 +1370,7 @@ void Renderer2D_Vulkan::createCommandBuffer()
 	}
 }
 
-void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
+void Renderer2D_Vulkan_tutorial::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
 {
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -1412,7 +1412,7 @@ void Renderer2D_Vulkan::recordCommandBuffer(VkCommandBuffer commandBuffer, uint3
 	}
 }
 
-void Renderer2D_Vulkan::updateUniformBuffer(uint32_t currentImage)
+void Renderer2D_Vulkan_tutorial::updateUniformBuffer(uint32_t currentImage)
 {
 	static auto startTime = std::chrono::high_resolution_clock::now();
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -1428,7 +1428,7 @@ void Renderer2D_Vulkan::updateUniformBuffer(uint32_t currentImage)
 }
 
 
-void Renderer2D_Vulkan::createSyncObjects()
+void Renderer2D_Vulkan_tutorial::createSyncObjects()
 {
 	VkSemaphoreCreateInfo semaphoreInfo{};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -1445,7 +1445,7 @@ void Renderer2D_Vulkan::createSyncObjects()
 	}
 }
 
-void Renderer2D_Vulkan::cleanupSwapChain()
+void Renderer2D_Vulkan_tutorial::cleanupSwapChain()
 {
 	for (auto& framebuffer : m_swapChainFramebuffers)
 	{
@@ -1458,7 +1458,7 @@ void Renderer2D_Vulkan::cleanupSwapChain()
 	vkDestroySwapchainKHR(m_device, m_swapChain, nullptr);
 }
 
-void Renderer2D_Vulkan::recreateSwapChain()
+void Renderer2D_Vulkan_tutorial::recreateSwapChain()
 {
 	// in case of a resize...
 	// int width = 0, height = 0;
@@ -1481,7 +1481,7 @@ void Renderer2D_Vulkan::recreateSwapChain()
 	//createGraphicsPipeline();
 }
 
-void Renderer2D_Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer& buffer, VkDeviceMemory &memory)
+void Renderer2D_Vulkan_tutorial::createBuffer(VkDeviceSize size, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags memoryPropertyFlags, VkBuffer& buffer, VkDeviceMemory &memory)
 {
 	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -1512,7 +1512,7 @@ void Renderer2D_Vulkan::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage
 	vkBindBufferMemory(m_device, buffer, memory, 0);
 }
 
-uint32_t Renderer2D_Vulkan::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t Renderer2D_Vulkan_tutorial::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
 	VkPhysicalDeviceMemoryProperties memProperties;
 	vkGetPhysicalDeviceMemoryProperties(m_physicalDevice, &memProperties);
@@ -1527,7 +1527,7 @@ uint32_t Renderer2D_Vulkan::findMemoryType(uint32_t typeFilter, VkMemoryProperty
 	throw std::runtime_error("failed to find suitable memory type");
 }
 
-void Renderer2D_Vulkan::copyBuffer(VkBuffer src, VkBuffer dest, VkDeviceSize size)
+void Renderer2D_Vulkan_tutorial::copyBuffer(VkBuffer src, VkBuffer dest, VkDeviceSize size)
 {
 	VkCommandBufferAllocateInfo allocInfo{};
 	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1563,7 +1563,7 @@ void Renderer2D_Vulkan::copyBuffer(VkBuffer src, VkBuffer dest, VkDeviceSize siz
 	vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
 }
 
-void Renderer2D_Vulkan::createVertexBuffer()
+void Renderer2D_Vulkan_tutorial::createVertexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(vertices) * sizeof(Vertex);
 	VkBuffer stagingBuffer;
@@ -1588,7 +1588,7 @@ void Renderer2D_Vulkan::createVertexBuffer()
 	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
 }
 
-void Renderer2D_Vulkan::createIndexBuffer()
+void Renderer2D_Vulkan_tutorial::createIndexBuffer()
 {
 	VkDeviceSize bufferSize = ARRAY_LEN(indices) * sizeof(indices[0]);
 	VkBuffer stagingBuffer;
@@ -1612,7 +1612,7 @@ void Renderer2D_Vulkan::createIndexBuffer()
 	vkFreeMemory(m_device, stagingBufferMemory, nullptr);
 }
 
-void Renderer2D_Vulkan::createUniformBuffers()
+void Renderer2D_Vulkan_tutorial::createUniformBuffers()
 {
 	MAX_FRAMES_IN_FLIGHT = m_swapChainFramebuffers.size();
 
@@ -1628,7 +1628,7 @@ void Renderer2D_Vulkan::createUniformBuffers()
 	}
 }
 
-void Renderer2D_Vulkan::createDescriptorPool()
+void Renderer2D_Vulkan_tutorial::createDescriptorPool()
 {
 	VkDescriptorPoolSize poolSize{};
 	poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -1646,7 +1646,7 @@ void Renderer2D_Vulkan::createDescriptorPool()
 	}
 }
 
-void Renderer2D_Vulkan::createDescriptorSets()
+void Renderer2D_Vulkan_tutorial::createDescriptorSets()
 {
 	std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_descriptorSetLayout);
 

@@ -36,14 +36,16 @@ struct SwapChainSupportDetails
 	std::vector<VkPresentModeKHR> presentModes;
 };
 
-class Renderer2D_Vulkan : public Renderer2D
+class Renderer2D_Vulkan_tutorial : public Renderer2D
 {
 public:
 	using VulkanInstanceExtensionGetterFn_t = std::function<bool(unsigned int*, const char**)>;
 	using VulkanSurfaceCreatorFn_t = std::function<bool(VkInstance, VkSurfaceKHR*)>;
 
-	Renderer2D_Vulkan();
-	virtual ~Renderer2D_Vulkan();
+	Renderer2D_Vulkan_tutorial
+();
+	virtual ~Renderer2D_Vulkan_tutorial
+();
 
 	virtual void Begin() override;
 	virtual void End() override;

@@ -1,7 +1,8 @@
 #pragma once
 #include "Core/Window.h"
 
-#include <SDL2/SDL.h>
+struct SDL_Window;
+struct SDL_Renderer;
 
 class Window_SDL : public Window
 {

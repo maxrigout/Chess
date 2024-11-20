@@ -42,6 +42,11 @@ project "Chess"
 		"deps/include/SDL2",
 	}
 
+	libdirs
+	{
+		"deps/libraries"
+	}
+
 	postbuildcommands
 	{
 		-- TODO
@@ -79,7 +84,8 @@ project "Chess"
 		{
 			"deps/include/metal-cpp",
 			"deps/include/metal-cpp-extensions",
-			"~/dev/VulkanSDK/1.3.261.1/macOS/include"
+			-- "~/dev/VulkanSDK/1.3.261.1/macOS/include",
+			"/Users/max/dev/VulkanSDK/1.3.261.1/macOS/include",
 		}
 
 		buildoptions
@@ -102,10 +108,12 @@ project "Chess"
 			"QuartzCore.framework",
 			"Foundation.framework",
 			"MetalKit.framework",
-			"curl"
+			"curl",
+			"glfw3"
 		}
 		linkoptions
 		{
+			-- "TestOpenGL/vendor/libs/libglfw3.a",
 			"-rpath",
 			"/Library/Frameworks",
 			"-F/Library/Frameworks"
