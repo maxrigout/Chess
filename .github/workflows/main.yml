@@ -1,17 +1,12 @@
 name: macos-build
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  workflow_dispatch:
+on: [push]
   
 jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       
       - name: Run Setup Script
         run: ${{github.workspace}}/scripts/macos/setup.sh
