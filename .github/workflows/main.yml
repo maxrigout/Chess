@@ -30,7 +30,7 @@ jobs:
           cp -R chess.app release/chess.app
       
       - name: Publish Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with: 
           name: macos-release
           path: release
