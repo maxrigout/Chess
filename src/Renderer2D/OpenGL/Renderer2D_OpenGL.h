@@ -4,7 +4,9 @@
 
 #include <functional>
 
+#ifdef __APPLE__
 #include <OpenGL/gl3.h>
+#endif
 
 #define N_QUAD_VERTICES 4
 

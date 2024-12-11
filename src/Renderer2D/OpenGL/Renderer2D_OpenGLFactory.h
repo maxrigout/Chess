@@ -13,9 +13,9 @@ public:
 	{
 		if (type == "classic")
 			return new Renderer2D_OpenGL_Classic();
-		else if (type == "batch")
+		if (type == "batch")
 			return new Renderer2D_OpenGL_Batch();
-		else if (type == "instance")
+		if (type == "instance")
 			return new Renderer2D_OpenGL_Instance();
 		return nullptr;
 	}
